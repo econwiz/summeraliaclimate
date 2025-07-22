@@ -1,0 +1,170 @@
+/*
+
+Purpose: Estimates the temperature-mortality response function using 
+subnational data across 40 countries pooled across the 3 age groups
+(as discussed in Appendix D.2).
+
+Inputs
+------
+
+- `0_data_cleaning/3_final/global_mortality_panel` - Final mortality panel.
+
+Outputs
+-------
+
+- `data/1_estimation/1_ster/age_combined`
+	- `pooled_response_spec*.ster` where * is model 1 through 5. Ster files
+	containing uninteracted, age combined regressuion results under various
+	fixed effects, estimation, and data construction assumptions.
+
+Notes
+------
+
+Summary of models:
+    1. 4th-order polynomial OLS (Age x ADM2) & (Age x ADM2) FE
+   *2. 4th-order polynomial OLS (Age x ADM2) & (AGE x Country x Year) FE
+    3. 4th-order polynomial OLS (Age x ADM2) & (AGE x Country x Year) (Age x ADM1 linear trend)
+	4. 4th-order polynomial FGLS (Age x ADM2) & (AGE x Country x Year) FE
+	5. 4th-order polynomial OLS (Age x ADM2) & (AGE x Country x Year) FE with 13-month climate exposure
+* indicates preferred model.
+
+- All regressions are population weighted with clustered standard errors at the
+ADM1 level.
+
+- Models also control for AGE x ADM0 precipitation.
+
+- `i.CHN_ts` indicator variable accounts for a discontinuity in China's
+mortality/population time series. See 1_estimation/README.md for additional
+details.
+
+*/
+
+
+*****************************************************************************
+* 						PART 1. Initializing		 						*
+*****************************************************************************
+
+* 0. Set your output folder and define where to save .ster files
+global OUTPUT "/user/ab5405/summeraliaclimate/output"
+local sterdir "$OUTPUT/age_combined_GMFD"
+
+* create the results folder if it doesn't exist
+capture mkdir "`sterdir'"
+
+* 1. Load the prepped ERA5 panel
+use "$OUTPUT/panel_prepped_for_regressions_GMFD.dta", clear
+
+*****************************************************************************
+* 						PART 2. OLS Regressions                 		    *
+*****************************************************************************
+
+* 1. set weighting schemes
+bysort year: egen tot_pop = total(population)
+gen weight = population / tot_pop
+
+// 1) No fixed effects, pure cluster‐robust SEs
+di as txt "=== 1) No FEs ==="
+reghdfe deathrate_w99 ///
+    tavg_poly_1_GMFD tavg_poly_2_GMFD ///
+    tavg_poly_3_GMFD tavg_poly_4_GMFD ///
+    [pw = weight], ///
+    vce(cluster adm1_code)
+
+// 2) Country×Year only
+di as txt "=== 2) Country×Year FE only ==="
+reghdfe deathrate_w99 ///
+    tavg_poly_1_GMFD tavg_poly_2_GMFD ///
+    tavg_poly_3_GMFD tavg_poly_4_GMFD ///
+    [pw = weight], ///
+    absorb(i.adm0_code#i.year) ///
+    vce(cluster adm1_code)
+
+// 3) ADM2×CHN_ts + Country×Year
+di as txt "=== 3) ADM2×CHN_ts + Country×Year ==="
+reghdfe deathrate_w99 ///
+    tavg_poly_1_GMFD tavg_poly_2_GMFD ///
+    tavg_poly_3_GMFD tavg_poly_4_GMFD ///
+    [pw = weight], ///
+    absorb(i.adm2_code#i.CHN_ts i.adm0_code#i.year) ///
+    vce(cluster adm1_code)
+
+// 4) (If you still have agegroup) Full Spec 2
+ di as txt "=== 4) ADM2×CHN_ts×Age + Country×Year×Age ==="
+ reghdfe deathrate_daily ///
+    tavg_poly_1_GMFD tavg_poly_2_GMFD ///
+    tavg_poly_3_GMFD tavg_poly_4_GMFD ///
+    [pw=weight], ///
+     absorb(i.adm2_code#i.CHN_ts#i.agegroup i.adm0_code#i.year#i.agegroup) ///
+     vce(cluster adm1_code)
+
+*/
+* 2. run regressions
+
+* specification 1
+reghdfe deathrate_w99 tavg_poly_1_GMFD tavg_poly_2_GMFD tavg_poly_3_GMFD tavg_poly_4_GMFD ///
+		[pw = weight]  ///
+		, absorb(i.adm2_code#i.CHN_ts#i.agegroup i.adm0_code#i.year ) ///
+		cluster(adm1_code)
+estimates save "`sterdir'/pooled_response_spec1_public_ERA5.ster", replace
+
+* specification 2
+*reghdfe deathrate_w99 tavg_poly_1_GMFD tavg_poly_2_GMFD tavg_poly_3_GMFD tavg_poly_4_GMFD ///
+		*[pw = weight] ///
+		*, absorb(i.adm2_code#i.CHN_ts#i.agegroup i.adm0_code#i.year) ///
+		*cluster(adm1_code) residual(e_hat)
+reghdfe deathrate_w99 ///
+       tavg_poly_1_GMFD tavg_poly_2_GMFD ///
+       tavg_poly_3_GMFD tavg_poly_4_GMFD ///
+       [pw = weight], ///
+    absorb(    ///
+      i.adm2_code#i.CHN_ts   /* ADM2×China-segment FE */   ///
+      i.adm0_code#i.year     /* Country×Year FE       */   ///
+    ) ///
+    vce(cluster adm1_code)   /* cluster‐robust SEs    */ ///
+    residual(e_hat)
+
+estimates save "`sterdir'/pooled_response_spec2_public_ERA5.ster", replace
+
+* specification 3
+reghdfe deathrate_w99 tavg_poly_1_GMFD tavg_poly_2_GMFD tavg_poly_3_GMFD tavg_poly_4_GMFD ///
+		[pw = weight] ///
+		, absorb(i.adm2_code#i.CHN_ts#i.agegroup i.adm0_code#i.year#i.agegroup adm1_agegrp_code##c.year) ///
+		cluster(adm1_code)
+estimates save "`sterdir'/pooled_response_spec3_public_ERA5.ster", replace
+
+
+*****************************************************************************
+* 						PART 3. FGLS Regressions                 		    *
+*****************************************************************************
+
+* 1. Build precision weights from residuals
+gen e2 = e_hat*e_hat
+bysort adm1_code: egen omega = sd(e_hat) if !mi(e_hat)
+gen precisionweight = weight/(omega^2)
+
+sort iso adm1_id adm2_id year agegroup
+
+* 2. Spec 4: FGLS
+reghdfe deathrate_w99 ///
+       tavg_poly_1_GMFD tavg_poly_2_GMFD tavg_poly_3_GMFD tavg_poly_4_GMFD ///
+       [pw = precisionweight], ///
+    absorb(                                          ///
+      i.adm2_code#i.CHN_ts#i.agegroup                  ///
+      i.adm0_code#i.year#i.agegroup                    ///
+    ) ///
+    cluster(adm1_code) tol(1e-7)
+
+estimates save "`sterdir'/pooled_response_spec4_public_ERA5.ster", replace
+
+
+*****************************************************************************
+* 						PART 4. 13-month ave T Regressions         		    *
+*****************************************************************************
+
+* specification 5
+*reghdfe deathrate_w99 tavg_poly_1_GMFD_13m tavg_poly_2_GMFD_13m tavg_poly_3_GMFD_13m tavg_poly_4_GMFD_13m ///
+		[pw = weight] ///
+		, absorb(i.adm2_code#i.CHN_ts#i.agegroup i.adm0_code#i.year#agegroup ) ///
+		cluster(adm1_code)
+*estimates save "`ster'/pooled_response_spec5_public.ster", replace
+*/
