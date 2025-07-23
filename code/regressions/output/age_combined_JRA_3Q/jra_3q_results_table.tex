@@ -1,0 +1,29 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{JRA\_3Q Mortality Regression Results (Specs 1–4)}
+\begin{tabular}{l*{4}{c}}
+\hline\hline
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
+                    &\multicolumn{1}{c}{deathrate\_w99}&\multicolumn{1}{c}{deathrate\_w99}&\multicolumn{1}{c}{deathrate\_w99}&\multicolumn{1}{c}{deathrate\_w99}\\
+\hline
+Constant            &       958.4\sym{***}&       973.7\sym{***}&       935.8\sym{***}&      1012.5\sym{***}\\
+                    &     (29.19)         &     (29.19)         &     (32.19)         &     (18.52)         \\
+[1em]
+tavg\_poly\_1\_JRA\_3Q  &     -0.0211\sym{*}  &     -0.0262\sym{**} &     -0.0282\sym{**} &     -0.0341\sym{***}\\
+                    &    (0.0116)         &    (0.0113)         &    (0.0115)         &   (0.00978)         \\
+[1em]
+tavg\_poly\_2\_JRA\_3Q  &    -0.00127\sym{***}&    -0.00127\sym{***}&   -0.000461         &    -0.00114\sym{**} \\
+                    &  (0.000486)         &  (0.000481)         &  (0.000397)         &  (0.000515)         \\
+[1em]
+tavg\_poly\_3\_JRA\_3Q  &   0.0000295         &   0.0000392         &   0.0000600\sym{**} &   0.0000478         \\
+                    & (0.0000320)         & (0.0000318)         & (0.0000271)         & (0.0000296)         \\
+[1em]
+tavg\_poly\_4\_JRA\_3Q  & 0.000000936         & 0.000000729         &-0.000000889         &  0.00000140         \\
+                    &(0.000000860)         &(0.000000869)         &(0.000000674)         &(0.000000921)         \\
+\hline
+Observations        &      406592         &      406592         &      406592         &      406592         \\
+\hline\hline
+\multicolumn{5}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{5}{l}{\footnotesize \sym{*} \(p<0.1\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}

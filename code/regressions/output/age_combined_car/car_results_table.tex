@@ -1,0 +1,29 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{Car Rerun Mortality Regression Results (Specs 1–4)}
+\begin{tabular}{l*{4}{c}}
+\hline\hline
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
+                    &\multicolumn{1}{c}{deathrate\_w99}&\multicolumn{1}{c}{deathrate\_w99}&\multicolumn{1}{c}{deathrate\_w99}&\multicolumn{1}{c}{deathrate\_w99}\\
+\hline
+Constant            &       769.4\sym{***}&       723.4\sym{***}&       686.6\sym{***}&       712.0\sym{***}\\
+                    &     (50.07)         &     (40.22)         &     (30.38)         &     (27.54)         \\
+[1em]
+tavg\_poly\_1\_GMFD    &     -0.0528\sym{*}  &     -0.0353\sym{**} &     -0.0150         &     -0.0160         \\
+                    &    (0.0270)         &    (0.0174)         &    (0.0133)         &    (0.0135)         \\
+[1em]
+tavg\_poly\_2\_GMFD    &     0.00224         &     0.00166         &     0.00161         &    0.000720         \\
+                    &   (0.00272)         &   (0.00160)         &   (0.00141)         &  (0.000732)         \\
+[1em]
+tavg\_poly\_3\_GMFD    &  -0.0000665         &  -0.0000629         &   -0.000121         &  -0.0000266         \\
+                    &  (0.000132)         & (0.0000853)         & (0.0000769)         & (0.0000468)         \\
+[1em]
+tavg\_poly\_4\_GMFD    &  0.00000121         &  0.00000124         &  0.00000252\sym{*}  & 0.000000786         \\
+                    &(0.00000215)         &(0.00000149)         &(0.00000134)         &(0.00000121)         \\
+\hline
+Observations        &      396246         &      396246         &      396246         &      396246         \\
+\hline\hline
+\multicolumn{5}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{5}{l}{\footnotesize \sym{*} \(p<0.1\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}
