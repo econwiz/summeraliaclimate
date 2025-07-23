@@ -1,0 +1,16 @@
+# Ignore generated panel & prep_data .dta files
+code/regressions/output/*.dta
+code/regressions/prep_data/*.dta
+
+# Ignore Jupyter checkpoint CSVs
+**/.ipynb_checkpoints/
+
+# macOS thumbnail files
+.DS_Store
+
+# R session files
+.RData
+.Rhistory
+
+# Python caches
+__pycache__/
