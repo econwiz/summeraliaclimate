@@ -4,7 +4,7 @@ from pathlib import Path
 import cartopy.crs as ccrs
 import xarray as xr
 
-
+#simple map plotting function, plots CONUS with borders, using the reds colorscale
 def plot_map(data, title, cbar_label):
     fig = plt.figure(figsize=(10, 6))
     ax = plt.axes(projection=ccrs.PlateCarree())
@@ -12,7 +12,8 @@ def plot_map(data, title, cbar_label):
     ax.coastlines()
     ax.set_title(title)
     plt.show()
-    
+
+# Create a two‐row panel of maps showing how internal and model variability contribute to local climate variability across different global warming levels (GWLs). Each subplot displays the fractional contribution for one source (internal or model) at a given GWL, with consistent color scaling and labeled panels. If an output directory is provided, the figure is saved; otherwise it is displayed inline.
 def plot_variability_panels(stats_ds: xr.Dataset,
                             title: str = "Variability partitioning",
                             cmap: str = 'Greens',

@@ -1,6 +1,7 @@
 import xarray as xr
 import numpy as np
 
+#this function rebins the mortality dmgf according to the bins used in the temperature df
 def rebin_temp_data_mortality(da):
     
     #creates new edges of the bins from >10, 10-100, <100, in intervals of 10F. Then, calculate the midpoints of the bins 
@@ -27,7 +28,7 @@ def rebin_temp_data_mortality(da):
     
     return hist_fine
 
-
+#this function rebins the gdp dmgf according to the bins used in the temperature df
 def rebin_temp_data_gdp(da):
     
     #creates new edges of the bins from >-15, -15-31, <31, in intervals of 3C. Then, calculate the midpoints of the bins 
