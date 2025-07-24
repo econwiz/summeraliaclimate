@@ -3,7 +3,7 @@ oneline: Mortality global age‑combined spec1 ERA5 results
 version: MORTALITY-AGE-COMBINED-SPEC1-ERA5
 dependencies: pooled_response_spec1_public_ERA5.ster
 description: 4th-order polynomial OLS, population‑weighted; ADM2 & ADM0×Year FE
-csvv-version: yourname-2025-07-23
+csvv-version: aliabonanno-2025-07-23
 variables:
   tavg_poly_1: T1_sum [C]
   tavg_poly_2: T2_sum [C^2]
@@ -21,8 +21,8 @@ covarnames
 1, lr_tavg, loggdppc_adm0_avg
 gamma
 -.0177597529714739, -.0012332716638599, 8.32184133804e-06, 1.68301793219e-06, 946.7651794945652, ., ., ., ., ., ., .
-, ., ., ., ., ., ., ., ., ., ., ., .
-, ., ., ., ., ., ., ., ., ., ., ., .
+., ., ., ., ., ., ., ., ., ., ., .
+., ., ., ., ., ., ., ., ., ., ., .
 gammavcv
 .0001432820289692, -2.62463593562e-06, -2.99895372482e-07, 8.60580248603e-09, -.2561594223986907, ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., .
 -2.62463593562e-06, 2.82913996502e-07, -1.08372168854e-09, -1.87960409894e-10, -.0037782675956123, ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., ., .
