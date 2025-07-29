@@ -1,6 +1,8 @@
 # Ignore generated panel & prep_data .dta files
 code/regressions/output/*.dta
 code/regressions/prep_data/*.dta
+regressions/0_generate_obs_data/obs_csvs/*.csv
+
 
 # Ignore Jupyter checkpoint CSVs
 **/.ipynb_checkpoints/
