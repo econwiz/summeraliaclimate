@@ -3,15 +3,30 @@
 This directory contains all of the Stata workflows for estimating
 temperature–mortality response functions.
 
-- **prep_data/**  
-  Prepares the global mortality panel with ERA5, JRA‑3Q, MERRA2, GMFD.
+- **0_generate_obs_data/**  
+  Generates observational climate variables aggregated to ADM2/ADM1.  
+  Climate products and file paths are defined in `car_paths.csv` in this directory.
 
-- **age_combined_regressions/**  
-  Runs 5 model specifications (pooled, FGLS, 13‑month) and saves `.ster` files.
+- **1_merge_tables/**  
+  Merges generated climate data with mortality and population panels at the ADM2 level, then collapses to ADM1 where needed.
+
+- **2_prep_data/**  
+  Cleans merged tables: creates exposure bins, handles missing values, and formats variables for regression.  
+  Outputs intermediate Stata panels (`.dta`) for the merged data.
+
+- **3_age_combined_regressions/**  
+  Runs five model specifications (pooled, fixed effects, FGLS, 13‑month lag, cluster-robust variants) using combined age exposures.  
+  Saves `.ster` and `.csvv` files in `output/`.
+
+- **4_age_interacted_regressions/**  
+  Runs regressions with interaction terms between age groups and exposure bins.  
+  Saves `.ster` and `.csvv` files in `output/`.
+
+- **prep_data/**  
+  Contains the Stata panels (`.dta`) created immediately after the merge step, ready for regression scripts.
+
+- **output_panels/**  
+  Stores final regression-ready panels (`.dta`) after all prep steps.
 
 - **output/**  
-  Holds `.ster` regression output (ignored via `.gitignore`).
-
-- **summarize_data.do**  
-  Aggregates and compares regression summaries into tables/figures.
-
+  Holds regression output files: `.ster`, `.csvv`, and log files.  

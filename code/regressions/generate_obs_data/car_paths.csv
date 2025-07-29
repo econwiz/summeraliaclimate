@@ -1,5 +1,0 @@
-product,tas_filepath,precip_filepath
-ERA5-025,/shared/share_hle/data/climate_raw/ERA5-025/tas_day_ERA5-025_historical_reanalysis_19810101-20241231.zarr,/shared/share_hle/data/climate_raw/ERA5-025/pr_Amon_ERA5-025_historical_reanalysis_19810131-20101231.zarr
-GMFD   ,/shared/share_hle/data/climate_raw/GMFD/tas_day_GMFD_historical_reanalysis_19810101-20101231.zarr,/shared/share_hle/data/climate_raw/GMFD/pr_Amon_GMFD_historical_reanalysis_19810131-20101231.zarr
-MERRA2 ,/shared/share_hle/data/climate_raw/MERRA2/tas_day_MERRA2_historical_reanalysis_19800101-20240801.nc,/shared/share_hle/data/climate_raw/MERRA2/pr_Amon_MERRA2_historical_reanalysis_19810131-20101231.zarr
-JRA-3Q ,/shared/share_hle/data/climate_raw/JRA-3Q/tas_day_JRA-3Q_historical_reanalysis_19810101-20241231.nc,/shared/share_hle/data/climate_raw/JRA-3Q/pr_Amon_JRA-3Q_historical_reanalysis_19810131-20101231.zarr
