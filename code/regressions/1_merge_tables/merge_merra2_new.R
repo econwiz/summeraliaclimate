@@ -49,11 +49,17 @@ obs_raw <- read_csv(obs_csv, show_col_types = FALSE) %>%
   clean_names() %>%
   mutate(
     iso      = str_trim(toupper(iso)),
-    iso     = if_else(iso %in% euro_iso, "EU", iso),
+    iso      = if_else(iso %in% euro_iso, "EU", iso),
     adm1_id  = str_trim(toupper(adm1_id)),
     adm2_id  = str_trim(toupper(adm2_id)),
     year     = as.integer(year)
+  ) %>%
+  # DROP the “_gmfd” suffix from every MERRA2 var name
+  rename_with(
+    ~ str_remove(., regex("_gmfd$", ignore_case = TRUE)),
+    matches("_gmfd$")
   )
+
 
 # Merge the two panels on their shared codes, and make sure to drop superfluous adm2 lr average from the merge. 
 merged <- panel %>%

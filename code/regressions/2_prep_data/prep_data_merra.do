@@ -24,7 +24,7 @@ period before and after 2004. See Appendix B.1.3 for more details.
 global CODE   "/user/ab5405/summeraliaclimate/code"
 global OUTPUT "/user/ab5405/summeraliaclimate/code/regressions/output_panels"
 
-use "/user/ab5405/summeraliaclimate/code/regressions/prep_data/global_mortality_panel_public_MERRA2.dta", clear
+use "/user/ab5405/summeraliaclimate/code/regressions/prep_panels/global_mortality_panel_public_MERRA2.dta", clear
 
 * a. create adm0 LR averages (one year one vote given imbalanced sample)
 preserve 

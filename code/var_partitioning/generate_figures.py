@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 #This code generates a figure that shows the fractional uncertainty occupied by model uncertainty and internal
-#variability for each GWL in the GWL list for the mort dmgf and the gdp dmgf. It plots the momdel uncertainty
+#variability for each GWL in the GWL list for the mort dmgf and the gdp dmgf. It plots the mmdel uncertainty
 #on the top row, and the internal variability on the bottom. It plots using the plot_variability_panels in the #.plot folder of var_partitioning. 
 
 import sys, traceback
