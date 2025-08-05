@@ -15,8 +15,11 @@ observations
  406592
 prednames
 tavg_poly_1, tavg_poly_2, tavg_poly_3, tavg_poly_4
+coefnames
+tavg_poly_1_ERA5_025, tavg_poly_2_ERA5_025, tavg_poly_3_ERA5_025, tavg_poly_4_ERA5_025, _cons
 covarnames
-
+Estimator: FGLS (Spec2 FE); Weights: precision (pop×1/ω^2); Controls: ADM0×prcp_poly_{1,2}
+# note: gamma includes the intercept (_cons) as the last entry
 gamma
 -.0339471484219631, -.0010439188814721, .0000348983532325, 1.88627123636e-06, 1019.630138538959
 gammavcv

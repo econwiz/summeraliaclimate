@@ -46,8 +46,35 @@ forvalues SPEC = 1/5 {
     file write csvv " `e(N)'" _n
     file write csvv "prednames" _n
     file write csvv "tavg_poly_1, tavg_poly_2, tavg_poly_3, tavg_poly_4" _n
+   /* coefnames: comma-separated names exactly as in e(b), including _cons last */
+    file write csvv "coefnames" _n
+    local cn : colnames e(b)
+    local cn_commas : subinstr local cn " " ", ", all
+    file write csvv "`cn_commas'" _n
+    
+    /* covarnames: human-readable description (metadata only) */
     file write csvv "covarnames" _n
-    file write csvv "" _n
+    if `SPEC'==1 {
+        file write csvv "FE: ADM2×CHN_ts×Age; FE: ADM0×Year; Controls: ADM0×prcp_poly_{1,2} (GMFD); Weights: population; Clusters: ADM1" _n
+    }
+    else if `SPEC'==2 {
+        file write csvv "FE: ADM2×CHN_ts×Age; FE: ADM0×Year×Age; Controls: ADM0×prcp_poly_{1,2} (GMFD); Weights: population; Clusters: ADM1" _n
+    }
+    else if `SPEC'==3 {
+        file write csvv "FE: ADM2×CHN_ts×Age; FE: ADM0×Year×Age; Trend: ADM1×Age linear; Controls: ADM0×prcp_poly_{1,2} (GMFD)" _n
+    }
+    else if `SPEC'==4 {
+        file write csvv "Estimator: FGLS (Spec2 FE); Weights: precision (pop×1/ω²); Controls: ADM0×prcp_poly_{1,2} (GMFD)" _n
+    }
+    else if `SPEC'==5 {
+        file write csvv "Exposure: 13-month; FE: as Spec2; Controls: ADM0×prcp_poly_{1,2} (GMFD)" _n
+    }
+    else {
+        file write csvv "" _n   // leave empty if not applicable
+    }
+    
+    /* (optional) make intercept convention explicit */
+    file write csvv "# note: gamma includes the intercept (_cons) as the last entry" _n
 
     /* 5. coefficients (gamma) */
     file write csvv "gamma" _n

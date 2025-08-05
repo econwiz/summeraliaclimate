@@ -15,8 +15,11 @@ observations
  406592
 prednames
 tavg_poly_1, tavg_poly_2, tavg_poly_3, tavg_poly_4
+coefnames
+tavg_poly_1_ERA5_025, tavg_poly_2_ERA5_025, tavg_poly_3_ERA5_025, tavg_poly_4_ERA5_025, _cons
 covarnames
-
+FE: ADM2×CHN_ts×Age; FE: ADM0×Year×Age; Trend: ADM1×Age linear; Controls: ADM0×prcp_poly_{1,2}
+# note: gamma includes the intercept (_cons) as the last entry
 gamma
 -.0289273419575782, -.0004146942630114, .0000632521666007, -7.63174688656e-07, 922.7056214860686
 gammavcv

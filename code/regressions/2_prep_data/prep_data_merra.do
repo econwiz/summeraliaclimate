@@ -51,8 +51,8 @@ drop deathrate_p99
 gen sample = 0
 replace sample = 1 if agegroup != 0 & year < = 2010
 replace sample = 0 if mi(deathrate_w99)
-*replace sample = 0 if mi(tavg_poly_1_MERRA2)
-*replace sample = 0 if mi(prcp_poly_1_MERRA2)
+replace sample = 0 if mi(tavg_poly_1_MERRA2)
+replace sample = 0 if mi(prcp_poly_1)
 replace sample = 0 if mi(loggdppc_adm1_avg)
 replace sample = 0 if mi(lr_tavg_MERRA2_adm1_avg)
 

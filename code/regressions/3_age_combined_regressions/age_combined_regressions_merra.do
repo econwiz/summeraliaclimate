@@ -65,7 +65,7 @@ gen weight = population / tot_pop
 * specification 1
 reghdfe deathrate_w99 tavg_poly_1_MERRA2 tavg_poly_2_MERRA2 tavg_poly_3_MERRA2 tavg_poly_4_MERRA2 ///
 		[pw = weight]  ///
-		, absorb(adm0_code##c.prcp_poly_1_MERRA2 adm0_code##c.prcp_poly_2_MERRA2 ///
+		, absorb(adm0_code##c.prcp_poly_1 adm0_code##c.prcp_poly_2 ///
 				i.adm2_code#i.CHN_ts#i.agegroup i.adm0_code#i.year ) ///
 		cluster(adm1_code)
 estimates save "`ster'/pooled_response_spec1_public_MERRA2.ster", replace
@@ -73,7 +73,7 @@ estimates save "`ster'/pooled_response_spec1_public_MERRA2.ster", replace
 * specification 2
 reghdfe deathrate_w99 tavg_poly_1_MERRA2 tavg_poly_2_MERRA2 tavg_poly_3_MERRA2 tavg_poly_4_MERRA2 ///
 		[pw = weight] ///
-		, absorb(adm0_code##c.prcp_poly_1_MERRA2      adm0_code##c.prcp_poly_2_MERRA2 ///
+		, absorb(adm0_code##c.prcp_poly_1      adm0_code##c.prcp_poly_2 ///
 				 i.adm2_code#i.CHN_ts#i.agegroup  i.adm0_code#i.year#i.agegroup ) ///
 		cluster(adm1_code) residual(e_hat)
 estimates save "`ster'/pooled_response_spec2_public_MERRA2.ster", replace
@@ -82,7 +82,7 @@ estimates save "`ster'/pooled_response_spec2_public_MERRA2.ster", replace
 * specification 3
 reghdfe deathrate_w99 tavg_poly_1_MERRA2 tavg_poly_2_MERRA2 tavg_poly_3_MERRA2 tavg_poly_4_MERRA2 ///
 		[pw = weight] ///
-		, absorb(adm0_code##c.prcp_poly_1_MERRA2 adm0_code##c.prcp_poly_2_MERRA2 ///
+		, absorb(adm0_code##c.prcp_poly_1 adm0_code##c.prcp_poly_2 ///
 				 i.adm2_code#i.CHN_ts#i.agegroup i.adm0_code#i.year#i.agegroup adm1_agegrp_code##c.year) ///
 		cluster(adm1_code)
 estimates save "`ster'/pooled_response_spec3_public_MERRA2.ster", replace
@@ -106,7 +106,7 @@ sort iso adm1_id adm2_id year agegroup
 * specification 4
 reghdfe deathrate_w99 tavg_poly_1_MERRA2 tavg_poly_2_MERRA2 tavg_poly_3_MERRA2 tavg_poly_4_MERRA2 ///
 		[pw = precisionweight] ///
-		, absorb(adm0_code##c.prcp_poly_1_MERRA2 adm0_code##c.prcp_poly_2_MERRA2 ///
+		, absorb(adm0_code##c.prcp_poly_1 adm0_code##c.prcp_poly_2 ///
 				i.adm2_code#i.CHN_ts#i.agegroup i.adm0_code#i.year#i.agegroup) ///
 		cluster(adm1_code) tol(1e-7)
 estimates save "`ster'/pooled_response_spec4_public_MERRA2.ster", replace
@@ -135,8 +135,8 @@ reghdfe deathrate_w99                                                           
     [pw = weight],                                                                 ///
     absorb(                                                                         ///
       /* a) country‑specific precip polynomials */                                  ///
-      adm0_code##c.prcp_poly_1_MERRA2                                           ///
-      adm0_code##c.prcp_poly_2_MERRA2                                              ///
+      adm0_code##c.prcp_poly_1                                          ///
+      adm0_code##c.prcp_poly_2                                             ///
                                                                                   ///
       /* b) regional seasonality (China break) */                                   ///
       i.adm2_code#i.CHN_ts                                                         ///

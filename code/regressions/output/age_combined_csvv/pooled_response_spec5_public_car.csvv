@@ -15,8 +15,11 @@ observations
  411668
 prednames
 tavg_poly_1, tavg_poly_2, tavg_poly_3, tavg_poly_4
+coefnames
+tavg_poly_1_GMFD, tavg_poly_2_GMFD, tavg_poly_3_GMFD, tavg_poly_4_GMFD, c.tavg_poly_1_GMFD#c.loggdppc_adm1_avg, c.tavg_poly_2_GMFD#c.loggdppc_adm1_avg, c.tavg_poly_3_GMFD#c.loggdppc_adm1_avg, c.tavg_poly_4_GMFD#c.loggdppc_adm1_avg, c.tavg_poly_1_GMFD#c.lr_tavg_GMFD_adm1_avg, c.tavg_poly_2_GMFD#c.lr_tavg_GMFD_adm1_avg, c.tavg_poly_3_GMFD#c.lr_tavg_GMFD_adm1_avg, c.tavg_poly_4_GMFD#c.lr_tavg_GMFD_adm1_avg, _cons
 covarnames
-
+Exposure: 13-month; FE: as Spec2; Controls: ADM0×prcp_poly_{1,2} (GMFD)
+# note: gamma includes the intercept (_cons) as the last entry
 gamma
 -.3258940938478743, -.0276542432021059, .0022990945616391, -.0000407797255286, .0336586005491383, .0023013261515221, -.000209909098844, 3.93248208007e-06, -.0028703058017577, .000277677108872, -.0000138056360743, 1.94997991525e-07
 923.0168080656515

@@ -41,13 +41,34 @@ forvalues SPEC = 1/5 {
     file write csvv "  deathrate_w99: mortality rate winnowed at 99th percentile" _n
     file write csvv "..." _n
 
-    /* 4. observations & predictors */
+     /* 4. observations & predictors */
     file write csvv "observations" _n
     file write csvv " `e(N)'" _n
+    
     file write csvv "prednames" _n
     file write csvv "tavg_poly_1, tavg_poly_2, tavg_poly_3, tavg_poly_4" _n
+    
+    /* coefnames: comma-separated names exactly as in e(b), including _cons last */
+    file write csvv "coefnames" _n
+    local cn : colnames e(b)
+    local cn_commas : subinstr local cn " " ", ", all
+    file write csvv "`cn_commas'" _n
+    
+    /* covarnames: human-readable description (metadata only) */
     file write csvv "covarnames" _n
-    file write csvv "" _n
+    local covar ""   // default empty
+    
+    /* Use simple one-line conditionals (no braces) to avoid block mismatches */
+    if `SPEC'==1 local covar "FE: ADM2×CHN_ts×Age; FE: ADM0×Year; Controls: ADM0×prcp_poly_{1,2} (GMFD); Weights: population; Clusters: ADM1"
+    else if `SPEC'==2 local covar "FE: ADM2×CHN_ts×Age; FE: ADM0×Year×Age; Controls: ADM0×prcp_poly_{1,2} (GMFD); Weights: population; Clusters: ADM1"
+    else if `SPEC'==3 local covar "FE: ADM2×CHN_ts×Age; FE: ADM0×Year×Age; Trend: ADM1×Age linear; Controls: ADM0×prcp_poly_{1,2} (GMFD)"
+    else if `SPEC'==4 local covar "Estimator: FGLS (Spec2 FE); Weights: precision (pop×1/ω²); Controls: ADM0×prcp_poly_{1,2} (GMFD)"
+    else if `SPEC'==5 local covar "Exposure: 13-month; FE: as Spec2; Controls: ADM0×prcp_poly_{1,2} (GMFD)"
+    
+    file write csvv "`covar'" _n
+    
+    /* optional: make intercept convention explicit */
+    file write csvv "# note: gamma includes the intercept (_cons) as the last entry" _n
 
     /* 5. coefficients (gamma) */
     file write csvv "gamma" _n

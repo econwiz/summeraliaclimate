@@ -15,8 +15,11 @@ observations
  406592
 prednames
 tavg_poly_1, tavg_poly_2, tavg_poly_3, tavg_poly_4
+coefnames
+tavg_poly_1_JRA_3Q, tavg_poly_2_JRA_3Q, tavg_poly_3_JRA_3Q, tavg_poly_4_JRA_3Q, c.tavg_poly_1_JRA_3Q#c.loggdppc_adm1_avg, c.tavg_poly_2_JRA_3Q#c.loggdppc_adm1_avg, c.tavg_poly_3_JRA_3Q#c.loggdppc_adm1_avg, c.tavg_poly_4_JRA_3Q#c.loggdppc_adm1_avg, c.tavg_poly_1_JRA_3Q#c.lr_tavg_JRA_3Q_adm1_avg, c.tavg_poly_2_JRA_3Q#c.lr_tavg_JRA_3Q_adm1_avg, c.tavg_poly_3_JRA_3Q#c.lr_tavg_JRA_3Q_adm1_avg, c.tavg_poly_4_JRA_3Q#c.lr_tavg_JRA_3Q_adm1_avg, _cons
 covarnames
-
+Exposure: 13-month; FE: as Spec2; Controls: ADM0×prcp_poly_{1,2} (JRA)
+# note: gamma includes the intercept (_cons) as the last entry
 gamma
 -.0849947655965873, .0087680171310137, -.0019597670079775, .0000697442911501, .0052986699249042, -.0022021323838475, .0001957810554752, -5.00084771219e-06, .0067926885421587, .0008600454970384, -.000032318905577, -2.29402106321e-07
 758.9819931473221

@@ -15,8 +15,11 @@ observations
  406592
 prednames
 tavg_poly_1, tavg_poly_2, tavg_poly_3, tavg_poly_4
+coefnames
+tavg_poly_1_JRA_3Q, tavg_poly_2_JRA_3Q, tavg_poly_3_JRA_3Q, tavg_poly_4_JRA_3Q, _cons
 covarnames
-
+FE: ADM2×CHN_ts×Age; FE: ADM0×Year×Age; Controls: ADM0×prcp_poly_{1,2} (JRA); Weights: population; Clusters: ADM1
+# note: gamma includes the intercept (_cons) as the last entry
 gamma
 -.0260929231251111, -.0013081859845832, .0000383823992263, 8.07470292525e-07, 974.9417884472495
 gammavcv
