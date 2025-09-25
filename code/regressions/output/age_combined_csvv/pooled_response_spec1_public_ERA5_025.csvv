@@ -1,0 +1,32 @@
+---
+oneline: Age-combined ERA5_025 spec1 results
+version: MORTALITY-AGE-COMBINED-ERA5_025-SPEC1
+dependencies: pooled_response_spec1_public_ERA5_025.ster
+description: 4th-order poly OLS; ADM2×Seasonality & ADM0×Year FE
+csvv-version: aliabonanno-2025-07-28
+variables:
+  tavg_poly_1: T1_sum [C]
+  tavg_poly_2: T2_sum [C^2]
+  tavg_poly_3: T3_sum [C^3]
+  tavg_poly_4: T4_sum [C^4]
+  deathrate_w99: mortality rate winnowed at 99th percentile
+...
+observations
+ 542617
+prednames
+tavg_poly_1, tavg_poly_2, tavg_poly_3, tavg_poly_4
+coefnames
+tavg_poly_1_ERA5_025, tavg_poly_2_ERA5_025, tavg_poly_3_ERA5_025, tavg_poly_4_ERA5_025, _cons
+covarnames
+FE: ADM2×CHN_ts×Age; FE: ADM0×Year; Controls: ADM0×prcp_poly_{1,2} (ERA5_025); Weights: population; Clusters: ADM1
+# note: gamma includes the intercept (_cons) as the last entry
+gamma
+-.0140707072487743, -.0007440215418586, -.0000214826950479, 2.46536167746e-06, 690.7617517262485
+gammavcv
+.0001640353429636, -4.03522723360e-06, -4.46917744494e-07, 1.14154210917e-08, .1435713324477064
+-4.03522723360e-06, 4.58549500950e-07, 5.53850065584e-09, -4.01311757510e-10, -.0277520858542739
+-4.46917744494e-07, 5.53850065584e-09, 2.38028034281e-09, -5.66115644322e-11, -.0015751180641306
+1.14154210917e-08, -4.01311757510e-10, -5.66115644322e-11, 1.60698740601e-12, .0000478721288975
+.1435713324477064, -.0277520858542739, -.0015751180641306, .0000478721288975, 5124.459251177705
+residvcv
+11287.06504968128
