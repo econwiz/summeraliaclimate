@@ -33,6 +33,7 @@ Notes:
 . set more off
 
 . 
+. * Root + data dirs
 . global PROJECT "/user/ab5405/summeraliaclimate/code/energy_uncertainty"
 
 . global DATA    "$PROJECT/data"
@@ -45,7 +46,7 @@ Notes:
 . cap mkdir "$REGD"
 
 . 
-. * List of climate products you want to process
+. * Climate products to process
 . local products "GMFD ERA5 JRA_3Q"
 
 . 
@@ -55,13 +56,14 @@ Notes:
   3.     di "  Building FD dataset for `product'"
   4.     di "==============================================="
   5. 
-.     local suf = "`product'"     // suffix for climate vars
+.     * Suffix for climate variables in this file
+.     local suf "`product'"
   6. 
-.     * ---- load merged energy + climate panel for this product (from .dta) --
-> --
+.     * ---- load merged energy + climate panel for this product (.dta) ----
+.     * (you must have created these with your Python merge script)
 .     use "$MERGED/`product'_energy_panel.dta", clear
   7. 
-.     * sanity check: lgdppc_MA15 must exist
+.     * ---- sanity check: key variables must exist ----
 .     capture confirm variable lgdppc_MA15
   8.     if _rc {
   9.         di as error "lgdppc_MA15 missing in `product'_energy_panel.dta"
@@ -69,207 +71,264 @@ Notes:
  11.         exit 111
  12.     }
  13. 
-.     * drop any old CIL FD variables & old spline so we can rebuild cleanly
-.     capture drop FD_* dc1_lgdppc_MA15
- 14. 
-.     * panel setup
-.     sort region_i year
- 15.     xtset region_i year
- 16. 
-. 
-.     * sanity check
-.     describe iso year load_pc lgdppc_MA15
- 17.     * region_i, year, product, flow, ind*, largeind*, etc should be presen
-> t
-. 
-.     * time set
-.     sort region_i year
- 18.     xtset region_i year
+.     capture confirm variable region_i
+ 14.     if _rc {
+ 15.         di as error "region_i missing in `product'_energy_panel.dta"
+ 16.         describe
+ 17.         exit 111
+ 18.     }
  19. 
+.     capture confirm variable year
+ 20.     if _rc {
+ 21.         di as error "year missing in `product'_energy_panel.dta"
+ 22.         describe
+ 23.         exit 111
+ 24.     }
+ 25. 
+.     capture confirm variable load_pc
+ 26.     if _rc {
+ 27.         di as error "load_pc missing in `product'_energy_panel.dta"
+ 28.         describe
+ 29.         exit 111
+ 30.     }
+ 31. 
+.     * Drop any previous FD variables / spline / decade dummies
+.     capture drop FD_*
+ 32.     capture drop dc1_lgdppc_MA15
+ 33.     capture drop decade decind*
+ 34. 
+.     * Panel setup
+.     sort region_i year
+ 35.     xtset region_i year
+ 36. 
+.     * Quick describe
+.     describe iso year load_pc lgdppc_MA15
+ 37. 
 .     ****************************************************************
-.     * *** FROM HERE DOWN: identical to original logic, just with
-.     *     `_GMFD` replaced by `_`suf'' on climate variables.
+.     *   From here down: same logical structure as CIL, but
+.     *   with NO TINV / dd20 / hdd20 terms.
 .     ****************************************************************
 . 
-.     ** Generate Decadal dummies **
+.     ***********************
+.     * 1. Decade dummies   *
+.     ***********************
 .     qui gen decade = .
- 20.     qui replace decade=1 if (year<=1980 & year>=1971)
- 21.     qui replace decade=2 if (year<=1990 & year>=1981)
- 22.     qui replace decade=3 if (year<=2000 & year>=1991)
- 23.     qui replace decade=4 if (year<=2012 & year>=2001)
- 24.     qui tab decade, gen(decind)
- 25. 
-.     ** Generate income spline variable **
-.     gen dc1_lgdppc_MA15 = .
- 26. 
-.     foreach p in "other_energy" "electricity" {
- 27.         qui summ lgdppc_MA15 if largegpid == 1 & product == "`p'"
- 28.         replace dc1_lgdppc_MA15 = lgdppc_MA15 - r(max) if product == "`p'"
- 29.     }
- 30. 
-.     ** First difference energy load pc **
-.     gen FD_load_pc = load_pc - L1.load_pc
- 31. 
-.     ** First difference income group and income x income group **
-.     forval lg=1/2 {
- 32.         qui gen FD_largeind`lg' = largeind`lg' - L1.largeind`lg'
- 33.         qui gen double FD_I`lg'lgdppc_MA15 = ///
->             ( lgdppc_MA15 * largeind`lg' ) - ( L1.lgdppc_MA15 * L1.largeind`l
-> g' )
- 34.     }
- 35. 
-.     ** First Difference precip **
-.     forval i=1/2 {
- 36.         qui gen double FD_precip`i'_`suf' = ///
->             precip`i'_`suf' - L1.precip`i'_`suf'
- 37.     }
- 38. 
-.     ** First Difference temp, temp x year, temp x year^2, and temp x decade *
-> *
-.     forval i=1/4 {
- 39. 
-.         // temp & polyBelow
-.         qui gen double FD_temp`i'_`suf'      = temp`i'_`suf'      - L1.temp`i
-> '_`suf'
- 40.         qui gen double FD_polyBelow`i'_`suf' = polyBelow`i'_`suf' - L1.pol
-> yBelow`i'_`suf'
- 41. 
-.         foreach yr in year cyear pyear p80yr {
- 42. 
-.             // temp x year
-.             qui gen double FD_`yr'temp`i'_`suf' = ///
->                 (`yr' * temp`i'_`suf') - (L1.`yr' * L1.temp`i'_`suf')
+ 38.     qui replace decade = 1 if inrange(year,1971,1980)
+ 39.     qui replace decade = 2 if inrange(year,1981,1990)
+ 40.     qui replace decade = 3 if inrange(year,1991,2000)
+ 41.     qui replace decade = 4 if inrange(year,2001,2012)
+ 42.     qui tab decade, gen(decind)
  43. 
-.             // temp x year^2
-.             qui gen double FD_`yr'2temp`i'_`suf' = ///
+.     *********************************
+.     * 2. Income spline (dc1_...)    *
+.     *********************************
+.     gen dc1_lgdppc_MA15 = .
+ 44. 
+.     foreach p in "other_energy" "electricity" {
+ 45.         qui summ lgdppc_MA15 if largegpid == 1 & product == "`p'"
+ 46.         replace dc1_lgdppc_MA15 = lgdppc_MA15 - r(max) if product == "`p'"
+ 47.     }
+ 48. 
+.     ************************************
+.     * 3. First difference load_pc      *
+.     ************************************
+.     gen FD_load_pc = load_pc - L1.load_pc
+ 49. 
+.     ************************************************************
+.     * 4. FD income group and income × income group             *
+.     ************************************************************
+.     forval lg = 1/2 {
+ 50.         qui gen FD_largeind`lg' = largeind`lg' - L1.largeind`lg'
+ 51.         qui gen double FD_I`lg'lgdppc_MA15 = ///
+>             (  lgdppc_MA15 * largeind`lg'   ) - ///
+>             (L1.lgdppc_MA15 * L1.largeind`lg')
+ 52.     }
+ 53. 
+.     ************************************
+.     * 5. First difference precip       *
+.     ************************************
+.     forval i = 1/2 {
+ 54.         qui gen double FD_precip`i' = ///
+>             precip`i'_`suf' - L1.precip`i'_`suf'
+ 55.     }
+ 56. 
+.     ******************************************************************
+.     * 6. FD temp, temp × year, temp × year^2, temp × decade,        *
+.     *    polyBelow / polyAbove interactions with year               *
+.     ******************************************************************
+.     forval i = 1/4 {
+ 57. 
+.         * temp & polyBelow
+.         qui gen double FD_temp`i'       = temp`i'_`suf'      - L1.temp`i'_`su
+> f'
+ 58.         qui gen double FD_polyBelow`i'  = polyBelow`i'_`suf' - L1.polyBelo
+> w`i'_`suf'
+ 59. 
+.         foreach yr in year cyear pyear p80yr {
+ 60. 
+.             * temp × year
+.             qui gen double FD_`yr'temp`i' = ///
+>                 (`yr' * temp`i'_`suf') - (L1.`yr' * L1.temp`i'_`suf')
+ 61. 
+.             * temp × year^2
+.             qui gen double FD_`yr'2temp`i' = ///
 >                 (`yr' * `yr' * temp`i'_`suf') - ///
 >                 (L1.`yr' * L1.`yr' * L1.temp`i'_`suf')
- 44.         }
- 45. 
-.         // temp x decade
-.         forval dg=1/2 {
- 46.             qui gen double FD_D`dg'temp`i'_`suf' = ///
+ 62.         }
+ 63. 
+.         * temp × decade
+.         forval dg = 1/2 {
+ 64.             qui gen double FD_D`dg'temp`i' = ///
 >                 (decind`dg' * temp`i'_`suf') - (L1.decind`dg' * L1.temp`i'_`s
 > uf')
- 47.         }
- 48. 
-.         // polyBelow x year post 1980 for coldsidep80 interaction
-.         qui gen double FD_p80yr_polyBelow`i'_`suf' = ///
+ 65.         }
+ 66. 
+.         * polyBelow × year post-1980 (coldside p80)
+.         qui gen double FD_p80yr_polyBelow`i' = ///
 >             (p80yr * polyBelow`i'_`suf') - (L1.p80yr * L1.polyBelow`i'_`suf')
- 49. 
-.         // polyBelow x year  for coldside interaction
-.         qui gen double FD_year_polyBelow`i'_`suf' = ///
+ 67. 
+.         * polyBelow × year (coldside)
+.         qui gen double FD_year_polyBelow`i' = ///
 >             (year * polyBelow`i'_`suf') - (L1.year * L1.polyBelow`i'_`suf')
- 50. 
-.         // polyAbove x year post 1980 for twosidedp80 interaction
-.         qui gen double FD_p80yr_polyAbove`i'_`suf' = ///
+ 68. 
+.         * polyAbove × year post-1980 (two-sided p80)
+.         qui gen double FD_p80yr_polyAbove`i' = ///
 >             (p80yr * polyAbove`i'_`suf') - (L1.p80yr * L1.polyAbove`i'_`suf')
- 51.     }
- 52. 
-.     ** First difference temp x income decile **
+ 69.     }
+ 70. 
+.     *********************************************************
+.     * 7. FD temp × income decile                            *
+.     *********************************************************
 .     forval lg = 1/10 {
- 53.         forval i=1/4 {
- 54.             gen double FD_I`lg'temp`i'_`suf' = ///
->                 ( temp`i'_`suf' * ind`lg' ) - ( L1.temp`i'_`suf' * L1.ind`lg'
->  )
- 55.         }
- 56.     }
- 57. 
-.     ** First difference temp x year x income spline **
-.     forval lg=1/2 {
- 58.         forval i=1/4 {
- 59. 
+ 71.         forval i = 1/4 {
+ 72.             gen double FD_I`lg'temp`i' = ///
+>                 ( temp`i'_`suf' * ind`lg' ) - ///
+>                 ( L1.temp`i'_`suf' * L1.ind`lg' )
+ 73.         }
+ 74.     }
+ 75. 
+.     ******************************************************************
+.     * 8. FD temp × year × income spline                              *
+.     ******************************************************************
+.     forval lg = 1/2 {
+ 76.         forval i = 1/4 {
+ 77. 
 .             foreach yr in year cyear pyear p80yr {
- 60. 
-.                 qui gen double FD_dc1_lgdppc_MA15`yr'I`lg'temp`i'_`suf' = ///
+ 78. 
+.                 qui gen double FD_dc1_lgdppc_MA15`yr'I`lg'temp`i' = ///
 >                     ( dc1_lgdppc_MA15 * temp`i'_`suf' * largeind`lg' * `yr' )
 >  ///
 >                   - ( L1.dc1_lgdppc_MA15 * L1.temp`i'_`suf' * L1.largeind`lg'
 >  * L1.`yr' )
- 61.             }
- 62. 
-.             // polyBelow interactions
-.             qui gen double FD_lgdppc_MA15p80yrI`lg'polyBelow`i'_`suf' = ///
+ 79.             }
+ 80. 
+.             * polyBelow interactions with income spline
+.             qui gen double FD_lgdppc_MA15p80yrI`lg'polyBelow`i' = ///
 >                 ( dc1_lgdppc_MA15 * polyBelow`i'_`suf' * largeind`lg' * p80yr
 >  ) ///
 >               - ( L1.dc1_lgdppc_MA15 * L1.polyBelow`i'_`suf' * L1.largeind`lg
 > ' * L1.p80yr )
- 63. 
-.             qui gen double FD_lgdppc_MA15yearI`lg'polyBelow`i'_`suf' = ///
+ 81. 
+.             qui gen double FD_lgdppc_MA15yearI`lg'polyBelow`i' = ///
 >                 ( dc1_lgdppc_MA15 * polyBelow`i'_`suf' * largeind`lg' * year 
 > ) ///
 >               - ( L1.dc1_lgdppc_MA15 * L1.polyBelow`i'_`suf' * L1.largeind`lg
 > ' * L1.year )
- 64. 
-.             // polyAbove interactions
-.             qui gen double FD_lgdppc_MA15p80yrI`lg'polyAbove`i'_`suf' = ///
+ 82. 
+.             * polyAbove interactions with income spline
+.             qui gen double FD_lgdppc_MA15p80yrI`lg'polyAbove`i' = ///
 >                 ( dc1_lgdppc_MA15 * polyAbove`i'_`suf' * largeind`lg' * p80yr
 >  ) ///
 >               - ( L1.dc1_lgdppc_MA15 * L1.polyAbove`i'_`suf' * L1.largeind`lg
 > ' * L1.p80yr )
- 65.         }
- 66.     }
- 67. 
-.     ** First difference temp x year^2 x income spline **
-.     forval lg=1/2 {
- 68.         forval i=1/4 {
- 69.             foreach yr in year cyear pyear p80yr {
- 70.                 qui gen double FD_dc1_lgdppc_MA15`yr'2I`lg'temp`i'_`suf' =
->  ///
+ 83.         }
+ 84.     }
+ 85. 
+.     *********************************************************************
+.     * 9. FD temp × year^2 × income spline                               *
+.     *********************************************************************
+.     forval lg = 1/2 {
+ 86.         forval i = 1/4 {
+ 87.             foreach yr in year cyear pyear p80yr {
+ 88.                 qui gen double FD_dc1_lgdppc_MA15`yr'2I`lg'temp`i' = ///
 >                     ( dc1_lgdppc_MA15 * temp`i'_`suf' * largeind`lg' * `yr' *
 >  `yr' ) ///
 >                   - ( L1.dc1_lgdppc_MA15 * L1.temp`i'_`suf' * L1.largeind`lg'
 >  * L1.`yr' * L1.`yr' )
- 71.             }
- 72.         }
- 73.     }
- 74. 
-.     ** First difference income spline x temp **
-.     forval lg=1/2 {
- 75.         forval i=1/4 {
- 76.             qui gen double FD_dc1_lgdppc_MA15I`lg'temp`i'_`suf' = ///
+ 89.             }
+ 90.         }
+ 91.     }
+ 92. 
+.     *********************************************************
+.     * 10. FD income spline × temp (and polyBelow)            *
+.     *********************************************************
+.     * income spline × temp
+.     forval lg = 1/2 {
+ 93.         forval i = 1/4 {
+ 94.             qui gen double FD_dc1_lgdppc_MA15I`lg'temp`i' = ///
 >                 ( dc1_lgdppc_MA15 * temp`i'_`suf' * largeind`lg' ) - ///
 >                 ( L1.dc1_lgdppc_MA15 * L1.temp`i'_`suf' * L1.largeind`lg' )
- 77.         }
- 78.     }
- 79. 
-.     ** First difference income spline x temp (polyBelow) **
-.     forval lg=1/2 {
- 80.         forval i=1/4 {
- 81.             qui gen double FD_dc1_lgdppc_MA15I`lg'polyBelow`i'_`suf' = ///
+ 95.         }
+ 96.     }
+ 97. 
+.     * income spline × polyBelow
+.     forval lg = 1/2 {
+ 98.         forval i = 1/4 {
+ 99.             qui gen double FD_dc1_lgdppc_MA15I`lg'polyBelow`i' = ///
 >                 ( dc1_lgdppc_MA15 * polyBelow`i'_`suf' * largeind`lg' ) - ///
 >                 ( L1.dc1_lgdppc_MA15 * L1.polyBelow`i'_`suf' * L1.largeind`lg
 > ' )
- 82.         }
- 83.     }
- 84. 
-.     ** First difference dd20 x polyBreak ** 
-.     forval i=1/4 {
- 85. 
-.         qui gen double FD_cdd20_TINVtemp`i'_`suf'_old = ///
->             ( cdd20_TINV_`suf' * polyAbove`i'_`suf' ) - ///
->             ( cdd20_TINV_`suf' * L1.polyAbove`i'_`suf' )
- 86. 
-.         qui gen double FD_hdd20_TINVtemp`i'_`suf'_old = ///
->             ( hdd20_TINV_`suf' * polyBelow`i'_`suf' ) - ///
->             ( hdd20_TINV_`suf' * L1.polyBelow`i'_`suf' )
- 87.     }
- 88. 
-.     ** First difference dd20 x polyBreak at pixel level ** 
-.     forval i=1/4 {
- 89. 
-.         qui gen double FD_cdd20_TINVtemp`i'_`suf' = ///
->             polyAbove`i'_x_cdd_`suf' - L1.polyAbove`i'_x_cdd_`suf'
- 90. 
-.         qui gen double FD_hdd20_TINVtemp`i'_`suf' = ///
->             polyBelow`i'_x_hdd_`suf' - L1.polyBelow`i'_x_hdd_`suf'
- 91.     }
- 92. 
-.     * Save regression-ready dataset for this product
+100.         }
+101.     }
+102. 
+.         *********************************************************
+.     * 11. FD TINV degree-days × polyBreak                    *
+.     *     (long-run HDD/CDD × polyAbove/polyBelow)           *
+.     *********************************************************
+.     forval i = 1/4 {
+103. 
+.         * --- Panel-level TINV scalars (always available if Python added them
+> ) ---
+.         capture confirm variable cdd20_TINV_`suf'
+104.         if !_rc {
+105.             qui gen double FD_cdd20_TINVtemp`i' = ///
+>                 ( cdd20_TINV_`suf' * polyAbove`i'_`suf' ) - ///
+>                 ( cdd20_TINV_`suf' * L1.polyAbove`i'_`suf' )
+106.         }
+107. 
+.         capture confirm variable hdd20_TINV_`suf'
+108.         if !_rc {
+109.             qui gen double FD_hdd20_TINVtemp`i' = ///
+>                 ( hdd20_TINV_`suf' * polyBelow`i'_`suf' ) - ///
+>                 ( hdd20_TINV_`suf' * L1.polyBelow`i'_`suf' )
+110.         }
+111. 
+.         * --- If pixel-level cross terms exist, prefer those (CIL-style) ---
+.         *     polyAbove`i'_x_cdd_`suf' = ∑ w_z polyAbove_i(T_z) · CDD_z^TINV,
+>  etc.
+.         capture confirm variable polyAbove`i'_x_cdd_`suf'
+112.         if !_rc {
+113.             capture drop FD_cdd20_TINVtemp`i'
+114.             qui gen double FD_cdd20_TINVtemp`i' = ///
+>                 polyAbove`i'_x_cdd_`suf' - L1.polyAbove`i'_x_cdd_`suf'
+115.         }
+116. 
+.         capture confirm variable polyBelow`i'_x_hdd_`suf'
+117.         if !_rc {
+118.             capture drop FD_hdd20_TINVtemp`i'
+119.             qui gen double FD_hdd20_TINVtemp`i' = ///
+>                 polyBelow`i'_x_hdd_`suf' - L1.polyBelow`i'_x_hdd_`suf'
+120.         }
+121.     }
+122. 
+. 
+.     ********************************************
+.     * 11. Save regression-ready dataset       *
+.     ********************************************
 .     compress
- 93.     save "$REGD/`product'_TINV_clim_regsort.dta", replace
- 94.     di "Saved: $REGD/`product'_TINV_clim_regsort.dta"
- 95. }
+123.     save "$REGD/`product'_TINV_clim_regsort.dta", replace
+124.     di "Saved: $REGD/`product'_TINV_clim_regsort.dta"
+125. }
 ===============================================
   Building FD dataset for GMFD
 ===============================================
@@ -285,12 +344,277 @@ iso             str6    %6s
 year            long    %12.0g                
 load_pc         double  %10.0g                
 lgdppc_MA15     double  %10.0g                
+(8,301 missing values generated)
+(3,809 real changes made)
+(4,492 real changes made)
+(581 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+  variable year was long now int
+  variable region_i was float now int
+  variable gpid was float now byte
+  variable tpid was float now byte
+  variable tgpid was float now byte
+  variable cyear was float now byte
+  variable pyear was float now byte
+  variable p80yr was float now byte
+  variable largegpid was float now byte
+  variable largeind_electricity was float now byte
+  variable nobs_electricity was float now byte
+  variable nobs_largeind was float now byte
+  variable first_year was float now int
+  variable last_year was float now int
+  variable largeind_allyears was float now byte
+  variable largeind_notallyears was float now byte
+  variable product_i was float now byte
+  variable flow_i was float now byte
+  variable indt was float now byte
+  variable indp80 was float now byte
+  variable indd was float now byte
+  variable subregionid was float now byte
+  variable decade was float now byte
+  variable FD_largeind1 was float now byte
+  variable FD_largeind2 was float now byte
+  variable FD_D1temp1 was double now byte
+  variable FD_D1temp2 was double now byte
+  variable FD_D1temp3 was double now byte
+  variable FD_D1temp4 was double now byte
+  (821,799 bytes saved)
+file
+    /user/ab5405/summeraliaclimate/code/energy_uncertainty/data/regression/GM
+    > FD_TINV_clim_regsort.dta saved
+Saved: /user/ab5405/summeraliaclimate/code/energy_uncertainty/data/regression/G
+> MFD_TINV_clim_regsort.dta
+===============================================
+  Building FD dataset for ERA5
+===============================================
 
 Panel variable: region_i (unbalanced)
  Time variable: year, 1971 to 2010, but with gaps
          Delta: 1 unit
-variable decade already defined
-r(110);
 
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+iso             str6    %6s                   
+year            long    %12.0g                
+load_pc         double  %10.0g                
+lgdppc_MA15     double  %10.0g                
+(8,301 missing values generated)
+(3,809 real changes made)
+(4,492 real changes made)
+(581 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+  variable year was long now int
+  variable region_i was float now int
+  variable gpid was float now byte
+  variable tpid was float now byte
+  variable tgpid was float now byte
+  variable cyear was float now byte
+  variable pyear was float now byte
+  variable p80yr was float now byte
+  variable largegpid was float now byte
+  variable largeind_electricity was float now byte
+  variable nobs_electricity was float now byte
+  variable nobs_largeind was float now byte
+  variable first_year was float now int
+  variable last_year was float now int
+  variable largeind_allyears was float now byte
+  variable largeind_notallyears was float now byte
+  variable product_i was float now byte
+  variable flow_i was float now byte
+  variable indt was float now byte
+  variable indp80 was float now byte
+  variable indd was float now byte
+  variable subregionid was float now byte
+  variable decade was float now byte
+  variable FD_largeind1 was float now byte
+  variable FD_largeind2 was float now byte
+  variable FD_D1temp1 was double now byte
+  variable FD_D1temp2 was double now byte
+  variable FD_D1temp3 was double now byte
+  variable FD_D1temp4 was double now byte
+  (821,799 bytes saved)
+file
+    /user/ab5405/summeraliaclimate/code/energy_uncertainty/data/regression/ER
+    > A5_TINV_clim_regsort.dta saved
+Saved: /user/ab5405/summeraliaclimate/code/energy_uncertainty/data/regression/E
+> RA5_TINV_clim_regsort.dta
+===============================================
+  Building FD dataset for JRA_3Q
+===============================================
+
+Panel variable: region_i (unbalanced)
+ Time variable: year, 1971 to 2010, but with gaps
+         Delta: 1 unit
+
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+iso             str6    %6s                   
+year            long    %12.0g                
+load_pc         double  %10.0g                
+lgdppc_MA15     double  %10.0g                
+(8,301 missing values generated)
+(3,809 real changes made)
+(4,492 real changes made)
+(581 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+(2,341 missing values generated)
+  variable year was long now int
+  variable region_i was float now int
+  variable gpid was float now byte
+  variable tpid was float now byte
+  variable tgpid was float now byte
+  variable cyear was float now byte
+  variable pyear was float now byte
+  variable p80yr was float now byte
+  variable largegpid was float now byte
+  variable largeind_electricity was float now byte
+  variable nobs_electricity was float now byte
+  variable nobs_largeind was float now byte
+  variable first_year was float now int
+  variable last_year was float now int
+  variable largeind_allyears was float now byte
+  variable largeind_notallyears was float now byte
+  variable product_i was float now byte
+  variable flow_i was float now byte
+  variable indt was float now byte
+  variable indp80 was float now byte
+  variable indd was float now byte
+  variable subregionid was float now byte
+  variable decade was float now byte
+  variable FD_largeind1 was float now byte
+  variable FD_largeind2 was float now byte
+  variable FD_D1temp1 was double now byte
+  variable FD_D1temp2 was double now byte
+  variable FD_D1temp3 was double now byte
+  variable FD_D1temp4 was double now byte
+  (821,799 bytes saved)
+file
+    /user/ab5405/summeraliaclimate/code/energy_uncertainty/data/regression/JR
+    > A_3Q_TINV_clim_regsort.dta saved
+Saved: /user/ab5405/summeraliaclimate/code/energy_uncertainty/data/regression/J
+> RA_3Q_TINV_clim_regsort.dta
+
+. 
+. ************************************************
+. * End of 0_build_FD_dataset_all.do
+. ************************************************
+. 
 end of do-file
-r(110);

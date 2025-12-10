@@ -14,7 +14,7 @@ global REGD    "$DATA/regression"
 cap mkdir "$REGD"
 
 * Climate products to process
-local products "GMFD ERA5 JRA_3Q"
+local products "ERA5 JRA_3Q GMFD MERRA2"
 
 foreach product of local products {
 
@@ -233,7 +233,44 @@ foreach product of local products {
         }
     }
 
-    * (No dd20 / TINV degree-day pieces here by design)
+        *********************************************************
+    * 11. FD TINV degree-days × polyBreak                    *
+    *     (long-run HDD/CDD × polyAbove/polyBelow)           *
+    *********************************************************
+    forval i = 1/4 {
+
+        * --- Panel-level TINV scalars (always available if Python added them) ---
+        capture confirm variable cdd20_TINV_`suf'
+        if !_rc {
+            qui gen double FD_cdd20_TINVtemp`i' = ///
+                ( cdd20_TINV_`suf' * polyAbove`i'_`suf' ) - ///
+                ( cdd20_TINV_`suf' * L1.polyAbove`i'_`suf' )
+        }
+
+        capture confirm variable hdd20_TINV_`suf'
+        if !_rc {
+            qui gen double FD_hdd20_TINVtemp`i' = ///
+                ( hdd20_TINV_`suf' * polyBelow`i'_`suf' ) - ///
+                ( hdd20_TINV_`suf' * L1.polyBelow`i'_`suf' )
+        }
+
+        * --- If pixel-level cross terms exist, prefer those (CIL-style) ---
+        *     polyAbove`i'_x_cdd_`suf' = ∑ w_z polyAbove_i(T_z) · CDD_z^TINV, etc.
+        capture confirm variable polyAbove`i'_x_cdd_`suf'
+        if !_rc {
+            capture drop FD_cdd20_TINVtemp`i'
+            qui gen double FD_cdd20_TINVtemp`i' = ///
+                polyAbove`i'_x_cdd_`suf' - L1.polyAbove`i'_x_cdd_`suf'
+        }
+
+        capture confirm variable polyBelow`i'_x_hdd_`suf'
+        if !_rc {
+            capture drop FD_hdd20_TINVtemp`i'
+            qui gen double FD_hdd20_TINVtemp`i' = ///
+                polyBelow`i'_x_hdd_`suf' - L1.polyBelow`i'_x_hdd_`suf'
+        }
+    }
+
 
     ********************************************
     * 11. Save regression-ready dataset       *

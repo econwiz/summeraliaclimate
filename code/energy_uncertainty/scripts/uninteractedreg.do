@@ -1,7 +1,8 @@
 ************************************************************
 * 2_FD_uninteracted_all.do
 * Replicate CIL stacked "uninteracted" FD spec for all products
-* (GMFD, ERA5, JRA_3Q), with pop weights + FGLS.
+* (GMFD, ERA5, JRA_3Q, MERRA2), with pop weights + FGLS,
+* AND export coeffs / vcov to CSV.
 ************************************************************
 clear all
 set more off
@@ -14,7 +15,7 @@ global OUTDIR  "$DATA/regression/sters"
 cap mkdir "$OUTDIR"
 
 * Products to loop over
-local products "GMFD ERA5 JRA_3Q"
+local products "GMFD ERA5 JRA_3Q MERRA2"
 
 foreach product of local products {
 
@@ -36,19 +37,19 @@ foreach product of local products {
     sort region_i year
     tset region_i year
 
-    * 4) Precip block: indp × indf1 × FD_precipk_suf
+    * 4) Precip block: indp × indf1 × FD_precipk  (NO product suffix on FD vars)
     local precip_r ""
     forval pg = 1/2 {
         forval k = 1/2 {
-            local precip_r "`precip_r' c.indp`pg'#c.indf1#c.FD_precip`k'_`suf'"
+            local precip_r "`precip_r' c.indp`pg'#c.indf1#c.FD_precip`k'"
         }
     }
-
-    * 5) Temp block: indp × indf1 × FD_tempk_suf
+    
+    * 5) Temp block: indp × indf1 × FD_tempk  (NO product suffix on FD vars)
     local temp_r ""
     forval pg = 1/2 {
         forval k = 1/4 {
-            local temp_r "`temp_r' c.indp`pg'#c.indf1#c.FD_temp`k'_`suf'"
+            local temp_r "`temp_r' c.indp`pg'#c.indf1#c.FD_temp`k'"
         }
     }
 
@@ -99,11 +100,10 @@ foreach product of local products {
     estimates save "$OUTDIR/FD_FGLS_global_`product'", replace
 
     * ------------------------------------------------------
-    * OPTIONAL: save coeff + vcov for uncertainty work
-    * (uncomment if you want CSVs for Python/R)
+    * Export coeffs and vcov for this PRODUCT (long format)
     * ------------------------------------------------------
-    /*
-    * coefficients
+
+    * 1) Coefficient vector: parm, beta
     matrix b = e(b)
     local k = colsof(b)
     local names : colnames b
@@ -111,46 +111,63 @@ foreach product of local products {
     preserve
         clear
         set obs `k'
-        gen parm = ""
-        gen beta = .
+        gen strL parm = ""
+        gen double beta = .
+
         local j = 1
         foreach nm of local names {
             replace parm = "`nm'" in `j'
             replace beta = b[1,`j'] in `j'
             local ++j
         }
+
         order parm beta
-        export delimited using "$OUTDIR/FD_FGLS_global_`product'_coeff.csv", replace
+        export delimited using ///
+            "$OUTDIR/FD_FGLS_global_`product'_coeff.csv", replace
     restore
 
-    * vcov
+    * 2) Variance–covariance matrix: parm_i, parm_j, v
     matrix V = e(V)
     local k = rowsof(V)
     local names : rownames V
 
     preserve
         clear
-        set obs `k'
-        gen rowname = ""
-        local j = 1
-        foreach nm of local names {
-            replace rowname = "`nm'" in `j'
-            local ++j
-        }
+        * We’ll create k^2 rows: one per (i,j) pair
+        set obs `=`k'*`k''
 
-        local j = 1
-        foreach nm of local names {
-            gen v_`nm' = .
-            forvalues i = 1/`k' {
-                replace v_`nm' = V[`i',`j'] in `i'
+        gen int i = .
+        gen int j = .
+        gen strL parm_i = ""
+        gen strL parm_j = ""
+        gen double v = .
+
+        local r = 1
+        forvalues ii = 1/`k' {
+            forvalues jj = 1/`k' {
+                * store indices
+                replace i = `ii' in `r'
+                replace j = `jj' in `r'
+
+                * look up parameter names
+                local name_i : word `ii' of `names'
+                local name_j : word `jj' of `names'
+                replace parm_i = "`name_i'" in `r'
+                replace parm_j = "`name_j'" in `r'
+
+                * vcov entry
+                replace v = V[`ii',`jj'] in `r'
+
+                local ++r
             }
-            local ++j
         }
 
-        order rowname
-        export delimited using "$OUTDIR/FD_FGLS_global_`product'_vcov.csv", replace
+        drop i j
+        order parm_i parm_j v
+        export delimited using ///
+            "$OUTDIR/FD_FGLS_global_`product'_vcov_long.csv", replace
     restore
-    */
+
 }
 
 ************************************************************

@@ -3,10 +3,15 @@
 """
 build_PRODUCT_country_climate_multi.py
 
-For each daily climate product listed in car_paths.csv
+For each climate product listed in car_paths.csv
 (ERA5-025, GMFD, JRA-3Q, MERRA2), construct population-weighted
 country–year climate variables analogous to the Rode/Carleton TINV
 inputs: temp*, precip*, polyAbove*, polyBelow*, hdd20, cdd20.
+
+- Temperature: uses DAILY tas (tas_day_*), builds daily transforms,
+  then sums over days within the year.
+- Precipitation: uses MONTHLY precip flux (pr_Amon_*), converts
+  kg m-2 s-1 -> mm/month, then averages months within the year.
 """
 
 import os
@@ -48,7 +53,10 @@ SUFFIX_MAP = {
     "MERRA2": "MERRA2",
 }
 
-#Helpers
+# ---------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------
+
 
 def open_any(path: Path) -> xr.Dataset:
     path = Path(path)
@@ -82,8 +90,14 @@ def coerce_lon_lat(ds: xr.Dataset) -> xr.Dataset:
 
 
 def compute_daily_transforms(ds: xr.Dataset) -> xr.Dataset:
-    """Daily nonlinear transforms for temperature and precipitation."""
-    tas_c = ds[TAS_VAR_NAME] - 273.15  #K to C
+    """
+    Daily nonlinear transforms for temperature (and *daily* precip if present).
+
+    For this observational-uncertainty pipeline, we use daily tas here.
+    Precipitation is handled from monthly pr_Amon separately, so we
+    normally do NOT expect PR_VAR_NAME to be in ds.
+    """
+    tas_c = ds[TAS_VAR_NAME] - 273.15  # K to C
 
     T1 = tas_c
     T2 = tas_c ** 2
@@ -120,17 +134,37 @@ def compute_daily_transforms(ds: xr.Dataset) -> xr.Dataset:
         BLW4=BLW4,
     )
 
+    # If you ever pass in a dataset with daily precip (kg m-2 s-1),
+    # this branch will construct daily PR1/PR2 in mm/day.
     if PR_VAR_NAME is not None and PR_VAR_NAME in ds:
         pr = ds[PR_VAR_NAME]
-        data_vars.update(PR1=pr, PR2=pr ** 2)
+        units = (pr.attrs.get("units", "") or "").lower()
+        if "kg m-2 s-1" in units or "kg m**-2 s**-1" in units:
+            pr_mm_day = pr * 86400.0  # flux -> daily depth
+        else:
+            pr_mm_day = pr
+        pr_mm_day.attrs["units"] = "mm/day"
+        data_vars.update(PR1=pr_mm_day, PR2=pr_mm_day ** 2)
 
     return xr.Dataset(data_vars, coords=ds.coords)
 
 
-def ensure_2d_lat_lon(da: xr.DataArray) -> xr.DataArray:
-    """Collapse to a 2D (lat, lon) field, summing over time and averaging other dims."""
-    if "time" in da.dims:
-        da = da.sum("time", skipna=True)
+def ensure_2d_lat_lon(da: xr.DataArray, *, time_agg: str | None = "sum") -> xr.DataArray:
+    """
+    Collapse to a 2D (lat, lon) field.
+
+    - If time_agg == "sum": sum over time.
+    - If time_agg == "mean": mean over time.
+    - If time_agg is None: leave 'time' alone (caller must handle).
+    Then average any remaining non-(lat,lon) dims.
+    """
+    if "time" in da.dims and time_agg is not None:
+        if time_agg == "sum":
+            da = da.sum("time", skipna=True)
+        elif time_agg == "mean":
+            da = da.mean("time", skipna=True)
+        else:
+            raise ValueError(f"Unknown time_agg='{time_agg}' (expected 'sum', 'mean', or None).")
 
     for dim in list(da.dims):
         if dim not in ("lat", "lon"):
@@ -177,6 +211,24 @@ def load_and_prepare_gpw() -> xr.DataArray:
     return gpw
 
 
+def pr_flux_to_mm_per_month(pr: xr.DataArray) -> xr.DataArray:
+    """
+    Convert monthly mean precip flux (kg m-2 s-1) to total mm/month.
+
+    mm/month = pr * 86400 * days_in_month
+    """
+    days = pr["time"].dt.days_in_month
+    seconds_per_day = 86400.0
+    pr_mm_month = pr * seconds_per_day * days
+    pr_mm_month.attrs["units"] = "mm/month"
+    return pr_mm_month
+
+
+# ---------------------------------------------------------------------
+# Main worker
+# ---------------------------------------------------------------------
+
+
 def build_product_country_climate(
     product_label: str,
     tas_path: Path,
@@ -188,28 +240,42 @@ def build_product_country_climate(
 
     out_dir = OUT_BASE / suffix
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_csv = out_dir / f"{suffix}_country_climate_{YEAR_MIN}_{YEAR_MAX}.csv"
+    out_csv = out_dir / f"{suffix}_country_year_{YEAR_MIN}_{YEAR_MAX}.csv"
 
     print("[INFO]", product_label, "Loading WORLD shapefile...")
     world = gpd.read_file(WORLD_SHP).to_crs("EPSG:4326")
     if ISO_COL not in world.columns:
         raise ValueError(f"{ISO_COL} not in WORLD columns: {world.columns}")
 
-    print("[INFO]", product_label, "Loading climate...")
+    # ----- Load temperature (daily) -----
+    print("[INFO]", product_label, "Loading DAILY temperature...")
     ds_t = open_any(tas_path)
+    ds_t = coerce_lon_lat(ds_t)
+    ds_t = ds_t.sel(time=slice(f"{YEAR_MIN}-01-01", f"{YEAR_MAX}-12-31"))
+
+    # ----- Load precipitation (monthly flux), if available -----
     if precip_path is not None:
+        print("[INFO]", product_label, "Loading MONTHLY precipitation...")
         ds_p = open_any(precip_path)
-        ds = xr.merge([ds_t, ds_p])
+        ds_p = coerce_lon_lat(ds_p)
+        ds_p = ds_p.sel(time=slice(f"{YEAR_MIN}-01-01", f"{YEAR_MAX}-12-31"))
     else:
-        ds = ds_t
+        ds_p = None
 
-    ds = coerce_lon_lat(ds)
-    ds = ds.sel(time=slice(f"{YEAR_MIN}-01-01", f"{YEAR_MAX}-12-31"))
-    years = np.unique(ds.time.dt.year.values)
-    print(f"[INFO] {product_label} Years in climate: {years.min()}–{years.max()}")
+    years_t = np.unique(ds_t.time.dt.year.values)
+    if ds_p is not None:
+        years_p = np.unique(ds_p.time.dt.year.values)
+        years = np.intersect1d(years_t, years_p)
+    else:
+        years = years_t
 
-    print("[INFO]", product_label, "Computing daily transforms...")
-    ds_daily = compute_daily_transforms(ds)
+    print(f"[INFO] {product_label} Years in temperature: {years_t.min()}–{years_t.max()}")
+    if ds_p is not None:
+        print(f"[INFO] {product_label} Years in precipitation: {years_p.min()}–{years_p.max()}")
+    print(f"[INFO] {product_label} Using overlapping years: {years.min()}–{years.max()}")
+
+    print("[INFO]", product_label, "Computing daily transforms (temperature)...")
+    ds_daily = compute_daily_transforms(ds_t)
 
     print("[INFO]", product_label, "Loading and reprojecting GPW population...")
     gpw = load_and_prepare_gpw()
@@ -229,7 +295,7 @@ def build_product_country_climate(
     wm, world_with_id = build_weightmap(sample, world)
     shape_to_iso = world_with_id.set_index("shape_id")[ISO_COL]
 
-    # Country populations
+    # ----- Country populations -----
     print("[INFO]", product_label, "Aggregating GPW to country populations...")
     ds_pop = xr.Dataset({"pop": gpw_on_grid}).load()
     with xa.set_options(silent=True):
@@ -244,22 +310,56 @@ def build_product_country_climate(
 
     all_year_rows: list[pd.DataFrame] = []
 
+    # -----------------------------------------------------------------
     # Year loop
+    # -----------------------------------------------------------------
     for yr in years:
-        print(f"[INFO] {product_label} Aggregating {int(yr)}")
-        ds_y = ds_daily.sel(time=ds_daily.time.dt.year == yr)
+        yr_int = int(yr)
+        print(f"[INFO] {product_label} Aggregating {yr_int}")
+        ds_y = ds_daily.sel(time=ds_daily.time.dt.year == yr_int)
 
         ds_sum = xr.Dataset()
+
+        # --- temperature-derived variables: sum over daily time ---
         for name, da in ds_y.data_vars.items():
-            da_2d = ensure_2d_lat_lon(da)
+            # Skip any daily precip that might be present; we want
+            # precip from the monthly pr_Amon files instead.
+            if name in {"PR1", "PR2"}:
+                continue
+
+            da_2d = ensure_2d_lat_lon(da, time_agg="sum")
             if set(da_2d.dims) != {"lat", "lon"}:
                 raise RuntimeError(
                     f"{product_label} {name}: still not 2D lat/lon, dims={da_2d.dims}"
                 )
             ds_sum[name] = da_2d
 
+        # --- precipitation (monthly): convert flux -> mm/month, then mean over months ---
+        if ds_p is not None and PR_VAR_NAME in ds_p:
+            pr_mon = ds_p[PR_VAR_NAME].sel(
+                time=slice(f"{yr_int}-01-01", f"{yr_int}-12-31")
+            )
+            if pr_mon.sizes.get("time", 0) == 0:
+                print(f"[WARN] {product_label} No precip data for year {yr_int}")
+            else:
+                pr_mm_month = pr_flux_to_mm_per_month(pr_mon)  # mm/month
+                ds_pr_y = xr.Dataset(
+                    {
+                        "PR1": pr_mm_month,
+                        "PR2": pr_mm_month ** 2,
+                    }
+                )
+                for name, da in ds_pr_y.data_vars.items():
+                    da_2d = ensure_2d_lat_lon(da, time_agg="mean")  # annual mean month
+                    if set(da_2d.dims) != {"lat", "lon"}:
+                        raise RuntimeError(
+                            f"{product_label} {name}: still not 2D lat/lon, dims={da_2d.dims}"
+                        )
+                    ds_sum[name] = da_2d
+
+        # ----- aggregate all variables over countries with pop weights -----
         df_year = pop_by_iso.rename("pop_country").to_frame().reset_index()
-        df_year["year"] = int(yr)
+        df_year["year"] = yr_int
 
         for name, da in ds_sum.data_vars.items():
             da2 = da.astype("float32").broadcast_like(gpw_on_grid)
@@ -295,6 +395,7 @@ def build_product_country_climate(
         "BLW2": "polyBelow2_{s}",
         "BLW3": "polyBelow3_{s}",
         "BLW4": "polyBelow4_{s}",
+        # precip (annual mean monthly, mm/month and (mm/month)^2)
         "PR1": "precip1_{s}",
         "PR2": "precip2_{s}",
     }
@@ -320,7 +421,11 @@ def build_product_country_climate(
     df.to_csv(out_csv, index=False)
     print(f"[DONE] {product_label}")
 
-#main driver
+
+# ---------------------------------------------------------------------
+# main driver
+# ---------------------------------------------------------------------
+
 
 def main() -> None:
     car_paths_path = (
@@ -333,9 +438,9 @@ def main() -> None:
     for _, row in car_paths.iterrows():
         product_label = str(row["product"]).strip()
 
-        if product_label != "MERRA2":
-            continue
-
+        # TEMP: currently only running one product; remove this
+        # guard when you want all.
+        
         tas_path = Path(str(row["tas_filepath"]).strip())
         precip_raw = row.get("precip_filepath", None)
         precip_path = (

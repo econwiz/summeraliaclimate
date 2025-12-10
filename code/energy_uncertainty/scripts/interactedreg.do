@@ -1,7 +1,7 @@
 ************************************************************
 * 3_FD_interacted_all.do
 * Replicate CIL stacked "interacted" FD spec for all products,
-* dropping TINV HDD/CDD terms.
+* dropping TINV HDD/CDD terms, and export coeff/vcov.
 ************************************************************
 clear all
 set more off
@@ -20,7 +20,7 @@ local submodel "lininter"   // or "quadinter" or "" as needed
 if "`submodel'" != "" local model_name = "`model'_`submodel'"
 else local model_name = "`model'"
 
-local products "GMFD ERA5 JRA_3Q"
+local products "GMFD ERA5 JRA_3Q MERRA2"
 
 foreach product of local products {
 
@@ -172,9 +172,75 @@ foreach product of local products {
         absorb(i.flow_i#i.product_i#i.year#i.subregionid) ///
         cluster(region_i)
 
-    * Again, short name:
     estimates store FDintF_`product'
     estimates save "$OUTDIR/FD_FGLS_inter_`model_name'_`product'", replace
+
+    * ------------------------------------------------------
+    * Export coeffs and vcov for this PRODUCT (long format)
+    * ------------------------------------------------------
+
+    * 1) Coefficient vector: parm, beta
+    matrix b = e(b)
+    local k = colsof(b)
+    local names : colnames b
+
+    preserve
+        clear
+        set obs `k'
+        gen strL parm = ""
+        gen double beta = .
+
+        local j = 1
+        foreach nm of local names {
+            replace parm = "`nm'" in `j'
+            replace beta = b[1,`j'] in `j'
+            local ++j
+        }
+
+        order parm beta
+        export delimited using ///
+            "$OUTDIR/FD_FGLS_inter_`model_name'_`product'_coeff.csv", replace
+    restore
+
+    * 2) Variance–covariance matrix: parm_i, parm_j, v
+    matrix V = e(V)
+    local k = rowsof(V)
+    local names : rownames V
+
+    preserve
+        clear
+        * We’ll create k^2 rows: one per (i,j) pair
+        set obs `=`k'*`k''
+
+        gen int i = .
+        gen int j = .
+        gen strL parm_i = ""
+        gen strL parm_j = ""
+        gen double v = .
+
+        local r = 1
+        forvalues ii = 1/`k' {
+            forvalues jj = 1/`k' {
+                replace i = `ii' in `r'
+                replace j = `jj' in `r'
+
+                local name_i : word `ii' of `names'
+                local name_j : word `jj' of `names'
+                replace parm_i = "`name_i'" in `r'
+                replace parm_j = "`name_j'" in `r'
+
+                replace v = V[`ii',`jj'] in `r'
+
+                local ++r
+            }
+        }
+
+        drop i j
+        order parm_i parm_j v
+        export delimited using ///
+            "$OUTDIR/FD_FGLS_inter_`model_name'_`product'_vcov_long.csv", replace
+    restore
+
 }
 
 ************************************************************

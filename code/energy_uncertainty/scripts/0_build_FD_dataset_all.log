@@ -46,7 +46,7 @@ Notes:
 
 . 
 . * List of climate products you want to process
-. local products "GMFD ERA5 JRA_3Q"
+. local products "MERRA2"
 
 . 
 . foreach product of local products {
