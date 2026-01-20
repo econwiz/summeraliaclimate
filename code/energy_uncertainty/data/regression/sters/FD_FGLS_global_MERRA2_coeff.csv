@@ -1,0 +1,14 @@
+parm,beta
+c.indp1#c.indf1#c.FD_temp1,-.0000221907722299
+c.indp1#c.indf1#c.FD_temp2,-9.61897340464e-07
+c.indp1#c.indf1#c.FD_temp3,8.08344361753e-08
+c.indp1#c.indf1#c.FD_temp4,-1.24347165775e-09
+c.indp2#c.indf1#c.FD_temp1,-.0007319998363196
+c.indp2#c.indf1#c.FD_temp2,5.48670309016e-06
+c.indp2#c.indf1#c.FD_temp3,1.06157028102e-06
+c.indp2#c.indf1#c.FD_temp4,-2.12022334190e-08
+c.indp1#c.indf1#c.FD_precip1,-2.203622555820325
+c.indp1#c.indf1#c.FD_precip2,1160.323230601356
+c.indp2#c.indf1#c.FD_precip1,8.69792952288708
+c.indp2#c.indf1#c.FD_precip2,-14294.66055646355
+_cons,.0573512885629596

@@ -1,0 +1,14 @@
+parm_norm,parm_old,old_beta,parm_new,new_beta,_merge,diff,rel_diff_pct
+_cons,_cons,0.0523786231643262,_cons,0.0585460311054746,both,0.006167407941148402,11.774666015560472
+c.indp1#c.indf1#c.FD_precip1,c.indp1#c.indf1#c.FD_precip1_GMFD,-2.42772355575e-05,c.indp1#c.indf1#c.FD_precip1,-2.930329775419921,both,-2.9303054981843637,-12070177.80605214
+c.indp1#c.indf1#c.FD_precip2,c.indp1#c.indf1#c.FD_precip2_GMFD,1.25900787944e-07,c.indp1#c.indf1#c.FD_precip2,764.6464989659981,both,764.6464988400974,607340518933.216
+c.indp1#c.indf1#c.FD_temp1,c.indp1#c.indf1#c.FD_temp1_GMFD,1.30000263181e-05,c.indp1#c.indf1#c.FD_temp1,2.17120425255e-05,both,8.7120162074e-06,67.01537361713042
+c.indp1#c.indf1#c.FD_temp2,c.indp1#c.indf1#c.FD_temp2_GMFD,-1.92553718917e-07,c.indp1#c.indf1#c.FD_temp2,-1.21379788627e-06,both,-1.021244167353e-06,-530.3684463207932
+c.indp1#c.indf1#c.FD_temp3,c.indp1#c.indf1#c.FD_temp3_GMFD,3.80290963546e-08,c.indp1#c.indf1#c.FD_temp3,5.98564458811e-08,both,2.1827349526500006e-08,57.39644540320445
+c.indp1#c.indf1#c.FD_temp4,c.indp1#c.indf1#c.FD_temp4_GMFD,-1.13933208256e-09,c.indp1#c.indf1#c.FD_temp4,-1.07667057681e-09,both,6.266150574999996e-11,5.499845629660838
+c.indp2#c.indf1#c.FD_precip1,c.indp2#c.indf1#c.FD_precip1_GMFD,-0.0001183682632306,c.indp2#c.indf1#c.FD_precip1,-0.017169370062525,both,-0.017051001799294398,-14405.04518181226
+c.indp2#c.indf1#c.FD_precip2,c.indp2#c.indf1#c.FD_precip2_GMFD,1.25466650138e-07,c.indp2#c.indf1#c.FD_precip2,-6833.449614100976,both,-6833.4496142264425,-5446427083779.134
+c.indp2#c.indf1#c.FD_temp1,c.indp2#c.indf1#c.FD_temp1_GMFD,-0.0008855027186254,c.indp2#c.indf1#c.FD_temp1,-0.0007692259634291,both,0.00011627675519630004,13.131157335891745
+c.indp2#c.indf1#c.FD_temp2,c.indp2#c.indf1#c.FD_temp2_GMFD,6.70716010923e-06,c.indp2#c.indf1#c.FD_temp2,8.39900097142e-07,both,-5.867260012088e-06,-87.47756004831048
+c.indp2#c.indf1#c.FD_temp3,c.indp2#c.indf1#c.FD_temp3_GMFD,1.18743525841e-06,c.indp2#c.indf1#c.FD_temp3,1.37776678918e-06,both,1.903315307700001e-07,16.02879225810238
+c.indp2#c.indf1#c.FD_temp4,c.indp2#c.indf1#c.FD_temp4_GMFD,-2.47986141252e-08,c.indp2#c.indf1#c.FD_temp4,-2.83410088741e-08,both,-3.5423947488999975e-09,-14.284648049345089
