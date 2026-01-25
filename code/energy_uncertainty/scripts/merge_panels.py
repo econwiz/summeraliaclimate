@@ -33,7 +33,7 @@ YEAR_MIN, YEAR_MAX = 1971, 2010
 PROJECT_ROOT = Path("/user/ab5405/summeraliaclimate/code/energy_uncertainty")
 
 # Where the new climate CSVs live
-CLIMATE_DIR = PROJECT_ROOT / "data" / "country_year"
+CLIMATE_DIR = PROJECT_ROOT / "data" / "country_climate"
 
 # Where we write merged panels
 MERGED_DIR = PROJECT_ROOT / "data" / "merged_panels"
@@ -44,7 +44,7 @@ ENERGY_PANEL_PATH = Path(
     "energy_data_release_2021oct21/DATA/regression/GMFD_TINV_clim_regsort.dta"
 )
 
-PRODUCTS = ["GMFD", "ERA5", "JRA_3Q"]
+PRODUCTS = ["GMFD", "ERA5", "JRA_3Q", "MERRA2"]
 
 
 def main() -> None:
@@ -72,7 +72,7 @@ def main() -> None:
         print(f"[INFO] Merging energy panel with {prod} climate")
 
         clim_dir = CLIMATE_DIR / prod
-        clim_path = clim_dir / f"{prod}_country_climate_{YEAR_MIN}_{YEAR_MAX}.csv"
+        clim_path = clim_dir / f"{prod}_country_year_{YEAR_MIN}_{YEAR_MAX}.csv"
 
         if not clim_path.exists():
             raise FileNotFoundError(f"Missing climate file for {prod}: {clim_path}")
