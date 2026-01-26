@@ -53,7 +53,9 @@ SUFFIX_MAP = {
     "MERRA2": "MERRA2",
 }
 
+# ---------------------------------------------------------------------
 # Helpers
+# ---------------------------------------------------------------------
 
 
 def open_any(path: Path) -> xr.Dataset:
@@ -132,6 +134,8 @@ def compute_daily_transforms(ds: xr.Dataset) -> xr.Dataset:
         BLW4=BLW4,
     )
 
+    # If you ever pass in a dataset with daily precip (kg m-2 s-1),
+    # this branch will construct daily PR1/PR2 in mm/day.
     if PR_VAR_NAME is not None and PR_VAR_NAME in ds:
         pr = ds[PR_VAR_NAME]
         units = (pr.attrs.get("units", "") or "").lower()
@@ -210,6 +214,7 @@ def load_and_prepare_gpw() -> xr.DataArray:
 def pr_flux_to_mm_per_month(pr: xr.DataArray) -> xr.DataArray:
     """
     Convert monthly mean precip flux (kg m-2 s-1) to total mm/month.
+
     mm/month = pr * 86400 * days_in_month
     """
     days = pr["time"].dt.days_in_month
@@ -218,6 +223,10 @@ def pr_flux_to_mm_per_month(pr: xr.DataArray) -> xr.DataArray:
     pr_mm_month.attrs["units"] = "mm/month"
     return pr_mm_month
 
+
+# ---------------------------------------------------------------------
+# Main worker
+# ---------------------------------------------------------------------
 
 
 def build_product_country_climate(
@@ -322,19 +331,31 @@ def build_product_country_climate(
             ds_sum[name] = da_2d
 
         # precipitation (monthly): convert flux -> mm/month, then mean over months
-        pr_mm_month = pr_flux_to_mm_per_month(pr_mon)
-        
-        # Annual linear exposure
-        PR1 = pr_mm_month.sum("time", skipna=True)
-        
-        # Annual nonlinear exposure (convexity)
-        PR2 = (pr_mm_month ** 2).sum("time", skipna=True)
-        
-        ds_pr_y = xr.Dataset(dict(PR1=PR1, PR2=PR2))
-        
+        if ds_p is not None and PR_VAR_NAME in ds_p:
+            pr_mon = ds_p[PR_VAR_NAME].sel(
+                time=slice(f"{yr_int}-01-01", f"{yr_int}-12-31")
+            )
+            if pr_mon.sizes.get("time", 0) == 0:
+                print(f"[WARN] {product_label} No precip data for year {yr_int}")
+            else:
+                # precipitation (monthly): flux -> mm/month, then SUM months -> mm/year ---
+                pr_mm_month = pr_flux_to_mm_per_month(pr_mon)     # mm/month
+                
+                PR1 = pr_mm_month.sum("time", skipna=True)        # mm/year
+                PR2 = (pr_mm_month ** 2).sum("time", skipna=True) # (mm/month)^2 summed
+                
+                ds_pr_y = xr.Dataset({
+                    "PR1": PR1,
+                    "PR2": PR2,
+                })
+                
+                                
+                for name, da in ds_pr_y.data_vars.items():
+                    da_2d = ensure_2d_lat_lon(da, time_agg=None)       # already collapsed time
+                    ds_sum[name] = da_2d
 
 
-        # aggregate all variables over countries with pop weights
+        # ----- aggregate all variables over countries with pop weights -----
         df_year = pop_by_iso.rename("pop_country").to_frame().reset_index()
         df_year["year"] = yr_int
 
@@ -398,7 +419,10 @@ def build_product_country_climate(
     print(f"[DONE] {product_label}")
 
 
+# ---------------------------------------------------------------------
 # main driver
+# ---------------------------------------------------------------------
+
 
 def main() -> None:
     car_paths_path = (
@@ -410,6 +434,9 @@ def main() -> None:
 
     for _, row in car_paths.iterrows():
         product_label = str(row["product"]).strip()
+
+        # TEMP: currently only running one product; remove this
+        # guard when you want all.
         
         tas_path = Path(str(row["tas_filepath"]).strip())
         precip_raw = row.get("precip_filepath", None)
