@@ -1,0 +1,133 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /user/ab5405/summeraliaclimate/code/energy_uncertainty/figures/plo
+> t_3x3_debug_TINV_clim_quadinter.log
+  log type:  text
+ opened on:  10 Feb 2026, 13:35:42
+
+. di "==============================================================="
+===============================================================
+
+. di "START plot_3x3_debug.do  | model=`model_name' | date/time: `c(current_dat
+> e)' `c(current_time)'"
+START plot_3x3_debug.do  | model=TINV_clim_quadinter | date/time: 10 Feb 2026 1
+> 3:35:42
+
+. di "PROJECT=$PROJECT"
+PROJECT=/user/ab5405/summeraliaclimate/code/energy_uncertainty
+
+. di "STERD=$STERD"
+STERD=/user/ab5405/summeraliaclimate/code/energy_uncertainty/data/regression/st
+> ers
+
+. di "EDR=$EDR"
+EDR=/user/ab5405/summeraliaclimate/code/energy_consumption/energy_data_release_
+> 2021oct21/DATA/regression
+
+. di "FIGDIR=$FIGDIR"
+FIGDIR=/user/ab5405/summeraliaclimate/code/energy_uncertainty/figures
+
+. di "==============================================================="
+===============================================================
+
+. 
+. * ===============================================================
+. * MAIN LOOP
+. * ===============================================================
+. foreach product of local products {
+  2.     foreach var of local fuels {
+  3. 
+.         di ""
+  4.         di "==============================================================
+> ="
+  5.         di "PLOTTING: product=`product' | fuel=`var' | model=`model_name' 
+> | year=`year'"
+  6.         di "==============================================================
+> ="
+  7. 
+.         * ----------------------------------------------------------
+.         * Determine pg for this fuel
+.         * ----------------------------------------------------------
+.         local pg = .
+  8.         if ("`var'"=="electricity") local pg = 1
+  9.         else if ("`var'"=="other_energy") local pg = 2
+ 10.         else {
+ 11.             di as error "Unknown fuel `var' -> cannot set pg"
+ 12.             continue
+ 13.         }
+ 14. 
+.         * ----------------------------------------------------------
+.         * Load ibar (income knot) from break_data
+.         * ----------------------------------------------------------
+.         preserve
+ 15.             use "$EDR/break_data_TINV_clim.dta", clear
+ 16.             qui summ maxInc_largegpid_`var' if largegpid_`var' == 1
+ 17.             local ibar = r(max)
+ 18.         restore
+ 19.         di "DEBUG: ibar (income knot) = `ibar'"
+ 20. 
+.         * ----------------------------------------------------------
+.         * Load estimates ONCE per product/fuel
+.         * ----------------------------------------------------------
+.         local sterfile "$STERD/FD_FGLS_inter_`model_name'_`product'.ster"
+ 21.         di "DEBUG: loading ster: `sterfile'"
+ 22.         cap estimates use "`sterfile'"
+ 23.         if (_rc) {
+ 24.             di as error "FAILED: cannot load ster for product=`product' rc
+> =`=_rc'"
+ 25.             continue
+ 26.         }
+ 27. 
+.         * ----------------------------------------------------------
+.         * Pull coefficient names
+.         * ----------------------------------------------------------
+.         matrix b = e(b)
+ 28.         local bnames : colnames b
+ 29. 
+.         di "DEBUG: number of coefficients in e(b) = " colsof(b)
+ 30.         di "DEBUG: showing first `SHOW_FIRST_N_COLNAMES' coefficient colna
+> mes:"
+ 31.         local cc = 0
+ 32.         foreach nm of local bnames {
+ 33.             local ++cc
+ 34.             if (`cc'<=`SHOW_FIRST_N_COLNAMES') di "    [`cc'] `nm'"
+ 35.         }
+ 36. 
+.         * ----------------------------------------------------------
+.         * Detect suffix for temp/precip/climate/year terms
+.         * ----------------------------------------------------------
+.         local SUF ""
+ 37.         local candidates "_`product' _GMFD _ERA5 _JRA_3Q _MERRA2"  // comm
+> on variants
+ 38.         local found 0
+ 39. 
+.         foreach s of local candidates {
+ 40.             foreach nm of local bnames {
+ 41.                 if ("`nm'"=="c.indp`pg'#c.indf1#c.FD_temp1`s'") {
+ 42.                     local SUF "`s'"
+ 43.                     local found 1
+ 44.                 }
+ 45.             }
+ 46.             if (`found') continue, break
+ 47.         }
+ 48.         di "DEBUG: detected suffix for temp/precip/climate/year terms: `SU
+> F'"
+ 49. 
+.         * ----------------------------------------------------------
+.         * Debug presence of key coefficient names
+.         * ----------------------------------------------------------
+.         program drop _all
+ 50.         program define _coef_present, rclass
+ 51.             syntax, NAME(string) BNAMES(string)
+ 52.             local ok 0
+ 53.             foreach nm of local BNAMES {
+ 54.                 if ("`nm'"=="`NAME'") local ok 1
+ 55.             }
+ 56.             return scalar ok = `ok'
+ 57.         end
+--Break--
+r(1);
+
+end of do-file
+--Break--
+r(1);

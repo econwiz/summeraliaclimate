@@ -1,0 +1,7 @@
+File,N_coef,Max_temp_order,Climate,Income,Year,Spec
+GMFD interacted,57,2,Yes,Yes,Yes,INTERACTED (quadinter)
+ERA5 interacted,57,2,Yes,Yes,Yes,INTERACTED (quadinter)
+JRA_3Q interacted,57,2,Yes,Yes,Yes,INTERACTED (quadinter)
+MERRA2 interacted,57,2,Yes,Yes,Yes,INTERACTED (quadinter)
+Original interacted,57,2,Yes,Yes,Yes,INTERACTED (quadinter)
+Original global,13,4,No,No,No,GLOBAL (simple 4th order)

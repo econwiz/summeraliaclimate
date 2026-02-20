@@ -1,0 +1,448 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /user/ab5405/summeraliaclimate/code/energy_uncertainty/figures/plo
+> t_3x3_CIL_exact_fix_TINV_clim_quadinter.log
+  log type:  text
+ opened on:  11 Feb 2026, 10:11:09
+
+. 
+. di "=== START `c(current_date)' `c(current_time)' ==="
+=== START 11 Feb 2026 10:11:09 ===
+
+. di "model_name=`model_name'"
+model_name=TINV_clim_quadinter
+
+. 
+. * ===============================================================
+. * Precompute tercile means ONCE (NO preserve/restore)
+. * ===============================================================
+. use "$EDR/break_data_TINV_clim.dta", clear
+
+. 
+. preserve
+
+.     keep tpid avgCDD_tpid avgHDD_tpid
+
+.     duplicates drop tpid, force
+
+Duplicates in terms of tpid
+
+(4,675 observations deleted)
+
+.     forval tr=1/3 {
+  2.         qui su avgCDD_tpid if tpid==`tr'
+  3.         local CDD`tr' = r(mean)
+  4.         qui su avgHDD_tpid if tpid==`tr'
+  5.         local HDD`tr' = r(mean)
+  6.     }
+
+. restore
+
+. 
+. preserve
+
+.     keep tgpid avgInc_tgpid
+
+.     duplicates drop tgpid, force
+
+Duplicates in terms of tgpid
+
+(4,675 observations deleted)
+
+.     forval lg=1/3 {
+  2.         qui su avgInc_tgpid if tgpid==`lg'
+  3.         local INC`lg' = r(mean)
+  4.     }
+
+. restore
+
+. 
+. * after this, you can safely "clear" before making the T grid
+. clear
+
+. 
+. 
+. * ===============================================================
+. * MAIN LOOP
+. * ===============================================================
+. foreach product of local products {
+  2.     foreach var of local fuels {
+  3. 
+.         di "-------------------------------------------------------------"
+  4.         di "PLOT: product=`product' fuel=`var' model=`model_name' year=`ye
+> ar'"
+  5.         di "-------------------------------------------------------------"
+  6. 
+.         * pg for fuel
+.         local pg = .
+  7.         if ("`var'"=="electricity") local pg = 1
+  8.         else if ("`var'"=="other_energy") local pg = 2
+  9.         else continue
+ 10. 
+.         * income knot (ibar)
+.         preserve
+ 11.             use "$EDR/break_data_TINV_clim.dta", clear
+ 12.             qui summ maxInc_largegpid_`var' if largegpid_`var' == 1
+ 13.             local ibar = r(max)
+ 14.         restore
+ 15.         di "ibar=`ibar'"
+ 16. 
+.         * load ster
+.         local sterfile "$STERD/FD_FGLS_inter_`model_name'_`product'.ster"
+ 17.         di "ster=`sterfile'"
+ 18.         cap estimates use "`sterfile'"
+ 19.         if (_rc) {
+ 20.             di as error "FAILED to load ster rc=`=_rc'"
+ 21.             continue
+ 22.         }
+ 23. 
+.         * coefficient names
+.         matrix b0 = e(b)
+ 24.         matrix V0 = e(V)
+ 25.         local bnames0 : colnames b0
+ 26. 
+.         * detect suffix for temp/precip/climate/year terms
+.         local SUF ""
+ 27.         local candidates "_`product' _GMFD _ERA5 _JRA_3Q _MERRA2"
+ 28.         local found 0
+ 29.         foreach s of local candidates {
+ 30.             foreach nm of local bnames0 {
+ 31.                 if ("`nm'"=="c.indp`pg'#c.indf1#c.FD_temp1`s'") {
+ 32.                     local SUF "`s'"
+ 33.                     local found 1
+ 34.                 }
+ 35.             }
+ 36.             if (`found') continue, break
+ 37.         }
+ 38.         di "SUF=`SUF'"
+ 39. 
+.         * ===========================================================
+.         * CIL EXACT STEP: ensure all plotting coefficients EXIST as c....
+.         * - If only co.... exists -> create c.... = 0
+.         * - If neither exists -> create c.... = 0
+.         * ===========================================================
+.         local need ""
+ 40. 
+.         * For plotting we only need terms for this pg, indf1, k=1/2, ig=1/2.
+.         foreach k of num 1/2 {
+ 41.             local need "`need' c.indp`pg'#c.indf1#c.FD_temp`k'`SUF'"
+ 42.             local need "`need' c.indp`pg'#c.indf1#c.FD_hdd20_TINVtemp`k'`S
+> UF'"
+ 43.             local need "`need' c.indp`pg'#c.indf1#c.FD_cdd20_TINVtemp`k'`S
+> UF'"
+ 44. 
+.             * time interactions (suffix may apply in THEIR old code)
+.             local need "`need' c.indp`pg'#c.indf1#c.FD_yeartemp`k'`SUF'"
+ 45.             local need "`need' c.indp`pg'#c.indf1#c.FD_year2temp`k'`SUF'"
+ 46. 
+.             * income spline interactions (UNSUFFIXED in their code)
+.             foreach ig of num 1/2 {
+ 47.                 local need "`need' c.indp`pg'#c.indf1#c.FD_dc1_lgdppc_MA15
+> I`ig'temp`k'"
+ 48.                 local need "`need' c.indp`pg'#c.indf1#c.FD_dc1_lgdppc_MA15
+> yearI`ig'temp`k'"
+ 49.                 local need "`need' c.indp`pg'#c.indf1#c.FD_dc1_lgdppc_MA15
+> year2I`ig'temp`k'"
+ 50.             }
+ 51.         }
+ 52. 
+.         * Expand b and V with missing coefs as zeros (CIL “complete_for_plot”
+>  idea)
+.         matrix b = b0
+ 53.         matrix V = V0
+ 54.         local bnames : colnames b
+ 55. 
+.         foreach coef of local need {
+ 56. 
+.             * check if coef exists already
+.             local has_c 0
+ 57.             foreach nm of local bnames {
+ 58.                 if ("`nm'"=="`coef'") local has_c 1
+ 59.             }
+ 60. 
+.             if (!`has_c') {
+ 61.                 * even if there is a co. version, we still create the c. v
+> ersion for plotting
+.                 local oldK = colsof(b)
+ 62.                 matrix b = b , J(1,1,0)
+ 63.                 matrix V = ( V , J(`oldK',1,0) ) \ ( J(1,`oldK',0) , J(1,1
+> ,0) )
+ 64. 
+.                 * assign col/row names
+.                 local newnames "`bnames' `coef'"
+ 65.                 matrix colnames b = `newnames'
+ 66.                 matrix colnames V = `newnames'
+ 67.                 matrix rownames V = `newnames'
+ 68.                 local bnames "`newnames'"
+ 69. 
+.                 di "REPOST: added missing coef as 0 -> `coef'"
+ 70.             }
+ 71.         }
+ 72. 
+.         * repost into e()
+.         ereturn repost b=b V=V
+ 73. 
+.         * ===========================================================
+.         * Build temperature grid and CIL kink bases
+.         * ===========================================================
+.         clear
+ 74.         set obs 41
+ 75.         gen double T  = _n - 6
+ 76.         gen double T1 = T
+ 77.         gen double T2 = T^2
+ 78.         gen byte ABOVE20 = (T >= 20)
+ 79.         gen byte BELOW20 = (T < 20)
+ 80.         
+.         gen double dT1_ABV = (T1 - 20^1)
+ 81.         gen double dT2_ABV = (T2 - 20^2)
+ 82.         gen double dT1_BLW = (20^1 - T1)
+ 83.         gen double dT2_BLW = (20^2 - T2)
+ 84.         
+.         local col_main "`col_`var''"
+ 85.         local graphicM ""
+ 86.         
+.         forval lg=3(-1)1 {
+ 87.             forval tr=3(-1)1 {
+ 88.         
+.                 local cellid = `lg' + `tr'*100
+ 89.         
+.                 local subCDD = `CDD`tr''
+ 90.                 local subHDD = `HDD`tr''
+ 91.                 local subInc = `INC`lg''
+ 92.         
+.                 local deltacut = `subInc' - `ibar'
+ 93.                 local ig = 1
+ 94.                 if (`subInc' > `ibar') local ig = 2
+ 95.         
+.                 local line "0"
+ 96.         
+.                 foreach k of num 1/2 {
+ 97.         
+.                     * ---- base temp (always exists) ----
+.                     local ctemp "c.indp`pg'#c.indf1#c.FD_temp`k'`SUF'"
+ 98.                     local line "`line' + ABOVE20*_b[`ctemp']*dT`k'_ABV"
+ 99.                     local line "`line' + BELOW20*_b[`ctemp']*dT`k'_BLW"
+100.         
+.                     * ---- climate heterogeneity (usually exists) ----
+.                     local ccdd "c.indp`pg'#c.indf1#c.FD_cdd20_TINVtemp`k'`SUF
+> '"
+101.                     local chdd "c.indp`pg'#c.indf1#c.FD_hdd20_TINVtemp`k'`
+> SUF'"
+102.                     local line "`line' + ABOVE20*_b[`ccdd']*`subCDD'*dT`k'
+> _ABV"
+103.                     local line "`line' + BELOW20*_b[`chdd']*`subHDD'*dT`k'
+> _BLW"
+104.         
+.                     * ---- income spline (exists) ----
+.                     local cinc "c.indp`pg'#c.indf1#c.FD_dc1_lgdppc_MA15I`ig't
+> emp`k'"
+105.                     local line "`line' + ABOVE20*_b[`cinc']*`deltacut'*dT`
+> k'_ABV"
+106.                     local line "`line' + BELOW20*_b[`cinc']*`deltacut'*dT`
+> k'_BLW"
+107.         
+.                     * ---- year x temp (include ONLY if c. exists; ignore co.
+> ) ----
+.                     local ytemp "c.indp`pg'#c.indf1#c.FD_yeartemp`k'`SUF'"
+108.                     local has_ytemp 0
+109.                     foreach nm of local bnames0 {
+110.                         if ("`nm'"=="`ytemp'") local has_ytemp 1
+111.                     }
+112.                     if (`has_ytemp') {
+113.                         local line "`line' + ABOVE20*_b[`ytemp']*`year'*dT
+> `k'_ABV"
+114.                         local line "`line' + BELOW20*_b[`ytemp']*`year'*dT
+> `k'_BLW"
+115.                     }
+116.         
+.                     * ---- year x income spline ----
+.                     local yinc "c.indp`pg'#c.indf1#c.FD_dc1_lgdppc_MA15yearI`
+> ig'temp`k'"
+117.                     local has_yinc 0
+118.                     foreach nm of local bnames0 {
+119.                         if ("`nm'"=="`yinc'") local has_yinc 1
+120.                     }
+121.                     if (`has_yinc') {
+122.                         local line "`line' + ABOVE20*_b[`yinc']*`deltacut'
+> *`year'*dT`k'_ABV"
+123.                         local line "`line' + BELOW20*_b[`yinc']*`deltacut'
+> *`year'*dT`k'_BLW"
+124.                     }
+125.         
+.                     * ---- year^2 x temp ----
+.                     local y2temp "c.indp`pg'#c.indf1#c.FD_year2temp`k'`SUF'"
+126.                     local has_y2temp 0
+127.                     foreach nm of local bnames0 {
+128.                         if ("`nm'"=="`y2temp'") local has_y2temp 1
+129.                     }
+130.                     if (`has_y2temp') {
+131.                         local line "`line' + ABOVE20*_b[`y2temp']*(`year'^
+> 2)*dT`k'_ABV"
+132.                         local line "`line' + BELOW20*_b[`y2temp']*(`year'^
+> 2)*dT`k'_BLW"
+133.                     }
+134.         
+.                     * ---- year^2 x income spline ----
+.                     local y2inc "c.indp`pg'#c.indf1#c.FD_dc1_lgdppc_MA15year2
+> I`ig'temp`k'"
+135.                     local has_y2inc 0
+136.                     foreach nm of local bnames0 {
+137.                         if ("`nm'"=="`y2inc'") local has_y2inc 1
+138.                     }
+139.                     if (`has_y2inc') {
+140.                         local line "`line' + ABOVE20*_b[`y2inc']*`deltacut
+> '*(`year'^2)*dT`k'_ABV"
+141.                         local line "`line' + BELOW20*_b[`y2inc']*`deltacut
+> '*(`year'^2)*dT`k'_BLW"
+142.                     }
+143.                 }
+144.         
+.                 cap predictnl yhat`cellid' = `line', se(se`cellid') ci(lo`cel
+> lid' hi`cellid')
+145.                 if (_rc) {
+146.                     di as error "predictnl FAILED cell `cellid' rc=`=_rc'"
+147.                     di as error "`line'"
+148.                     continue
+149.                 }
+150.         
+.                 tw ///
+>                     rarea hi`cellid' lo`cellid' T, col(`col_main'%30) || ///
+>                     line yhat`cellid' T, lc(`col_main') lw(medthick) || ///
+>                     , yline(0, lwidth(vthin) lc(black) lp(dash)) ///
+>                       xline(20, lwidth(vthin) lc(gray) lp(dot)) ///
+>                       xlabel(-5(10)35, labsize(vsmall)) ///
+>                       ylabel(, labsize(vsmall) nogrid format(%5.2f)) ///
+>                       legend(off) xtitle("") ytitle("") ///
+>                       plotregion(color(white)) graphregion(color(white)) ///
+>                       nodraw name(M`cellid', replace)
+151.         
+.                 local graphicM "`graphicM' M`cellid'"
+152.             }
+153.         }
+154.         
+. 
+.         * ===========================================================
+.         * 3x3 panels (rows: income 3->1, cols: climate 3->1)
+.         * ===========================================================
+.         forval lg=3(-1)1 {
+155.             forval tr=3(-1)1 {
+156. 
+.                 local cellid = `lg' + `tr'*100
+157. 
+.                 local subCDD = `CDD`tr''
+158.                 local subHDD = `HDD`tr''
+159.                 local subInc = `INC`lg''
+160. 
+.                 local deltacut = `subInc' - `ibar'
+161.                 local ig = 1
+162.                 if (`subInc' > `ibar') local ig = 2
+163. 
+.                 di "CELL `cellid': lg=`lg' tr=`tr' subCDD=`subCDD' subHDD=`su
+> bHDD' subInc=`subInc' ig=`ig' deltacut=`deltacut'"
+164. 
+.                 * CIL exact expression (safe now because we reposted missing 
+> coefs)
+.                 local line "0"
+165.                 foreach k of num 1/2 {
+166. 
+.                     * base temp (same coef, different side basis)
+.                     local line "`line' + ABOVE20*_b[c.indp`pg'#c.indf1#c.FD_t
+> emp`k'`SUF']*dT`k'_ABV"
+167.                     local line "`line' + BELOW20*_b[c.indp`pg'#c.indf1#c.F
+> D_temp`k'`SUF']*dT`k'_BLW"
+168. 
+.                     * climate heterogeneity
+.                     local line "`line' + ABOVE20*_b[c.indp`pg'#c.indf1#c.FD_c
+> dd20_TINVtemp`k'`SUF']*`subCDD'*dT`k'_ABV"
+169.                     local line "`line' + BELOW20*_b[c.indp`pg'#c.indf1#c.F
+> D_hdd20_TINVtemp`k'`SUF']*`subHDD'*dT`k'_BLW"
+170. 
+.                     * income spline
+.                     local line "`line' + ABOVE20*_b[c.indp`pg'#c.indf1#c.FD_d
+> c1_lgdppc_MA15I`ig'temp`k']*`deltacut'*dT`k'_ABV"
+171.                     local line "`line' + BELOW20*_b[c.indp`pg'#c.indf1#c.F
+> D_dc1_lgdppc_MA15I`ig'temp`k']*`deltacut'*dT`k'_BLW"
+172. 
+.                     * year x temp (will be 0 if omitted/missing)
+.                     local line "`line' + ABOVE20*_b[c.indp`pg'#c.indf1#c.FD_y
+> eartemp`k'`SUF']*`year'*dT`k'_ABV"
+173.                     local line "`line' + BELOW20*_b[c.indp`pg'#c.indf1#c.F
+> D_yeartemp`k'`SUF']*`year'*dT`k'_BLW"
+174. 
+.                     * year x income spline
+.                     local line "`line' + ABOVE20*_b[c.indp`pg'#c.indf1#c.FD_d
+> c1_lgdppc_MA15yearI`ig'temp`k']*`deltacut'*`year'*dT`k'_ABV"
+175.                     local line "`line' + BELOW20*_b[c.indp`pg'#c.indf1#c.F
+> D_dc1_lgdppc_MA15yearI`ig'temp`k']*`deltacut'*`year'*dT`k'_BLW"
+176. 
+.                     * year^2 x temp
+.                     local line "`line' + ABOVE20*_b[c.indp`pg'#c.indf1#c.FD_y
+> ear2temp`k'`SUF']*(`year'^2)*dT`k'_ABV"
+177.                     local line "`line' + BELOW20*_b[c.indp`pg'#c.indf1#c.F
+> D_year2temp`k'`SUF']*(`year'^2)*dT`k'_BLW"
+178. 
+.                     * year^2 x income spline
+.                     local line "`line' + ABOVE20*_b[c.indp`pg'#c.indf1#c.FD_d
+> c1_lgdppc_MA15year2I`ig'temp`k']*`deltacut'*(`year'^2)*dT`k'_ABV"
+179.                     local line "`line' + BELOW20*_b[c.indp`pg'#c.indf1#c.F
+> D_dc1_lgdppc_MA15year2I`ig'temp`k']*`deltacut'*(`year'^2)*dT`k'_BLW"
+180.                 }
+181. 
+.                 cap predictnl yhat`cellid' = `line', se(se`cellid') ci(lo`cel
+> lid' hi`cellid')
+182.                 if (_rc) {
+183.                     di as error "predictnl FAILED cell `cellid' rc=`=_rc'"
+184.                     di as error "`line'"
+185.                     continue
+186.                 }
+187. 
+.                 tw ///
+>                     rarea hi`cellid' lo`cellid' T, col(`col_main'%30) || ///
+>                     line yhat`cellid' T, lc(`col_main') lw(medthick) || ///
+>                     , yline(0, lwidth(vthin) lc(black) lp(dash)) ///
+>                       xline(20, lwidth(vthin) lc(gray) lp(dot)) ///
+>                       xlabel(-5(10)35, labsize(vsmall)) ///
+>                       ylabel(, labsize(vsmall) nogrid format(%5.2f)) ///
+>                       legend(off) xtitle("") ytitle("") ///
+>                       plotregion(color(white)) graphregion(color(white)) ///
+>                       nodraw name(M`cellid', replace)
+188. 
+.                 local graphicM "`graphicM' M`cellid'"
+189.             }
+190.         }
+191. 
+.         graph combine `graphicM', imargin(zero) ycommon rows(3) ///
+>             title("`product': `var'", size(medsmall)) ///
+>             subtitle("`model_name' | Year=`year' | SUF=`SUF'", size(vsmall)) 
+> ///
+>             note("Rows: High→Mid→Low income | Cols: Hot→Mid→Cold climate", si
+> ze(vsmall)) ///
+>             plotregion(color(white)) graphregion(color(white)) ///
+>             name(comb_`product'_`var', replace)
+192. 
+.         local figname "$FIGDIR/fig_3x3_`var'_`model_name'_`product'_CILexact_
+> fix.pdf"
+193.         graph export "`figname'", replace
+194.         di "SAVED: `figname'"
+195. 
+.         graph drop _all
+196.     }
+197. }
+-------------------------------------------------------------
+PLOT: product=GMFD fuel=electricity model=TINV_clim_quadinter year=2099
+-------------------------------------------------------------
+ibar=9.087010383605957
+ster=/user/ab5405/summeraliaclimate/code/energy_uncertainty/data/regression/ste
+> rs/FD_FGLS_inter_TINV_clim_quadinter_GMFD.ster
+SUF=
+REPOST: added missing coef as 0 -> c.indp1#c.indf1#c.FD_yeartemp1
+REPOST: added missing coef as 0 -> c.indp1#c.indf1#c.FD_yeartemp2
+REPOST: added missing coef as 0 -> c.indp1#c.indf1#c.FD_dc1_lgdppc_MA15yearI1te
+> mp2
+REPOST: added missing coef as 0 -> c.indp1#c.indf1#c.FD_dc1_lgdppc_MA15yearI2te
+> mp2
+non e-class program may not set e()
+r(152);
+
+end of do-file
+r(152);
