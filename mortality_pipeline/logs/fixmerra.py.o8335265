@@ -1,0 +1,77 @@
+[INFO] Panel years 1957–2013  ADM2 clusters=8893
+[INFO] Reading shapefile...
+[WARN] Found 25 invalid geometries — fixing...
+[INFO] Shapes aligned: ADM2=8843
+[DEBUG] ds chunking: {'tas': ((20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 19), (263,), (576,))}
+1980-01-01T12:00:00.000000000 2013-12-31T12:00:00.000000000
+[INFO] Building weightmaps...
+[INFO] Skipping regridding for MERRA2 (native grid)
+[INFO] Aggregating 1980
+[DEBUG] yearly dsy chunks: {'tas': ((19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 24), (263,), (576,))}
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_1980.parquet
+[INFO] Aggregating 1981
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_1981.parquet
+[INFO] Aggregating 1982
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_1982.parquet
+[INFO] Aggregating 1983
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_1983.parquet
+[INFO] Aggregating 1984
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_1984.parquet
+[INFO] Aggregating 1985
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_1985.parquet
+[INFO] Aggregating 1986
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_1986.parquet
+[INFO] Aggregating 1987
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_1987.parquet
+[INFO] Aggregating 1988
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_1988.parquet
+[INFO] Aggregating 1989
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_1989.parquet
+[INFO] Aggregating 1990
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_1990.parquet
+[INFO] Aggregating 1991
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_1991.parquet
+[INFO] Aggregating 1992
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_1992.parquet
+[INFO] Aggregating 1993
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_1993.parquet
+[INFO] Aggregating 1994
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_1994.parquet
+[INFO] Aggregating 1995
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_1995.parquet
+[INFO] Aggregating 1996
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_1996.parquet
+[INFO] Aggregating 1997
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_1997.parquet
+[INFO] Aggregating 1998
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_1998.parquet
+[INFO] Aggregating 1999
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_1999.parquet
+[INFO] Aggregating 2000
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_2000.parquet
+[INFO] Aggregating 2001
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_2001.parquet
+[INFO] Aggregating 2002
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_2002.parquet
+[INFO] Aggregating 2003
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_2003.parquet
+[INFO] Aggregating 2004
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_2004.parquet
+[INFO] Aggregating 2005
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_2005.parquet
+[INFO] Aggregating 2006
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_2006.parquet
+[INFO] Aggregating 2007
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_2007.parquet
+[INFO] Aggregating 2008
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_2008.parquet
+[INFO] Aggregating 2009
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_2009.parquet
+[INFO] Aggregating 2010
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_2010.parquet
+[INFO] Aggregating 2011
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_2011.parquet
+[INFO] Aggregating 2012
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_2012.parquet
+[INFO] Aggregating 2013
+✅ Wrote /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_yearly/MERRA2_2013.parquet

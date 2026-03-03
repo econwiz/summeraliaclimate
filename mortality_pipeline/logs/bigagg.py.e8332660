@@ -1,0 +1,12 @@
+/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/array/core.py:4998: PerformanceWarning: Increasing number of chunks by factor of 15
+  result = blockwise(
+/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/array/core.py:4998: PerformanceWarning: Increasing number of chunks by factor of 15
+  result = blockwise(
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/bigagg.py", line 210, in <module>
+    agg_ds = xr.Dataset(agg_da)
+             ^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/dataset.py", line 380, in __init__
+    both_data_and_coords = set(data_vars) & set(coords)
+                           ^^^^^^^^^^^^^^
+TypeError: 'aggregated' object is not iterable

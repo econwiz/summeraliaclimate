@@ -1,0 +1,90 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_all_prod_regs.py", line 535, in <module>
+    main()
+  File "/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_all_prod_regs.py", line 527, in main
+    build_product_country_climate(
+  File "/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_all_prod_regs.py", line 466, in build_product_country_climate
+    ds_num = xr.Dataset({"num": num}).load()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/dataset.py", line 542, in load
+    evaluated_data: tuple[np.ndarray[Any, Any], ...] = chunkmanager.compute(
+                                                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/namedarray/daskmanager.py", line 85, in compute
+    return compute(*data, **kwargs)  # type: ignore[no-untyped-call, no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/base.py", line 681, in compute
+    results = schedule(expr, keys, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/indexing.py", line 573, in __array__
+    return np.asarray(self.get_duck_array(), dtype=dtype, copy=copy)
+                      ^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/indexing.py", line 578, in get_duck_array
+    return self.array.get_duck_array()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/indexing.py", line 797, in get_duck_array
+    return self.array.get_duck_array()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/indexing.py", line 652, in get_duck_array
+    array = self.array[self.key]
+            ~~~~~~~~~~^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/backends/zarr.py", line 224, in __getitem__
+    return indexing.explicit_indexing_adapter(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/indexing.py", line 1021, in explicit_indexing_adapter
+    result = raw_indexing_method(raw_key.tuple)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/backends/zarr.py", line 214, in _getitem
+    return self._array[key]
+           ~~~~~~~~~~~^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/array.py", line 2434, in __getitem__
+    return self.get_orthogonal_selection(pure_selection, fields=fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/_compat.py", line 43, in inner_f
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/array.py", line 2876, in get_orthogonal_selection
+    return sync(
+           ^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/sync.py", line 163, in sync
+    raise return_result
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/sync.py", line 119, in _runner
+    return await coro
+           ^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/array.py", line 1290, in _get_selection
+    await self.codec_pipeline.read(
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/codec_pipeline.py", line 464, in read
+    await concurrent_map(
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/common.py", line 71, in concurrent_map
+    return await asyncio.gather(*[asyncio.ensure_future(run(item)) for item in items])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/common.py", line 69, in run
+    return await func(*item)
+           ^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/codec_pipeline.py", line 265, in read_batch
+    chunk_bytes_batch = await concurrent_map(
+                        ^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/common.py", line 71, in concurrent_map
+    return await asyncio.gather(*[asyncio.ensure_future(run(item)) for item in items])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/common.py", line 69, in run
+    return await func(*item)
+           ^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/storage/_common.py", line 164, in get
+    return await self.store.get(self.path, prototype=prototype, byte_range=byte_range)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/storage/_local.py", line 147, in get
+    return await asyncio.to_thread(_get, path, prototype, byte_range)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/asyncio/threads.py", line 25, in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/storage/_local.py", line 29, in _get
+    return prototype.buffer.from_bytes(path.read_bytes())
+                                       ^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/pathlib.py", line 1019, in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 5] Input/output error: '/shared/share_hle/data/climate_raw/GMFD/tas_day_GMFD_historical_reanalysis_19810101-20101231.zarr/tas/201.5.10'

@@ -1,0 +1,35 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/generate_obs_data/precip_JRA_3Q_agg.py", line 31, in <module>
+    ds_pr  = open_climate(row["precip_filepath"])  # returns a Dataset with your precip var
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/summeraliaclimate/code/regressions/generate_obs_data/precip_JRA_3Q_agg.py", line 26, in open_climate
+    return xr.open_zarr(path, consolidated=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/backends/zarr.py", line 1513, in open_zarr
+    ds = open_dataset(
+         ^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/backends/api.py", line 715, in open_dataset
+    backend_ds = backend.open_dataset(
+                 ^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/backends/zarr.py", line 1587, in open_dataset
+    store = ZarrStore.open_group(
+            ^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/backends/zarr.py", line 664, in open_group
+    ) = _get_open_params(
+        ^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/backends/zarr.py", line 1829, in _get_open_params
+    zarr_group = zarr.open_group(store, **open_kwargs)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/_compat.py", line 43, in inner_f
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/api/synchronous.py", line 534, in open_group
+    sync(
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/sync.py", line 163, in sync
+    raise return_result
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/sync.py", line 119, in _runner
+    return await coro
+           ^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/api/asynchronous.py", line 857, in open_group
+    raise GroupNotFoundError(store, store_path.path)
+zarr.errors.GroupNotFoundError: No group found in store '/shared/share_hle/data/climate_raw/JRA-3Q/pr_day_JRA-3Q_historical_reanalysis_19810131-20101231.zarr' at path ''

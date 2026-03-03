@@ -1,0 +1,61 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/logs/../code/agg_to_reg.py", line 35, in <module>
+    ds_all = open_climate(path).load()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/dataset.py", line 715, in compute
+    return new.load(**kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/dataset.py", line 542, in load
+    evaluated_data: tuple[np.ndarray[Any, Any], ...] = chunkmanager.compute(
+                                                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/namedarray/daskmanager.py", line 85, in compute
+    return compute(*data, **kwargs)  # type: ignore[no-untyped-call, no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/base.py", line 681, in compute
+    results = schedule(expr, keys, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/indexing.py", line 575, in __array__
+    return np.asarray(self.get_duck_array(), dtype=dtype, copy=copy)
+                      ^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/indexing.py", line 580, in get_duck_array
+    return self.array.get_duck_array()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/indexing.py", line 799, in get_duck_array
+    return self.array.get_duck_array()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/indexing.py", line 654, in get_duck_array
+    array = self.array[self.key]
+            ~~~~~~~~~~^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/backends/zarr.py", line 224, in __getitem__
+    return indexing.explicit_indexing_adapter(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/indexing.py", line 1023, in explicit_indexing_adapter
+    result = raw_indexing_method(raw_key.tuple)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/backends/zarr.py", line 214, in _getitem
+    return self._array[key]
+           ~~~~~~~~~~~^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/array.py", line 2441, in __getitem__
+    return self.get_orthogonal_selection(pure_selection, fields=fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/_compat.py", line 43, in inner_f
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/array.py", line 2883, in get_orthogonal_selection
+    return sync(
+           ^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/sync.py", line 163, in sync
+    raise return_result
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/sync.py", line 119, in _runner
+    return await coro
+           ^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/array.py", line 1285, in _get_selection
+    out_buffer = prototype.nd_buffer.create(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/buffer/cpu.py", line 160, in create
+    return cls(np.full(shape=tuple(shape), fill_value=fill_value, dtype=dtype, order=order))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/numpy/_core/numeric.py", line 352, in full
+    a = empty(shape, dtype, order, device=device)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 5.97 MiB for an array with shape (30, 145, 360) and data type float32

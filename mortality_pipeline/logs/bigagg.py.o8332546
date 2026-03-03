@@ -1,0 +1,3 @@
+[INFO] Panel years 1957–2013  regions=8893
+[INFO] Shapes aligned: ADM2=8843 ADM1=228
+[INFO] Product=GMFD  has_precip=True  precip_path=/shared/share_hle/data/climate_raw/GMFD/pr_day_GMFD_historical_reanalysis_19810101-20101231.zarr

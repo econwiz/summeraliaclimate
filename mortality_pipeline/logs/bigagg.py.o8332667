@@ -1,0 +1,30 @@
+[INFO] Panel years 1957–2013  ADM2 clusters=8893
+[INFO] Reading shapefile...
+[WARN] Found 25 invalid geometries — fixing them...
+[INFO] Shapes aligned: ADM2=8843, ADM1=228
+[INFO] Building regridder and computing weightmaps...
+[INFO] Aggregating 1957
+[INFO] Aggregating 1958
+[INFO] Aggregating 1959
+[INFO] Aggregating 1960
+[INFO] Aggregating 1961
+[INFO] Aggregating 1962
+[INFO] Aggregating 1963
+[INFO] Aggregating 1964
+[INFO] Aggregating 1965
+[INFO] Aggregating 1966
+[INFO] Aggregating 1967
+[INFO] Aggregating 1968
+[INFO] Aggregating 1969
+[INFO] Aggregating 1970
+[INFO] Aggregating 1971
+[INFO] Aggregating 1972
+[INFO] Aggregating 1973
+[INFO] Aggregating 1974
+[INFO] Aggregating 1975
+[INFO] Aggregating 1976
+[INFO] Aggregating 1977
+[INFO] Aggregating 1978
+[INFO] Aggregating 1979
+[INFO] Aggregating 1980
+[INFO] Aggregating 1981

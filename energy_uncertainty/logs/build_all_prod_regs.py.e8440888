@@ -1,0 +1,39 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_all_prod_regs.py", line 460, in <module>
+    main()
+  File "/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_all_prod_regs.py", line 452, in main
+    build_product_country_climate(
+  File "/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_all_prod_regs.py", line 259, in build_product_country_climate
+    ds_p = open_any(precip_path)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_all_prod_regs.py", line 64, in open_any
+    return xr.open_zarr(path, consolidated=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/backends/zarr.py", line 1513, in open_zarr
+    ds = open_dataset(
+         ^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/backends/api.py", line 715, in open_dataset
+    backend_ds = backend.open_dataset(
+                 ^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/backends/zarr.py", line 1587, in open_dataset
+    store = ZarrStore.open_group(
+            ^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/backends/zarr.py", line 664, in open_group
+    ) = _get_open_params(
+        ^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/backends/zarr.py", line 1829, in _get_open_params
+    zarr_group = zarr.open_group(store, **open_kwargs)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/_compat.py", line 43, in inner_f
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/api/synchronous.py", line 534, in open_group
+    sync(
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/sync.py", line 163, in sync
+    raise return_result
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/sync.py", line 119, in _runner
+    return await coro
+           ^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/api/asynchronous.py", line 857, in open_group
+    raise GroupNotFoundError(store, store_path.path)
+zarr.errors.GroupNotFoundError: No group found in store '/shared/share_hle/data/climate_raw/GMFD/pr_Amon_GMFD_historical_reanalysis_19810101-20101231.zarr' at path ''

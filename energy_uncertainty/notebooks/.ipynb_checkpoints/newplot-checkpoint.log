@@ -1,0 +1,337 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: 10-user 8-core network perpetual
+Serial number: 501806318811
+  Licensed to: Columbia Business School
+               Columbia University, New York
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do newplot.do 
+
+. /*
+> Purpose: 3x3 arrays - PROPERLY skip omitted co.* coefficients
+> */
+. 
+. set scheme s1color
+
+. clear all
+
+. set more off
+
+. 
+. global PROJECT "/user/ab5405/summeraliaclimate/code/energy_uncertainty"
+
+. global EDR "/user/ab5405/summeraliaclimate/code/energy_consumption/energy_dat
+> a_release_2021oct21/DATA/regression"
+
+. 
+. global DATA    "$PROJECT/data"
+
+. global OUTPUT  "$PROJECT"
+
+. global STERD   "$DATA/regression/sters"
+
+. 
+. local model_main "TINV_clim"
+
+. local submodel   "quadinter"
+
+. local model_name "`model_main'_`submodel'"
+
+. 
+. local fuels "electricity other_energy"
+
+. local products "GMFD ERA5 JRA_3Q MERRA2"
+
+. 
+. local year 2099
+
+. 
+. local col_electricity "dknavy"
+
+. local col_other_energy "dkorange"
+
+. 
+. foreach product of local products {
+  2.     foreach var of local fuels {
+  3. 
+.         di ""
+  4.         di "================================================"
+  5.         di "Plotting product=`product' fuel=`var' model=`model_name'"
+  6.         di "================================================"
+  7. 
+.         * Create temperature grid
+.         clear
+  8.         set obs 41
+  9.         
+.         gen double temp1 = _n - 6
+ 10.         gen double temp2 = temp1^2
+ 11.         gen byte above20 = (temp1 >= 20)
+ 12.         gen byte below20 = (temp1 < 20)
+ 13. 
+.         * Get income knot
+.         preserve
+ 14.             use "$EDR/break_data_TINV_clim.dta", clear
+ 15.             qui summ maxInc_largegpid_`var' if largegpid_`var' == 1
+ 16.             local ibar = `r(max)'
+ 17.         restore
+ 18. 
+.         di "  ibar = `ibar'"
+ 19. 
+.         local col_main "`col_`var''"
+ 20. 
+.         * Create 3x3 plots
+.         local graphicM ""
+ 21. 
+.         forval lg=3(-1)1 {
+ 22.             forval tr=3(-1)1 {
+ 23. 
+.                 local cellid = `lg' + `tr'*100
+ 24. 
+.                 * Get tercile covariates
+.                 preserve
+ 25.                     use "$EDR/break_data_TINV_clim.dta", clear
+ 26.                     duplicates drop tpid tgpid, force
+ 27.                     sort tpid tgpid
+ 28.                     local tr_index = `tr' * 3
+ 29.                     local subCDD = avgCDD_tpid[`tr_index']
+ 30.                     local subHDD = avgHDD_tpid[`tr_index']
+ 31.                     local subInc = avgInc_tgpid[`lg']
+ 32.                 restore
+ 33. 
+.                 di "  Cell (lg=`lg', tr=`tr'): Inc=`subInc', CDD=`subCDD', HD
+> D=`subHDD'"
+ 34. 
+.                 * pg assignment
+.                 if "`var'"=="electricity" local pg=1
+ 35.                 else local pg=2
+ 36. 
+.                 * Income group
+.                 local deltacut = `subInc' - `ibar'
+ 37.                 if (`subInc' > `ibar') local ig=2
+ 38.                 else local ig=1
+ 39. 
+.                 * Load estimates
+.                 estimates use "$STERD/FD_FGLS_inter_`model_name'_`product'.st
+> er"
+ 40. 
+.                 * Get coefficient names
+.                 matrix b = e(b)
+ 41.                 local bnames : colnames b
+ 42. 
+.                 * Build predictnl expression - CHECK FOR OMITTED FIRST
+.                 local line ""
+ 43.                 local add ""
+ 44.                 
+.                 foreach k of num 1/2 {
+ 45.                     * Base temperature effects (always present)
+.                     local line = "`line' `add' _b[c.indp`pg'#c.indf1#c.FD_tem
+> p`k'] * (temp`k' - 20^`k')"
+ 46.                     
+.                     * Climate heterogeneity (always present)
+.                     local line = "`line' + above20*_b[c.indp`pg'#c.indf1#c.FD
+> _cdd20_TINVtemp`k']*`subCDD' * (temp`k' - 20^`k')"
+ 47.                     local line = "`line' + below20*_b[c.indp`pg'#c.indf1#c
+> .FD_hdd20_TINVtemp`k']*`subHDD' * (20^`k' - temp`k')"
+ 48.                     
+.                     * Income spline (always present)
+.                     local line = "`line' + _b[c.indp`pg'#c.indf1#c.FD_dc1_lgd
+> ppc_MA15I`ig'temp`k']*`deltacut'*(temp`k' - 20^`k')"
+ 49. 
+.                     * Year × temp - CHECK IF NOT OMITTED
+.                     local coef_name "c.indp`pg'#c.indf1#c.FD_yeartemp`k'"
+ 50.                     local is_omitted = 0
+ 51.                     foreach nm of local bnames {
+ 52.                         * Check if this exact name exists with co. prefix 
+> (omitted)
+.                         if "`nm'" == "co.indp`pg'#co.indf1#co.FD_yeartemp`k'"
+>  {
+ 53.                             local is_omitted = 1
+ 54.                         }
+ 55.                     }
+ 56.                     if !`is_omitted' {
+ 57.                         * Check if c. version exists
+.                         local exists = 0
+ 58.                         foreach nm of local bnames {
+ 59.                             if "`nm'" == "`coef_name'" {
+ 60.                                 local exists = 1
+ 61.                             }
+ 62.                         }
+ 63.                         if `exists' {
+ 64.                             local line = "`line' + _b[`coef_name'] * (temp
+> `k' - 20^`k')*`year'"
+ 65.                         }
+ 66.                     }
+ 67.                     
+.                     * Year × income × temp - CHECK IF NOT OMITTED
+.                     local coef_name "c.indp`pg'#c.indf1#c.FD_dc1_lgdppc_MA15y
+> earI`ig'temp`k'"
+ 68.                     local is_omitted = 0
+ 69.                     foreach nm of local bnames {
+ 70.                         if "`nm'" == "co.indp`pg'#co.indf1#co.FD_dc1_lgdpp
+> c_MA15yearI`ig'temp`k'" {
+ 71.                             local is_omitted = 1
+ 72.                         }
+ 73.                     }
+ 74.                     if !`is_omitted' {
+ 75.                         local exists = 0
+ 76.                         foreach nm of local bnames {
+ 77.                             if "`nm'" == "`coef_name'" {
+ 78.                                 local exists = 1
+ 79.                             }
+ 80.                         }
+ 81.                         if `exists' {
+ 82.                             local line = "`line' + _b[`coef_name']*`deltac
+> ut'*`year'*(temp`k' - 20^`k')"
+ 83.                         }
+ 84.                     }
+ 85. 
+.                     * Year² × temp - CHECK IF NOT OMITTED
+.                     local coef_name "c.indp`pg'#c.indf1#c.FD_year2temp`k'"
+ 86.                     local is_omitted = 0
+ 87.                     foreach nm of local bnames {
+ 88.                         if "`nm'" == "co.indp`pg'#co.indf1#co.FD_year2temp
+> `k'" {
+ 89.                             local is_omitted = 1
+ 90.                         }
+ 91.                     }
+ 92.                     if !`is_omitted' {
+ 93.                         local exists = 0
+ 94.                         foreach nm of local bnames {
+ 95.                             if "`nm'" == "`coef_name'" {
+ 96.                                 local exists = 1
+ 97.                             }
+ 98.                         }
+ 99.                         if `exists' {
+100.                             local line = "`line' + _b[`coef_name'] * (temp
+> `k' - 20^`k')*`year'*`year'"
+101.                         }
+102.                     }
+103.                     
+.                     * Year² × income × temp - CHECK IF NOT OMITTED
+.                     local coef_name "c.indp`pg'#c.indf1#c.FD_dc1_lgdppc_MA15y
+> ear2I`ig'temp`k'"
+104.                     local is_omitted = 0
+105.                     foreach nm of local bnames {
+106.                         if "`nm'" == "co.indp`pg'#co.indf1#co.FD_dc1_lgdpp
+> c_MA15year2I`ig'temp`k'" {
+107.                             local is_omitted = 1
+108.                         }
+109.                     }
+110.                     if !`is_omitted' {
+111.                         local exists = 0
+112.                         foreach nm of local bnames {
+113.                             if "`nm'" == "`coef_name'" {
+114.                                 local exists = 1
+115.                             }
+116.                         }
+117.                         if `exists' {
+118.                             local line = "`line' + _b[`coef_name']*`deltac
+> ut'*`year'*`year'*(temp`k' - 20^`k')"
+119.                         }
+120.                     }
+121. 
+.                     local add " + "
+122.                 }
+123. 
+.                 * Generate predictions
+.                 cap predictnl yhat`cellid' = `line', se(se`cellid') ci(lo`cel
+> lid' hi`cellid')
+124.                 
+.                 if _rc {
+125.                     di as error "  ERROR: predictnl failed for cell `celli
+> d'"
+126.                     di as error "  Return code: `=_rc'"
+127.                     continue, break
+128.                 }
+129. 
+.                 * Create subplot
+.                 tw ///
+>                     rarea hi`cellid' lo`cellid' temp1, col(`col_main'%30) || 
+> ///
+>                     line yhat`cellid' temp1, lc(`col_main') lw(medthick) || /
+> //
+>                     , yline(0, lwidth(vthin) lc(black) lp(dash)) ///
+>                     xline(20, lwidth(vthin) lc(gray) lp(dot)) ///
+>                     xlabel(-5(10)35, labsize(vsmall)) ///
+>                     ylabel(, labsize(vsmall) nogrid format(%5.2f)) ///
+>                     legend(off) ///
+>                     xtitle("") ytitle("") ///
+>                     plotregion(color(white)) graphregion(color(white)) ///
+>                     nodraw name(Maddgraph`cellid', replace)
+130. 
+.                 local graphicM "`graphicM' Maddgraph`cellid'"
+131.             }
+132.         }
+133. 
+.         * Combine and save
+.         graph combine `graphicM', imargin(zero) ycommon rows(3) ///
+>             title("`product': `var' energy-temperature response", size(medsma
+> ll)) ///
+>             subtitle("Model: `model_name' | Year: `year'", size(vsmall)) ///
+>             note("Rows: High→Mid→Low income | Columns: Hot→Mid→Cold climate",
+>  size(vsmall)) ///
+>             plotregion(color(white)) graphregion(color(white)) ///
+>             name(comb_`product'_`var', replace)
+134. 
+.         cap mkdir "$OUTPUT/figures"
+135.         local figname "$OUTPUT/figures/fig_3x3_`var'_`model_name'_`product
+> '.pdf"
+136.         graph export "`figname'", replace
+137.         
+.         di "  SUCCESS: Saved `figname'"
+138.         
+.         graph drop _all
+139.     }
+140. }
+
+================================================
+Plotting product=GMFD fuel=electricity model=TINV_clim_quadinter
+================================================
+Number of observations (_N) was 0, now 41.
+  ibar = 9.087010383605957
+
+Duplicates in terms of tpid tgpid
+
+(4,669 observations deleted)
+  Cell (lg=3, tr=3): Inc=9.997271537780762, CDD=223.8359832763672, HDD=3925.803
+> 955078125
+  ERROR: predictnl failed for cell 303
+  Return code: 111
+
+Duplicates in terms of tpid tgpid
+
+(4,669 observations deleted)
+  Cell (lg=2, tr=3): Inc=8.770168304443359, CDD=223.8359832763672, HDD=3925.803
+> 955078125
+  ERROR: predictnl failed for cell 302
+  Return code: 111
+
+Duplicates in terms of tpid tgpid
+
+(4,669 observations deleted)
+  Cell (lg=1, tr=3): Inc=7.497846126556396, CDD=223.8359832763672, HDD=3925.803
+> 955078125
+  ERROR: predictnl failed for cell 301
+  Return code: 111
+unrecognized command
+r(199);
+
+end of do-file
+r(199);

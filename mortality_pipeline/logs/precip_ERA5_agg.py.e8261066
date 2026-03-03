@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/generate_obs_data/precip_ERA5_agg.py", line 59, in <module>
+    out_csv = OUTDIR / f"{product.replace('-', '_')}_by_region_year.csv"
+              ~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TypeError: unsupported operand type(s) for /: 'str' and 'str'

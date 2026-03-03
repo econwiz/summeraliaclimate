@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/logs/../code/fixed_agg_to_reg.py", line 63, in <module>
+    agg = xa.aggregate(ds_poly, wm).compute()          # ←
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'aggregated' object has no attribute 'compute'

@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/bigagg.py", line 180, in <module>
+    WM_ADM2 = xa.pixel_overlaps(sample, gdf_adm2)
+                                ^^^^^^
+NameError: name 'sample' is not defined

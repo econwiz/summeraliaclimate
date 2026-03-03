@@ -1,0 +1,32 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/bigagg.py", line 195, in <module>
+    _sample = ds_yr.isel(time=0, drop=True)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/dataset.py", line 2777, in isel
+    var = var.isel(var_indexers)
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/variable.py", line 1051, in isel
+    return self[key]
+           ~~~~^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/variable.py", line 797, in __getitem__
+    data = indexing.apply_indexer(indexable, indexer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/indexing.py", line 1036, in apply_indexer
+    return indexable[indexer]
+           ~~~~~~~~~^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/indexing.py", line 1890, in __getitem__
+    return self._index_get(indexer, "__getitem__")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/indexing.py", line 1871, in _index_get
+    result = self.array[key]
+             ~~~~~~~~~~^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 5401, in __getitem__
+    return getitem(key)
+           ^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/pandas/core/arrays/datetimelike.py", line 398, in __getitem__
+    result = cast("Union[Self, DTScalarOrNaT]", super().__getitem__(key))
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/pandas/core/arrays/_mixins.py", line 284, in __getitem__
+    result = self._ndarray[key]
+             ~~~~~~~~~~~~~^^^^^
+IndexError: index 0 is out of bounds for axis 0 with size 0

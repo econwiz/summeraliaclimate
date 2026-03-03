@@ -1,0 +1,20 @@
+Exception ignored in sys.unraisablehookTraceback (most recent call last):
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/variable.py", line 2639, in chunk
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/namedarray/core.py", line 832, in chunk
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/namedarray/parallelcompat.py", line 349, in rechunk
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/array/core.py", line 2823, in rechunk
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/array/rechunk.py", line 374, in rechunk
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/array/rechunk.py", line 724, in _compute_rechunk
+MemoryError
+
+During handling of the above exception, another exception occurred:
+
+MemoryError
+
+During handling of the above exception, another exception occurred:
+
+MemoryError
+
+During handling of the above exception, another exception occurred:
+
+MemoryError

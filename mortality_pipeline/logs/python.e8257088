@@ -1,0 +1,4 @@
+  File "/user/ab5405/summeraliaclimate/code/fixed_agg_to_reg.py", line 33
+    out_csv = OUTDIR / f"{product.replace('-', '_')}_by_region_year.csv"
+                                                                       ^
+SyntaxError: invalid syntax

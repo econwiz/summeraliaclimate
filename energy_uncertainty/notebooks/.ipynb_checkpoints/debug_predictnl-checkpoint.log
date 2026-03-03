@@ -1,0 +1,283 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: 10-user 8-core network perpetual
+Serial number: 501806318811
+  Licensed to: Columbia Business School
+               Columbia University, New York
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do debug_predictnl.do 
+
+. /*
+> DEBUG version - prints the expression
+> */
+. 
+. set scheme s1color
+
+. clear all
+
+. set more off
+
+. 
+. global PROJECT "/user/ab5405/summeraliaclimate/code/energy_uncertainty"
+
+. global EDR "/user/ab5405/summeraliaclimate/code/energy_consumption/energy_dat
+> a_release_2021oct21/DATA/regression"
+
+. global STERD   "$PROJECT/data/regression/sters"
+
+. 
+. local var "electricity"
+
+. local product "GMFD"
+
+. local model_name "TINV_clim_quadinter"
+
+. local year 2099
+
+. 
+. * Create temperature grid
+. clear
+
+. set obs 41
+Number of observations (_N) was 0, now 41.
+
+. gen double temp1 = _n - 6
+
+. gen double temp2 = temp1^2
+
+. gen byte above20 = (temp1 >= 20)
+
+. gen byte below20 = (temp1 < 20)
+
+. 
+. * Get income knot
+. preserve
+
+.     use "$EDR/break_data_TINV_clim.dta", clear
+
+.     qui summ maxInc_largegpid_`var' if largegpid_`var' == 1
+
+.     local ibar = `r(max)'
+
+. restore
+
+. 
+. di "ibar = `ibar'"
+ibar = 9.087010383605957
+
+. 
+. * Just do ONE cell for testing
+. local lg = 3
+
+. local tr = 3
+
+. local cellid = 303
+
+. 
+. * Get tercile covariates
+. preserve
+
+.     use "$EDR/break_data_TINV_clim.dta", clear
+
+.     duplicates drop tpid tgpid, force
+
+Duplicates in terms of tpid tgpid
+
+(4,669 observations deleted)
+
+.     sort tpid tgpid
+
+.     local tr_index = `tr' * 3
+
+.     local subCDD = avgCDD_tpid[`tr_index']
+
+.     local subHDD = avgHDD_tpid[`tr_index']
+
+.     local subInc = avgInc_tgpid[`lg']
+
+. restore
+
+. 
+. di "Cell values: Inc=`subInc', CDD=`subCDD', HDD=`subHDD'"
+Cell values: Inc=9.997271537780762, CDD=223.8359832763672, HDD=3925.80395507812
+> 5
+
+. 
+. * pg assignment
+. if "`var'"=="electricity" local pg=1
+
+. else local pg=2
+
+. 
+. di "Using pg = `pg'"
+Using pg = 1
+
+. 
+. * Income group
+. local deltacut = `subInc' - `ibar'
+
+. if (`subInc' > `ibar') local ig=2
+
+. else local ig=1
+
+. 
+. di "Income group: ig = `ig', deltacut = `deltacut'"
+Income group: ig = 2, deltacut = .9102611541748047
+
+. 
+. * Load estimates
+. estimates use "$STERD/FD_FGLS_inter_`model_name'_`product'"
+
+. 
+. * Get coefficient names
+. matrix b = e(b)
+
+. local bnames : colnames b
+
+. 
+. * Build expression with detailed checking
+. local line ""
+
+. local add ""
+
+. 
+. foreach k of num 1/2 {
+  2.     di ""
+  3.     di "Building terms for k=`k'..."
+  4.     
+.     * Base temperature
+.     local term "c.indp`pg'#c.indf1#c.FD_temp`k'"
+  5.     di "  Checking: `term'"
+  6.     cap scalar test = _b[`term']
+  7.     if _rc {
+  8.         di "    ERROR: Not found!"
+  9.     }
+ 10.     else {
+ 11.         di "    ✓ Found, value = " _b[`term']
+ 12.         local line = "`line' `add' _b[`term'] * (temp`k' - 20^`k')"
+ 13.     }
+ 14.     
+.     * Climate - CDD
+.     local term "c.indp`pg'#c.indf1#c.FD_cdd20_TINVtemp`k'"
+ 15.     di "  Checking: `term'"
+ 16.     cap scalar test = _b[`term']
+ 17.     if _rc {
+ 18.         di "    ERROR: Not found!"
+ 19.     }
+ 20.     else {
+ 21.         di "    ✓ Found, value = " _b[`term']
+ 22.         local line = "`line' + above20*_b[`term']*`subCDD' * (temp`k' - 20
+> ^`k')"
+ 23.     }
+ 24.     
+.     * Climate - HDD
+.     local term "c.indp`pg'#c.indf1#c.FD_hdd20_TINVtemp`k'"
+ 25.     di "  Checking: `term'"
+ 26.     cap scalar test = _b[`term']
+ 27.     if _rc {
+ 28.         di "    ERROR: Not found!"
+ 29.     }
+ 30.     else {
+ 31.         di "    ✓ Found, value = " _b[`term']
+ 32.         local line = "`line' + below20*_b[`term']*`subHDD' * (20^`k' - tem
+> p`k')"
+ 33.     }
+ 34.     
+.     * Income spline
+.     local term "c.indp`pg'#c.indf1#c.FD_dc1_lgdppc_MA15I`ig'temp`k'"
+ 35.     di "  Checking: `term'"
+ 36.     cap scalar test = _b[`term']
+ 37.     if _rc {
+ 38.         di "    ERROR: Not found!"
+ 39.     }
+ 40.     else {
+ 41.         di "    ✓ Found, value = " _b[`term']
+ 42.         local line = "`line' + _b[`term']*`deltacut'*(temp`k' - 20^`k')"
+ 43.     }
+ 44.     
+.     local add " + "
+ 45. }
+
+Building terms for k=1...
+  Checking: c.indp1#c.indf1#c.FD_temp1
+    ✓ Found, value = -.01400503
+  Checking: c.indp1#c.indf1#c.FD_cdd20_TINVtemp1
+    ✓ Found, value = 1.365e-07
+  Checking: c.indp1#c.indf1#c.FD_hdd20_TINVtemp1
+    ✓ Found, value = 3.840e-08
+  Checking: c.indp1#c.indf1#c.FD_dc1_lgdppc_MA15I2temp1
+    ✓ Found, value = -4.4072815
+
+Building terms for k=2...
+  Checking: c.indp1#c.indf1#c.FD_temp2
+    ✓ Found, value = .00051125
+  Checking: c.indp1#c.indf1#c.FD_cdd20_TINVtemp2
+    ✓ Found, value = -5.725e-10
+  Checking: c.indp1#c.indf1#c.FD_hdd20_TINVtemp2
+    ✓ Found, value = 2.402e-09
+  Checking: c.indp1#c.indf1#c.FD_dc1_lgdppc_MA15I2temp2
+    ✓ Found, value = -.00193637
+
+. 
+. di ""
+
+
+. di "=========================================="
+==========================================
+
+. di "FINAL EXPRESSION:"
+FINAL EXPRESSION:
+
+. di "`line'"
+  _b[c.indp1#c.indf1#c.FD_temp1] * (temp1 - 20^1) + above20*_b[c.indp1#c.indf1#
+> c.FD_cdd20_TINVtemp1]*223.8359832763672 * (temp1 - 20^1) + below20*_b[c.indp1
+> #c.indf1#c.FD_hdd20_TINVtemp1]*3925.803955078125 * (20^1 - temp1) + _b[c.indp
+> 1#c.indf1#c.FD_dc1_lgdppc_MA15I2temp1]*.9102611541748047*(temp1 - 20^1)  +  _
+> b[c.indp1#c.indf1#c.FD_temp2] * (temp2 - 20^2) + above20*_b[c.indp1#c.indf1#c
+> .FD_cdd20_TINVtemp2]*223.8359832763672 * (temp2 - 20^2) + below20*_b[c.indp1#
+> c.indf1#c.FD_hdd20_TINVtemp2]*3925.803955078125 * (20^2 - temp2) + _b[c.indp1
+> #c.indf1#c.FD_dc1_lgdppc_MA15I2temp2]*.9102611541748047*(temp2 - 20^2)
+
+. di "=========================================="
+==========================================
+
+. 
+. * Try to predict
+. di ""
+
+
+. di "Attempting predictnl..."
+Attempting predictnl...
+
+. cap predictnl yhat`cellid' = `line', se(se`cellid') ci(lo`cellid' hi`cellid')
+
+. 
+. if _rc {
+.     di as error "ERROR: predictnl failed with code `=_rc'"
+ERROR: predictnl failed with code 111
+. }
+
+. else {
+.     di "SUCCESS!"
+.     list temp1 yhat`cellid' in 1/5
+. }
+
+. 
+end of do-file

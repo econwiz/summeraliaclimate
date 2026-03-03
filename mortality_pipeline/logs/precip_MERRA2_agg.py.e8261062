@@ -1,0 +1,42 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/generate_obs_data/precip_MERRA2_agg.py", line 47, in <module>
+    ds_full = xr.merge([ds_tas, ds_pr[[precip_var]]]).chunk({"time": 1})
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/structure/merge.py", line 984, in merge
+    merge_result = merge_core(
+                   ^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/structure/merge.py", line 700, in merge_core
+    aligned = deep_align(
+              ^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/structure/alignment.py", line 1008, in deep_align
+    aligned = align(
+              ^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/structure/alignment.py", line 944, in align
+    aligner.align()
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/structure/alignment.py", line 644, in align
+    self.reindex_all()
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/structure/alignment.py", line 615, in reindex_all
+    self.results = tuple(
+                   ^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/structure/alignment.py", line 604, in _reindex_one
+    return obj._reindex_callback(
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/dataset.py", line 3297, in _reindex_callback
+    reindexed_vars = alignment.reindex_variables(
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/structure/alignment.py", line 84, in reindex_variables
+    new_var = var._getitem_with_mask(indxr, fill_value=fill_value_)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/variable.py", line 834, in _getitem_with_mask
+    mask = indexing.create_mask(indexer, self.shape, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/indexing.py", line 1437, in create_mask
+    mask = _masked_result_drop_slice(key, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/indexing.py", line 1408, in _masked_result_drop_slice
+    mask = _logical_any(k == -1 for k in new_keys)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/indexing.py", line 1384, in _logical_any
+    return functools.reduce(operator.or_, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 36.8 GiB for an array with shape (27242, 839, 1728) and data type bool

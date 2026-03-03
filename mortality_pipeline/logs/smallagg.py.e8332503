@@ -1,0 +1,19 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/smallagg.py", line 134, in <module>
+    rg = build_regridder(ds.isel(time=0, drop=True), TAG)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/smallagg.py", line 51, in build_regridder
+    return xe.Regridder(src, tgt, method="bilinear", periodic=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xesmf/frontend.py", line 926, in __init__
+    super().__init__(
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xesmf/frontend.py", line 377, in __init__
+    self.weights = read_weights(weights, self.n_in, self.n_out)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xesmf/smm.py", line 42, in read_weights
+    weights = _parse_coords_and_values(weights, n_in, n_out)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xesmf/smm.py", line 75, in _parse_coords_and_values
+    raise IOError(f'Weights file not found on disk.\n{indata}')
+OSError: Weights file not found on disk.
+/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/weights_ERA5_025_to025.nc

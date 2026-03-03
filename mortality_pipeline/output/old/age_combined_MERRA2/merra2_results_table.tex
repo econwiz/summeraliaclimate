@@ -1,0 +1,29 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{MERRA2 Mortality Regression Results (Specs 1–4)}
+\begin{tabular}{l*{4}{c}}
+\hline\hline
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
+                    &\multicolumn{1}{c}{deathrate\_w99}&\multicolumn{1}{c}{deathrate\_w99}&\multicolumn{1}{c}{deathrate\_w99}&\multicolumn{1}{c}{deathrate\_w99}\\
+\hline
+Constant            &       950.7\sym{***}&       967.6\sym{***}&       941.2\sym{***}&      1009.2\sym{***}\\
+                    &     (35.72)         &     (35.34)         &     (35.85)         &     (21.17)         \\
+[1em]
+tavg\_poly\_1\_MERRA2  &     -0.0184         &     -0.0248\sym{**} &     -0.0269\sym{**} &     -0.0281\sym{***}\\
+                    &    (0.0115)         &    (0.0112)         &    (0.0116)         &   (0.00842)         \\
+[1em]
+tavg\_poly\_2\_MERRA2  &    -0.00108\sym{**} &    -0.00111\sym{**} &   -0.000517         &    -0.00124\sym{***}\\
+                    &  (0.000463)         &  (0.000462)         &  (0.000378)         &  (0.000449)         \\
+[1em]
+tavg\_poly\_3\_MERRA2  &   0.0000285         &   0.0000481         &   0.0000500\sym{*}  &   0.0000285         \\
+                    & (0.0000340)         & (0.0000344)         & (0.0000281)         & (0.0000279)         \\
+[1em]
+tavg\_poly\_4\_MERRA2  & 0.000000395         &   -6.42e-08         &-0.000000624         &  0.00000159\sym{*}  \\
+                    &(0.000000805)         &(0.000000819)         &(0.000000650)         &(0.000000818)         \\
+\hline
+Observations        &      406592         &      406592         &      406592         &      406592         \\
+\hline\hline
+\multicolumn{5}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{5}{l}{\footnotesize \sym{*} \(p<0.1\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}

@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/logs/../code/GMFD_agg_to_reg.py", line 10, in <module>
+    _orig_make_valid = _overlay._make_valid
+                       ^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'function' object has no attribute '_make_valid'

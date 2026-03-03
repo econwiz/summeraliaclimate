@@ -1,0 +1,39 @@
+[INFO] Loading WORLD shapefile...
+[INFO] Loading climate...
+[INFO] Years in climate: 1981–2010
+[INFO] Computing daily transforms...
+[INFO] Loading and reprojecting GPW population...
+[INFO] Building WORLD × grid weightmap...
+[INFO] Aggregating GPW to country populations...
+[INFO] Aggregating 1981
+[INFO] Aggregating 1982
+[INFO] Aggregating 1983
+[INFO] Aggregating 1984
+[INFO] Aggregating 1985
+[INFO] Aggregating 1986
+[INFO] Aggregating 1987
+[INFO] Aggregating 1988
+[INFO] Aggregating 1989
+[INFO] Aggregating 1990
+[INFO] Aggregating 1991
+[INFO] Aggregating 1992
+[INFO] Aggregating 1993
+[INFO] Aggregating 1994
+[INFO] Aggregating 1995
+[INFO] Aggregating 1996
+[INFO] Aggregating 1997
+[INFO] Aggregating 1998
+[INFO] Aggregating 1999
+[INFO] Aggregating 2000
+[INFO] Aggregating 2001
+[INFO] Aggregating 2002
+[INFO] Aggregating 2003
+[INFO] Aggregating 2004
+[INFO] Aggregating 2005
+[INFO] Aggregating 2006
+[INFO] Aggregating 2007
+[INFO] Aggregating 2008
+[INFO] Aggregating 2009
+[INFO] Aggregating 2010
+[INFO] Writing /user/ab5405/summeraliaclimate/code/energy_consumption/energy_data_release_2021oct21/DATA/climate/ERA5/ERA5_country_climate_1971_2010.csv
+[DONE]

@@ -1,0 +1,42 @@
+Processing ERA5-025
+creating polygons for each pixel...
+lat/lon bounds not found in dataset; they will be created.
+calculating overlaps between pixels and output polygons...
+success!
+creating polygons for each pixel...
+calculating overlaps between pixels and output polygons...
+success!
+  Year 1981
+  Year 1982
+  Year 1983
+  Year 1984
+  Year 1985
+  Year 1986
+  Year 1987
+  Year 1988
+  Year 1989
+  Year 1990
+  Year 1991
+  Year 1992
+  Year 1993
+  Year 1994
+  Year 1995
+  Year 1996
+  Year 1997
+  Year 1998
+  Year 1999
+  Year 2000
+  Year 2001
+  Year 2002
+  Year 2003
+  Year 2004
+  Year 2005
+  Year 2006
+  Year 2007
+  Year 2008
+  Year 2009
+  Year 2010
+  Year 2011
+  Year 2012
+  Year 2013
+↳ Wrote ERA5_025_by_region_year.csv with 496980 rows

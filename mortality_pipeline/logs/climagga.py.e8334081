@@ -1,0 +1,32 @@
+ERROR 1: PROJ: proj_create_from_database: Open of /user/ab5405/.conda/envs/hle_iv/share/proj failed
+/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/climagga.py:61: UserWarning: The specified chunks separate the stored chunks along dimension "time" starting at index 20. This could degrade performance. Instead, consider rechunking after loading.
+  return xr.open_zarr(path, consolidated=False) if path.endswith(".zarr") else xr.open_dataset(path, chunks={"lat":-1,"lon":-1,"time":20})
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/climagga.py", line 157, in <module>
+    RGRD = build_regridder(_sample_src)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/climagga.py", line 81, in build_regridder
+    return xe.Regridder(src, make_target_grid(), method="bilinear", periodic=True, ignore_degenerate=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xesmf/frontend.py", line 926, in __init__
+    super().__init__(
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xesmf/frontend.py", line 370, in __init__
+    weights = self._compute_weights(grid_in, grid_out)  # Dictionary of weights
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xesmf/frontend.py", line 437, in _compute_weights
+    regrid = esmf_regrid_build(
+             ^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xesmf/backend.py", line 484, in esmf_regrid_build
+    regrid = ESMF.Regrid(sourcefield, destfield, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/esmpy/util/decorators.py", line 59, in new_func
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/esmpy/api/regrid.py", line 179, in __init__
+    self._routehandle = ESMP_FieldRegridStore(
+                        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/esmpy/interface/cbindings.py", line 2143, in ESMP_FieldRegridStore
+    handle_esmf_error(rc, 'ESMC_FieldRegridStore')
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/esmpy/interface/cbindings.py", line 26, in handle_esmf_error
+    raise ValueError(msg)
+ValueError: ESMC_FieldRegridStore failed with rc = 545. Please check the log files (named "*ESMF_LogFile").

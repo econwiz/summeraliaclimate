@@ -1,0 +1,141 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: 10-user 8-core network perpetual
+Serial number: 501806318811
+  Licensed to: Columbia Business School
+               Columbia University, New York
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do obsintprep.do 
+
+. /**************************************************************************
+> * stack_all_products_to_output_panels.do
+> * - Stacks per-product aligned panels into ONE pooled dataset (ALLREA)
+> * - Saves to $OUTPUT (your output_panels folder)
+> **************************************************************************/
+. 
+. clear all
+
+. set more off
+
+. 
+. local resolution "1deg"  /* ← CHANGE THIS */
+
+. 
+. global CODE    "/user/ab5405/summeraliaclimate/code"
+
+. 
+. * Input/output directories include resolution
+. global PANELS  "$CODE/mortality_pipeline/prep_panels/`resolution'"
+
+. global OUTPUT  "$CODE/mortality_pipeline/output_panels/`resolution'"
+
+. capture mkdir "$OUTPUT"
+
+. 
+. 
+. capture mkdir "$OUTPUT"
+
+. 
+. tempfile base
+
+. local first = 1
+
+. 
+. foreach product of local products {
+  2.     local fpath "$OUTPUT/panel_prepped_for_regressions_`product'_aligned.d
+> ta"
+  3. 
+.     capture confirm file "`fpath'"
+  4.     if _rc {
+  5.         di as yellow "Note: file not found for `product' → `fpath' (skippi
+> ng)"
+  6.         continue
+  7.     }
+  8. 
+.     di as txt "Loading `product' → `fpath'"
+  9.     use "`fpath'", clear
+ 10. 
+.     * Add product label
+.     gen str20 proj_base = "`product'"
+ 11. 
+.     * ---- Standardize product-specific names to generic ----
+.     capture confirm variable tavg_poly_1_`product'
+ 12.     if !_rc {
+ 13.         rename tavg_poly_1_`product' tavg_poly_1
+ 14.         capture rename tavg_poly_2_`product' tavg_poly_2
+ 15.         capture rename tavg_poly_3_`product' tavg_poly_3
+ 16.         capture rename tavg_poly_4_`product' tavg_poly_4
+ 17.     }
+ 18. 
+.     capture confirm variable prcp_poly_1_`product'
+ 19.     if !_rc {
+ 20.         rename prcp_poly_1_`product' prcp_poly_1
+ 21.         capture rename prcp_poly_2_`product' prcp_poly_2
+ 22.     }
+ 23. 
+.     capture confirm variable lr_tavg_`product'_adm1_avg
+ 24.     if !_rc {
+ 25.         rename lr_tavg_`product'_adm1_avg lr_tavg_adm1_avg
+ 26.     }
+ 27. 
+.     * Keep the vars needed downstream
+.     keep iso iso2 adm0_code adm0_code2 adm1_id adm1_code adm2_id adm2_code //
+> /
+>      year agegroup CHN_ts deaths population deathrate_w99 ///
+>      tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4 ///
+>      prcp_poly_1 prcp_poly_2 loggdppc_adm1_avg lr_tavg_adm1_avg ///
+>      /* keep FE IDs from prep */ ///
+>      adm0_agegrp_code adm1_agegrp_code ///
+>      proj_base
+ 28. 
+.     order iso iso2 adm0_code adm0_code2 adm1_id adm1_code adm2_id adm2_code /
+> //
+>          year agegroup CHN_ts deaths population deathrate_w99 ///
+>          tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4 ///
+>          prcp_poly_1 prcp_poly_2 loggdppc_adm1_avg lr_tavg_adm1_avg ///
+>          proj_base
+ 29. 
+.     if `first' {
+ 30.         save `base'
+ 31.         local first = 0
+ 32.     }
+ 33.     else {
+ 34.         append using `base'
+ 35.         save `base', replace
+ 36.     }
+ 37. }
+
+. 
+. capture confirm file `base'
+
+. if _rc {
+.     di as error "No product files were found in $OUTPUT. Nothing to stack."
+No product files were found in /user/ab5405/summeraliaclimate/code/mortality_pi
+> peline/output_panels/1deg. Nothing to stack.
+.     exit 1
+--Break--
+r(1);
+. }
+--Break--
+r(1);
+
+end of do-file
+--Break--
+r(1);

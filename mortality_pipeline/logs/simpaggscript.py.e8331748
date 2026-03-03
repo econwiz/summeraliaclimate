@@ -1,0 +1,4 @@
+/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/simpaggscript.py:253: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/simpaggscript.py", line 297, in <module>
+RuntimeError: ID mismatch after shaping: 50 keys not found in gdf_sub

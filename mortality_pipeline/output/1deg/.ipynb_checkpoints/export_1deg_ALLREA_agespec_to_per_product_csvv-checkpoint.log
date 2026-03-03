@@ -1,0 +1,68 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: 10-user 8-core network perpetual
+Serial number: 501806318811
+  Licensed to: Columbia Business School
+               Columbia University, New York
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do export_1deg_ALLREA_agespec_to_per_product_csvv.do 
+
+. /**************************************************************************
+> * CSVV GENERATOR — ALLREA pooled ster → per-product CSVVs
+> * 1deg version
+> *
+> * Product encoding: 1=ERA5_025, 2=GMFD, 3=JRA_3Q, 4=MERRA2
+> * Base category (product=1b) = ERA5_025
+> *
+> * 36 gammas per product: 3 ages × 4 polys × 3 covariates {1, LR, loginc}
+> * Age codes: 1b=0-4, 2=5-64, 3=65+, 4=total (skip total in CSVV)
+> **************************************************************************/
+. 
+. clear all
+
+. set more off
+
+. 
+. global REPO "/user/ab5405/summeraliaclimate"
+
+. 
+. local STERFILE "$REPO/code/mortality_pipeline/output/1deg/age_spec_ALLREA/age
+> spec_prod_interact_spec2_ALLREA.ster"
+
+. local CSVVDIR  "$REPO/code/mortality_pipeline/output/1deg/age_spec_interacted
+> _csvv"
+
+. cap mkdir "`CSVVDIR'"
+
+. 
+. local prod_codes "1 2 3 4"
+
+. local prod_names "ERA5_025 GMFD JRA_3Q MERRA2"
+
+. local age_codes  "1 2 3"
+
+. 
+. estimates use "`STERFILE'"
+file /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_spe
+> c_ALLREA/agespec_prod_interact_spec2_ALLREA.ster not found
+r(601);
+
+end of do-file
+r(601);

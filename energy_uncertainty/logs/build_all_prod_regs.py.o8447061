@@ -1,0 +1,14 @@
+[INFO] Reading /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/car_paths.csv
+
+[INFO] Processing product: ERA5-025 (suffix=ERA5)
+[INFO] ERA5-025 Loading WORLD shapefile
+[INFO] ERA5-025 Loading DAILY temperature
+[INFO] ERA5-025 Loading MONTHLY precipitation
+[INFO] ERA5-025 Years in temperature: 1981–2010
+[INFO] ERA5-025 Years in precipitation: 1981–2010
+[INFO] ERA5-025 Using overlapping years: 1981–2010
+[INFO] ERA5-025 Computing daily transforms (temperature)
+[INFO] ERA5-025 Loading and reprojecting GPW population
+[INFO] ERA5-025 Building WORLD × grid weightmap
+[INFO] ERA5-025 Aggregating GPW to country populations
+[INFO] ERA5-025 Aggregating 1981

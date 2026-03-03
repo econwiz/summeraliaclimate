@@ -1,0 +1,29 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/bigagg.py", line 161, in <module>
+    ds = ds.chunk({"time": 1, "lat": 40, "lon": 40})
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/dataset.py", line 2529, in chunk
+    k: _maybe_chunk(
+       ^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/structure/chunks.py", line 151, in _maybe_chunk
+    var = var.chunk(
+          ^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/variable.py", line 2639, in chunk
+    return super().chunk(
+           ^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/namedarray/core.py", line 832, in chunk
+    data_chunked = chunkmanager.rechunk(data_old, chunks)  # type: ignore[arg-type]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/namedarray/parallelcompat.py", line 349, in rechunk
+    return data.rechunk(chunks, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/array/core.py", line 2823, in rechunk
+    return rechunk(self, chunks, threshold, block_size_limit, balance, method)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/array/rechunk.py", line 374, in rechunk
+    x = _compute_rechunk(x, c)
+        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/array/rechunk.py", line 737, in _compute_rechunk
+    x2[key] = Alias(key, rec_cat_arg.flat[0])
+    ~~^^^^^
+MemoryError

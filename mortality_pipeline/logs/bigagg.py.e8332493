@@ -1,0 +1,47 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/bigagg.py", line 112, in <module>
+    ds["tas"] = ds["tas"] - 273.15  # K → °C
+                ~~~~~~~~~~^~~~~~~~
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/_typed_ops.py", line 540, in __sub__
+    return self._binary_op(other, operator.sub)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/dataarray.py", line 4845, in _binary_op
+    f(self.variable, other_variable_or_arraylike)
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/_typed_ops.py", line 920, in __sub__
+    return self._binary_op(other, operator.sub)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/variable.py", line 2358, in _binary_op
+    self_data, other_data, dims = _broadcast_compat_data(self, other)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/variable.py", line 2969, in _broadcast_compat_data
+    self_data = self.data
+                ^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/variable.py", line 436, in data
+    duck_array = self._data.get_duck_array()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/indexing.py", line 843, in get_duck_array
+    self._ensure_cached()
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/indexing.py", line 840, in _ensure_cached
+    self.array = as_indexable(self.array.get_duck_array())
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/indexing.py", line 797, in get_duck_array
+    return self.array.get_duck_array()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/coding/common.py", line 80, in get_duck_array
+    return self.func(self.array.get_duck_array())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/indexing.py", line 652, in get_duck_array
+    array = self.array[self.key]
+            ~~~~~~~~~~^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/backends/netCDF4_.py", line 108, in __getitem__
+    return indexing.explicit_indexing_adapter(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/indexing.py", line 1021, in explicit_indexing_adapter
+    result = raw_indexing_method(raw_key.tuple)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/backends/netCDF4_.py", line 121, in _getitem
+    array = getitem(original_array, key)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "src/netCDF4/_netCDF4.pyx", line 5079, in netCDF4._netCDF4.Variable.__getitem__
+  File "src/netCDF4/_netCDF4.pyx", line 6028, in netCDF4._netCDF4.Variable._get
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 7.01 GiB for an array with shape (12419, 263, 576) and data type float32

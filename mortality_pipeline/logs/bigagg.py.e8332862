@@ -1,0 +1,9 @@
+/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/array/core.py:4998: PerformanceWarning: Increasing number of chunks by factor of 15
+  result = blockwise(
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/bigagg.py", line 183, in <module>
+    RGRD = build_regridder(ds.isel(time=0, drop=True).to_dataset(name="tas"))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/common.py", line 306, in __getattr__
+    raise AttributeError(
+AttributeError: 'Dataset' object has no attribute 'to_dataset'. Did you mean: 'rda_dataset'?

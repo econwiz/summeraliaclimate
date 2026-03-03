@@ -1,0 +1,4 @@
+  File "/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_all_prod_regs.py", line 15
+    """a
+       ^
+SyntaxError: invalid syntax

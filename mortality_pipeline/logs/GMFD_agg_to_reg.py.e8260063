@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/logs/../code/GMFD_agg_to_reg.py", line 72, in <module>
+    wm     = xa.pixel_overlaps(sample, gdf)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xagg/wrappers.py", line 90, in pixel_overlaps
+    pix_agg = create_raster_polygons(ds,subset_bbox=gdf_in,weights=weights,silent=silent)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xagg/core.py", line 363, in create_raster_polygons
+    cross_antimeridian_idxs = ((np.abs(np.array(pix_poly_coords)[:,:,0] - -180) < wrap_around_thresh).any(axis=1) & 
+                                       ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+IndexError: too many indices for array: array is 1-dimensional, but 3 were indexed

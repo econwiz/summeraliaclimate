@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/generate_obs_data/MERRA2_agg_to_reg.py", line 40, in <module>
+    ds_full = open_climate(row.filepath).chunk({"time": 1})
+                           ^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/pandas/core/generic.py", line 6318, in __getattr__
+    return object.__getattribute__(self, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Series' object has no attribute 'filepath'

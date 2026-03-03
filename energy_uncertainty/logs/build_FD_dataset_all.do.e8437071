@@ -1,0 +1,35 @@
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: line 1: build_all_prod_regs.py.e8436808: command not found
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: line 2: build_all_prod_regs.py.e8436808: command not found
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: line 3: build_all_prod_regs.py.e8436808: command not found
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: line 4: build_all_prod_regs.py.e8436808: command not found
+Usage: clear [options]
+
+Options:
+  -T TERM     use this instead of $TERM
+  -V          print curses-version
+  -x          do not try to clear scrollback
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: line 8: global: command not found
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: line 9: global: command not found
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: line 10: global: command not found
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: line 11: global: command not found
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: line 13: cap: command not found
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: line 15: build_all_prod_regs.py.e8436808: command not found
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: line 16: local: can only be used in a function
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: line 18: foreach: command not found
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: line 20: di: command not found
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: command substitution: line 24: unexpected EOF while looking for matching `''
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: command substitution: line 28: syntax error: unexpected end of file
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: line 24: di: command not found
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: line 26: build_all_prod_regs.py.e8436808: command not found
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: command substitution: line 27: unexpected EOF while looking for matching `''
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: command substitution: line 40: syntax error: unexpected end of file
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: line 27: replaced: command not found
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: line 27: suf: command not found
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: line 28: build_all_prod_regs.py.e8436808: command not found
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: line 30: build_all_prod_regs.py.e8436808: command not found
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: line 31: qui: command not found
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: command substitution: line 32: syntax error near unexpected token `('
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: command substitution: line 32: `    qui replace decade=1 if (year<=1980 & year>=1971)'
+import-im6.q16: unable to open X server `:1003.0' @ error/import.c/ImportImageCommand/363.
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: line 55: syntax error near unexpected token `('
+/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_FD_dataset_all.do: line 55: `        replace dc1_lgdppc_MA15 = lgdppc_MA15 - r(max) if product == "`p'"'

@@ -1,0 +1,309 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: 10-user 8-core network perpetual
+Serial number: 501806318811
+  Licensed to: Columbia Business School
+               Columbia University, New York
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do prep1deg.do 
+
+. /**************************************************************************
+> * prep_panel_ALL_aligned_FLEXIBLE.do
+> * 
+> * FLEXIBLE RESOLUTION VERSION for MORTALITY PIPELINE
+> *
+> * - Builds 'total' agegroup from bins (important!)
+> * - Applies sample filters
+> * - Winsorizes deathrate within iso×agegroup (AFTER filtering, correct order)
+> * - Constructs FE IDs
+> * - Loops over observational products: GMFD, ERA5, JRA_3Q, MERRA2
+> *
+> * CHANGE LOG:
+> * - Added resolution parameter to control input/output directories
+> * - Input reads from mortality_pipeline/prep_panels/{resolution}/
+> * - Output writes to mortality_pipeline/output_panels/{resolution}/
+> * - Added file existence check to skip missing products
+> **************************************************************************/
+. 
+. * ===========================================================================
+> =
+. * CONFIG
+. * ===========================================================================
+> =
+. 
+. local resolution "1deg"  /* ← CHANGE THIS: "025deg" or "1deg" */
+
+. 
+. global CODE    "/user/ab5405/summeraliaclimate/code"
+
+. 
+. * Input/output directories include resolution - MORTALITY PIPELINE PATHS
+. global PANELS  "$CODE/mortality_pipeline/prep_panels/`resolution'"
+
+. global OUTPUT  "$CODE/mortality_pipeline/output_panels/`resolution'"
+
+. capture mkdir "$OUTPUT"
+
+. 
+. di ""
+
+
+. di "========================================================================"
+========================================================================
+
+. di "CONFIGURATION:"
+CONFIGURATION:
+
+. di "  Resolution: `resolution'"
+  Resolution: 1deg
+
+. di "  Input dir:  $PANELS"
+  Input dir:  /user/ab5405/summeraliaclimate/code/mortality_pipeline/prep_panel
+> s/1deg
+
+. di "  Output dir: $OUTPUT"
+  Output dir: /user/ab5405/summeraliaclimate/code/mortality_pipeline/output_pan
+> els/1deg
+
+. di "========================================================================"
+========================================================================
+
+. di ""
+
+
+. 
+. local products GMFD ERA5 JRA_3Q MERRA2 
+
+. 
+. * ===========================================================================
+> =
+. * PRODUCT LOOP
+. * ===========================================================================
+> =
+. 
+. foreach product of local products {
+  2. 
+.     * Define input/output paths
+.     local inpanel  "$PANELS/global_mortality_panel_public_`product'.dta"
+  3.     local outpanel "$OUTPUT/panel_prepped_for_regressions_`product'_aligne
+> d.dta"
+  4.     
+.     * Check if input exists
+.     capture confirm file "`inpanel'"
+  5.     if _rc {
+  6.         di as error ""
+  7.         di as error "⚠️  Skipping `product' - file not found:"
+  8.         di as error "    `inpanel'"
+  9.         di as error ""
+ 10.         continue
+ 11.     }
+ 12. 
+.     di ""
+ 13.     di "------------------------------------------------------------------
+> --"
+ 14.     di "Processing `product' ..."
+ 15.     di "------------------------------------------------------------------
+> --"
+ 16.     use "`inpanel'", clear
+ 17. 
+.     * =======================================================================
+> =
+.     * 0a) Coerce agegroup to string
+.     * =======================================================================
+> =
+.     
+.     capture confirm numeric variable agegroup
+ 18.     if !_rc {
+ 19.         capture decode agegroup, gen(age_s)
+ 20.         if !_rc {
+ 21.             drop agegroup
+ 22.             rename age_s agegroup
+ 23.         }
+ 24.     }
+ 25.     replace agegroup = strtrim(agegroup)
+ 26. 
+.     * =======================================================================
+> =
+.     * 0b) Construct 'total' agegroup
+.     * =======================================================================
+> =
+.     
+.     preserve
+ 27.         keep if inlist(agegroup,"0-4","5-64","65+")
+ 28.         collapse (sum) deaths population, by(iso adm1_id adm2_id year)
+ 29.         gen agegroup = "total"
+ 30.         tempfile total
+ 31.         save `total'
+ 32.     restore
+ 33.     append using `total'
+ 34. 
+.     * =======================================================================
+> =
+.     * 1) Recompute raw deathrate
+.     * =======================================================================
+> =
+.     
+.     capture drop deathrate
+ 35.     gen deathrate = (deaths / population) * 100000
+ 36. 
+.     * =======================================================================
+> =
+.     * 2) Apply sample filters
+.     * =======================================================================
+> =
+.     
+.     gen sample = 1
+ 37.     replace sample = 0 if year > 2010
+ 38.     replace sample = 0 if mi(tavg_poly_1_`product')
+ 39.     
+.     * Precip filter - comment out for MERRA2 if it has no precip
+.     replace sample = 0 if mi(prcp_poly_1_`product')
+ 40.     
+.     replace sample = 0 if mi(loggdppc_adm1_avg)
+ 41.     replace sample = 0 if mi(lr_tavg_`product'_adm1_avg)
+ 42. 
+.     keep if sample==1
+ 43.     drop sample
+ 44. 
+.     * =======================================================================
+> =
+.     * 3) Winsorize deathrate (after filtering!)
+.     * =======================================================================
+> =
+.     
+.     bysort iso agegroup: egen deathrate_p99 = pctile(deathrate), p(99)
+ 45.     gen deathrate_w99 = cond(deathrate > deathrate_p99 & !mi(deathrate), d
+> eathrate_p99, deathrate)
+ 46.     drop deathrate_p99
+ 47. 
+.     * =======================================================================
+> =
+.     * 4) FE IDs
+.     * =======================================================================
+> =
+.     
+.     egen adm0_code          = group(iso)
+ 48.     egen adm1_code          = group(iso adm1_id)
+ 49.     replace adm2_id         = adm1_id if iso == "JPN"
+ 50.     egen adm2_code          = group(iso adm1_id adm2_id)
+ 51. 
+.     egen adm0_agegrp_code   = group(iso agegroup)
+ 52.     egen adm1_agegrp_code   = group(iso adm1_id agegroup)
+ 53. 
+.     * =======================================================================
+> =
+.     * 5) Build adm0_code2 (EU pooling)
+.     * =======================================================================
+> =
+.     
+.     gen adm0_code2 = 41
+ 54.     replace adm0_code2 = 4  if adm0_code == 4   // BRA
+ 55.     replace adm0_code2 = 6  if adm0_code == 6   // CHL
+ 56.     replace adm0_code2 = 7  if adm0_code == 7   // CHN
+ 57.     replace adm0_code2 = 15 if adm0_code == 15  // FRA
+ 58.     replace adm0_code2 = 23 if adm0_code == 23  // JPN
+ 59.     replace adm0_code2 = 27 if adm0_code == 27  // MEX
+ 60.     replace adm0_code2 = 40 if adm0_code == 40  // USA
+ 61. 
+.     gen iso2 = iso
+ 62.     replace iso2 = "EUR" if adm0_code2==41
+ 63. 
+.     * =======================================================================
+> =
+.     * 6) China structural break flag
+.     * =======================================================================
+> =
+.     
+.     gen CHN_ts = 1
+ 64.     replace CHN_ts = 2 if year >= 2004 & iso=="CHN"
+ 65. 
+.     * =======================================================================
+> =
+.     * 7) Save aligned panel
+.     * =======================================================================
+> =
+.     
+.     save "`outpanel'", replace
+ 66.     di ""
+ 67.     di "✅ Saved aligned panel for `product'"
+ 68.     di "   → `outpanel'"
+ 69. 
+.     clear
+ 70. }
+
+--------------------------------------------------------------------
+Processing GMFD ...
+--------------------------------------------------------------------
+(0 real changes made)
+(168,442 observations deleted)
+file /tmp/8480606.1.debian.q/St429827.000002 saved as .dta format
+(3,346 missing values generated)
+(94,520 real changes made)
+(145,039 real changes made)
+(0 real changes made)
+(134 real changes made)
+(0 real changes made)
+(239,693 observations deleted)
+(3,323 missing values generated)
+(0 real changes made)
+(11,311 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(545,499 real changes made)
+(0 real changes made)
+(file
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/output_panels/1deg
+    > /panel_prepped_for_regressions_GMFD_aligned.dta not found)
+file
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/output_panels/1deg
+    > /panel_prepped_for_regressions_GMFD_aligned.dta saved
+
+✅ Saved aligned panel for GMFD
+   → /user/ab5405/summeraliaclimate/code/mortality_pipeline/output_panels/1deg/
+> panel_prepped_for_regressions_GMFD_aligned.dta
+
+⚠️  Skipping ERA5 - file not found:
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/prep_panels/1deg/glo
+> bal_mortality_panel_public_ERA5.dta
+
+
+⚠️  Skipping JRA_3Q - file not found:
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/prep_panels/1deg/glo
+> bal_mortality_panel_public_JRA_3Q.dta
+
+
+--------------------------------------------------------------------
+Processing MERRA2 ...
+--------------------------------------------------------------------
+(0 real changes made)
+(168,442 observations deleted)
+file /tmp/8480606.1.debian.q/St429827.000004 saved as .dta format
+(3,346 missing values generated)
+(94,520 real changes made)
+(150,684 real changes made)
+prcp_poly_1_MERRA2 not found
+r(111);
+
+end of do-file
+r(111);

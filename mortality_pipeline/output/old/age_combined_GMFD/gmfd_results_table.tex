@@ -1,0 +1,29 @@
+\begin{table}[htbp]\centering
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\caption{GMFD Mortality Regression Results (Specs 1–4)}
+\begin{tabular}{l*{4}{c}}
+\hline\hline
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
+                    &\multicolumn{1}{c}{deathrate\_w99}&\multicolumn{1}{c}{deathrate\_w99}&\multicolumn{1}{c}{deathrate\_w99}&\multicolumn{1}{c}{deathrate\_w99}\\
+\hline
+Constant            &       944.3\sym{***}&       965.4\sym{***}&       935.3\sym{***}&      1003.0\sym{***}\\
+                    &     (39.49)         &     (38.82)         &     (38.34)         &     (31.95)         \\
+[1em]
+tavg\_poly\_1\_GMFD    &     -0.0227         &     -0.0285\sym{**} &     -0.0186         &     -0.0326\sym{**} \\
+                    &    (0.0145)         &    (0.0141)         &    (0.0146)         &    (0.0143)         \\
+[1em]
+tavg\_poly\_2\_GMFD    &    -0.00188\sym{***}&    -0.00194\sym{***}&    -0.00189\sym{***}&    -0.00114\sym{*}  \\
+                    &  (0.000643)         &  (0.000672)         &  (0.000597)         &  (0.000658)         \\
+[1em]
+tavg\_poly\_3\_GMFD    &    0.000123\sym{***}&    0.000134\sym{***}&    0.000120\sym{***}&    0.000126\sym{***}\\
+                    & (0.0000453)         & (0.0000480)         & (0.0000439)         & (0.0000406)         \\
+[1em]
+tavg\_poly\_4\_GMFD    & -0.00000141         & -0.00000159         & -0.00000152         & -0.00000158         \\
+                    &(0.00000104)         &(0.00000108)         &(0.000000986)         &(0.00000115)         \\
+\hline
+Observations        &      406643         &      406643         &      406643         &      406643         \\
+\hline\hline
+\multicolumn{5}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{5}{l}{\footnotesize \sym{*} \(p<0.1\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+\end{table}

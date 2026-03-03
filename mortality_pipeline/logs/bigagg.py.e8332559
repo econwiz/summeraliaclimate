@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/bigagg.py", line 316, in <module>
+    main()
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/bigagg.py", line 313, in main
+    run_product(product)
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/bigagg.py", line 161, in run_product
+    gdf  = gpd.read_file(shape_path, engine="fiona").to_crs("EPSG:4326")
+                         ^^^^^^^^^^
+NameError: name 'shape_path' is not defined

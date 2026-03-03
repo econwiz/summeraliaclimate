@@ -1,0 +1,474 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: 10-user 8-core network perpetual
+Serial number: 501806318811
+  Licensed to: Columbia Business School
+               Columbia University, New York
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do 1degageinteracted.do 
+
+. /**************************************************************************
+> * age_specific_regressions_FLEXIBLE.do
+> *
+> * FLEXIBLE RESOLUTION VERSION
+> *
+> * Age-specific interacted regressions across products
+> * Carleton et al. (2022) Spec 2 by default; altspec=1 runs 1/3/4/5.
+> * 
+> * CHANGE LOG:
+> * - Added resolution parameter to control input/output directories
+> * - Reads from mortality_pipeline/output_panels/{resolution}/
+> * - Saves to mortality_pipeline/output/{resolution}/age_spec_interacted/
+> **************************************************************************/
+. 
+. clear all
+
+. set more off
+
+. 
+. * ===========================================================================
+> =
+. * CONFIG
+. * ===========================================================================
+> =
+. 
+. local resolution "1deg"  /* ← CHANGE THIS: "025deg" or "1deg" */
+
+. 
+. global CODE    "/user/ab5405/summeraliaclimate/code"
+
+. 
+. * Input/output directories include resolution
+. global PANELS  "$CODE/mortality_pipeline/output_panels/`resolution'"
+
+. global OUTPUT  "$CODE/mortality_pipeline/output/`resolution'"
+
+. 
+. * Products to process
+. local prods "GMFD ERA5 JRA_3Q MERRA2"
+
+. 
+. local altspec 0   // toggle: 0 = only spec2, 1 = run all altspecs
+
+. 
+. di ""
+
+
+. di "========================================================================"
+========================================================================
+
+. di "CONFIGURATION:"
+CONFIGURATION:
+
+. di "  Resolution: `resolution'"
+  Resolution: 1deg
+
+. di "  Products: `prods'"
+  Products: GMFD ERA5 JRA_3Q MERRA2
+
+. di "  Input dir: $PANELS"
+  Input dir: /user/ab5405/summeraliaclimate/code/mortality_pipeline/output_pane
+> ls/1deg
+
+. di "  Output dir: $OUTPUT/age_spec_interacted"
+  Output dir: /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1de
+> g/age_spec_interacted
+
+. di "  Alt specs: `altspec'"
+  Alt specs: 0
+
+. di "========================================================================"
+========================================================================
+
+. di ""
+
+
+. 
+. * ===========================================================================
+> =
+. * PRODUCT LOOP
+. * ===========================================================================
+> =
+. 
+. foreach prod of local prods {
+  2. 
+.     di ""
+  3.     di "==================================================================
+> ======"
+  4.     di ">>> PROCESSING: `prod'"
+  5.     di "==================================================================
+> ======"
+  6.     di ""
+  7. 
+.     * Map to variable stem with underscores (e.g., ERA5-025 -> ERA5_025)
+.     local prod_var : subinstr local prod "-" "_", all
+  8. 
+.     * =======================================================================
+> =
+.     * LOAD DATA
+.     * =======================================================================
+> =
+.     
+.     * Try with hyphen first, then underscore
+.     local in_hyp "$PANELS/panel_prepped_for_regressions_`prod'_aligned.dta"
+  9.     local in_und "$PANELS/panel_prepped_for_regressions_`prod_var'_aligned
+> .dta"
+ 10. 
+.     capture confirm file "`in_hyp'"
+ 11.     if _rc {
+ 12.         capture confirm file "`in_und'"
+ 13.         if _rc {
+ 14.             di as error ""
+ 15.             di as error "❌ ERROR: Could not find input panel for `prod'"
+ 16.             di as error "   Tried:"
+ 17.             di as error "     `in_hyp'"
+ 18.             di as error "     `in_und'"
+ 19.             di as error ""
+ 20.             continue
+ 21.         }
+ 22.         else {
+ 23.             di "Loading: `in_und'"
+ 24.             use "`in_und'", clear
+ 25.         }
+ 26.     }
+ 27.     else {
+ 28.         di "Loading: `in_hyp'"
+ 29.         use "`in_hyp'", clear
+ 30.     }
+ 31. 
+.     * Output directory
+.     local sterdir "$OUTPUT/age_spec_interacted"
+ 32.     capture mkdir "$OUTPUT"
+ 33.     capture mkdir "`sterdir'"
+ 34. 
+.     * =======================================================================
+> =
+.     * DATA PREP
+.     * =======================================================================
+> =
+.     
+.     * Ensure agegroup is numeric for factor notation
+.     capture confirm numeric variable agegroup
+ 35.     if _rc {
+ 36.         encode agegroup, gen(agegroup_)
+ 37.         drop agegroup
+ 38.         rename agegroup_ agegroup
+ 39.     }
+ 40. 
+.     * =======================================================================
+> =
+.     * SANITY CHECKS
+.     * =======================================================================
+> =
+.     
+.     di "Checking required variables..."
+ 41.     
+.     local required_vars ///
+>         tavg_poly_1_`prod_var' tavg_poly_2_`prod_var' ///
+>         tavg_poly_3_`prod_var' tavg_poly_4_`prod_var' ///
+>         prcp_poly_1_`prod_var' prcp_poly_2_`prod_var' ///
+>         lr_tavg_`prod_var'_adm1_avg loggdppc_adm1_avg ///
+>         deathrate_w99 adm0_code adm1_code adm2_code ///
+>         CHN_ts year
+ 42.     
+.     local all_ok = 1
+ 43.     foreach v of local required_vars {
+ 44.         capture confirm variable `v'
+ 45.         if _rc {
+ 46.             di as error "  ❌ Missing: `v'"
+ 47.             local all_ok = 0
+ 48.         }
+ 49.     }
+ 50.     
+.     if !`all_ok' {
+ 51.         di as error ""
+ 52.         di as error "Skipping `prod' due to missing variables"
+ 53.         di as error ""
+ 54.         continue
+ 55.     }
+ 56.     
+.     di "  ✅ All required variables present"
+ 57. 
+.     * =======================================================================
+> =
+.     * SPEC 2 (PREFERRED): 4th-order polynomial × AGE
+.     * =======================================================================
+> =
+.     
+.     di ""
+ 58.     di "------------------------------------------------------------------
+> --"
+ 59.     di "ESTIMATING SPEC 2 (Preferred) for `prod'"
+ 60.     di "------------------------------------------------------------------
+> --"
+ 61.     di ""
+ 62.     
+.     reghdfe deathrate_w99 ///
+>         /* Temp quartic × AGE */ ///
+>         c.tavg_poly_1_`prod_var'#i.agegroup ///
+>         c.tavg_poly_2_`prod_var'#i.agegroup ///
+>         c.tavg_poly_3_`prod_var'#i.agegroup ///
+>         c.tavg_poly_4_`prod_var'#i.agegroup ///
+>         /* Temp × income × AGE */ ///
+>         c.tavg_poly_1_`prod_var'#c.loggdppc_adm1_avg#i.agegroup ///
+>         c.tavg_poly_2_`prod_var'#c.loggdppc_adm1_avg#i.agegroup ///
+>         c.tavg_poly_3_`prod_var'#c.loggdppc_adm1_avg#i.agegroup ///
+>         c.tavg_poly_4_`prod_var'#c.loggdppc_adm1_avg#i.agegroup ///
+>         /* Temp × LR-mean × AGE */ ///
+>         c.tavg_poly_1_`prod_var'#c.lr_tavg_`prod_var'_adm1_avg#i.agegroup ///
+>         c.tavg_poly_2_`prod_var'#c.lr_tavg_`prod_var'_adm1_avg#i.agegroup ///
+>         c.tavg_poly_3_`prod_var'#c.lr_tavg_`prod_var'_adm1_avg#i.agegroup ///
+>         c.tavg_poly_4_`prod_var'#c.lr_tavg_`prod_var'_adm1_avg#i.agegroup ///
+>         , absorb( ///
+>             /* Precip controls as FE interactions (AGE×ADM0×prcp) */ ///
+>             i.adm0_code#c.prcp_poly_1_`prod_var'#i.agegroup ///
+>             i.adm0_code#c.prcp_poly_2_`prod_var'#i.agegroup ///
+>             /* AGE×ADM2 FE with China discontinuity */ ///
+>             i.adm2_code#i.CHN_ts#i.agegroup ///
+>             /* AGE×Country×Year FE */ ///
+>             i.adm0_code#i.year#i.agegroup ///
+>         ) cluster(adm1_code)
+ 63. 
+.     estimates save "`sterdir'/agespec_interaction_response_`prod_var'_noint.s
+> ter", replace
+ 64.     di ""
+ 65.     di "✅ Saved Spec 2 for `prod'"
+ 66. 
+.     * =======================================================================
+> =
+.     * ALTERNATIVE SPECS (if requested)
+.     * =======================================================================
+> =
+.     
+.     if (`altspec') {
+ 67.         
+.         di ""
+ 68.         di "--------------------------------------------------------------
+> ------"
+ 69.         di "ESTIMATING ALT SPECS for `prod'"
+ 70.         di "--------------------------------------------------------------
+> ------"
+ 71. 
+.         * -------------------------------------------------------------------
+> -
+.         * SPEC 1: Baseline FE
+.         * -------------------------------------------------------------------
+> -
+.         
+.         di ""
+ 72.         di "  Spec 1..."
+ 73.         
+.         reghdfe deathrate_w99 ///
+>             c.tavg_poly_1_`prod_var'#i.agegroup ///
+>             c.tavg_poly_2_`prod_var'#i.agegroup ///
+>             c.tavg_poly_3_`prod_var'#i.agegroup ///
+>             c.tavg_poly_4_`prod_var'#i.agegroup ///
+>             c.tavg_poly_1_`prod_var'#c.loggdppc_adm1_avg#i.agegroup ///
+>             c.tavg_poly_2_`prod_var'#c.loggdppc_adm1_avg#i.agegroup ///
+>             c.tavg_poly_3_`prod_var'#c.loggdppc_adm1_avg#i.agegroup ///
+>             c.tavg_poly_4_`prod_var'#c.loggdppc_adm1_avg#i.agegroup ///
+>             c.tavg_poly_1_`prod_var'#c.lr_tavg_`prod_var'_adm1_avg#i.agegroup
+>  ///
+>             c.tavg_poly_2_`prod_var'#c.lr_tavg_`prod_var'_adm1_avg#i.agegroup
+>  ///
+>             c.tavg_poly_3_`prod_var'#c.lr_tavg_`prod_var'_adm1_avg#i.agegroup
+>  ///
+>             c.tavg_poly_4_`prod_var'#c.lr_tavg_`prod_var'_adm1_avg#i.agegroup
+>  ///
+>             , absorb( ///
+>                 i.adm0_code#c.prcp_poly_1_`prod_var'#i.agegroup ///
+>                 i.adm0_code#c.prcp_poly_2_`prod_var'#i.agegroup ///
+>                 i.adm2_code#i.CHN_ts#i.agegroup ///
+>                 i.adm0_code#i.year ///
+>             ) cluster(adm1_code)
+ 74.         estimates save "`sterdir'/agespec_response_spec1_interacted_`prod_
+> var'.ster", replace
+ 75.         di "  ✅ Saved Spec 1"
+ 76. 
+.         * -------------------------------------------------------------------
+> -
+.         * SPEC 3: + ADM1×Age time trends
+.         * -------------------------------------------------------------------
+> -
+.         
+.         di ""
+ 77.         di "  Spec 3..."
+ 78.         
+.         reghdfe deathrate_w99 ///
+>             c.tavg_poly_1_`prod_var'#i.agegroup ///
+>             c.tavg_poly_2_`prod_var'#i.agegroup ///
+>             c.tavg_poly_3_`prod_var'#i.agegroup ///
+>             c.tavg_poly_4_`prod_var'#i.agegroup ///
+>             c.tavg_poly_1_`prod_var'#c.loggdppc_adm1_avg#i.agegroup ///
+>             c.tavg_poly_2_`prod_var'#c.loggdppc_adm1_avg#i.agegroup ///
+>             c.tavg_poly_3_`prod_var'#c.loggdppc_adm1_avg#i.agegroup ///
+>             c.tavg_poly_4_`prod_var'#c.loggdppc_adm1_avg#i.agegroup ///
+>             c.tavg_poly_1_`prod_var'#c.lr_tavg_`prod_var'_adm1_avg#i.agegroup
+>  ///
+>             c.tavg_poly_2_`prod_var'#c.lr_tavg_`prod_var'_adm1_avg#i.agegroup
+>  ///
+>             c.tavg_poly_3_`prod_var'#c.lr_tavg_`prod_var'_adm1_avg#i.agegroup
+>  ///
+>             c.tavg_poly_4_`prod_var'#c.lr_tavg_`prod_var'_adm1_avg#i.agegroup
+>  ///
+>             , absorb( ///
+>                 i.adm0_code#c.prcp_poly_1_`prod_var'#i.agegroup ///
+>                 i.adm0_code#c.prcp_poly_2_`prod_var'#i.agegroup ///
+>                 i.adm2_code#i.CHN_ts#i.agegroup ///
+>                 i.adm0_code#i.year#i.agegroup ///
+>                 adm1_agegrp_code##c.year ///
+>             ) cluster(adm1_code)
+ 79.         estimates save "`sterdir'/agespec_response_spec3_interacted_`prod_
+> var'.ster", replace
+ 80.         di "  ✅ Saved Spec 3"
+ 81. 
+.         * -------------------------------------------------------------------
+> -
+.         * SPEC 4: FGLS precision weights
+.         * -------------------------------------------------------------------
+> -
+.         
+.         di ""
+ 82.         di "  Spec 4 (FGLS)..."
+ 83.         
+.         preserve
+ 84.             reghdfe deathrate_w99 ///
+>                 c.tavg_poly_1_`prod_var'#i.agegroup ///
+>                 c.tavg_poly_2_`prod_var'#i.agegroup ///
+>                 c.tavg_poly_3_`prod_var'#i.agegroup ///
+>                 c.tavg_poly_4_`prod_var'#i.agegroup ///
+>                 c.tavg_poly_1_`prod_var'#c.loggdppc_adm1_avg#i.agegroup ///
+>                 c.tavg_poly_2_`prod_var'#c.loggdppc_adm1_avg#i.agegroup ///
+>                 c.tavg_poly_3_`prod_var'#c.loggdppc_adm1_avg#i.agegroup ///
+>                 c.tavg_poly_4_`prod_var'#c.loggdppc_adm1_avg#i.agegroup ///
+>                 c.tavg_poly_1_`prod_var'#c.lr_tavg_`prod_var'_adm1_avg#i.ageg
+> roup ///
+>                 c.tavg_poly_2_`prod_var'#c.lr_tavg_`prod_var'_adm1_avg#i.ageg
+> roup ///
+>                 c.tavg_poly_3_`prod_var'#c.lr_tavg_`prod_var'_adm1_avg#i.ageg
+> roup ///
+>                 c.tavg_poly_4_`prod_var'#c.lr_tavg_`prod_var'_adm1_avg#i.ageg
+> roup ///
+>                 , absorb( ///
+>                     i.adm0_code#c.prcp_poly_1_`prod_var'#i.agegroup ///
+>                     i.adm0_code#c.prcp_poly_2_`prod_var'#i.agegroup ///
+>                     i.adm2_code#i.CHN_ts#i.agegroup ///
+>                     i.adm0_code#i.year#i.agegroup ///
+>                 ) cluster(adm1_code) residual(e_hat)
+ 85. 
+.             bysort adm1_code: egen omega = sd(e_hat) if e_hat!=.
+ 86.             gen precisionweight = 1/(omega*omega)
+ 87.             sort iso adm1_id adm2_id agegroup year
+ 88. 
+.             reghdfe deathrate_w99 ///
+>                 c.tavg_poly_1_`prod_var'#i.agegroup ///
+>                 c.tavg_poly_2_`prod_var'#i.agegroup ///
+>                 c.tavg_poly_3_`prod_var'#i.agegroup ///
+>                 c.tavg_poly_4_`prod_var'#i.agegroup ///
+>                 c.tavg_poly_1_`prod_var'#c.loggdppc_adm1_avg#i.agegroup ///
+>                 c.tavg_poly_2_`prod_var'#c.loggdppc_adm1_avg#i.agegroup ///
+>                 c.tavg_poly_3_`prod_var'#c.loggdppc_adm1_avg#i.agegroup ///
+>                 c.tavg_poly_4_`prod_var'#c.loggdppc_adm1_avg#i.agegroup ///
+>                 c.tavg_poly_1_`prod_var'#c.lr_tavg_`prod_var'_adm1_avg#i.ageg
+> roup ///
+>                 c.tavg_poly_2_`prod_var'#c.lr_tavg_`prod_var'_adm1_avg#i.ageg
+> roup ///
+>                 c.tavg_poly_3_`prod_var'#c.lr_tavg_`prod_var'_adm1_avg#i.ageg
+> roup ///
+>                 c.tavg_poly_4_`prod_var'#c.lr_tavg_`prod_var'_adm1_avg#i.ageg
+> roup ///
+>                 [pw = precisionweight], ///
+>                 absorb( ///
+>                     i.adm0_code#c.prcp_poly_1_`prod_var'#i.agegroup ///
+>                     i.adm0_code#c.prcp_poly_2_`prod_var'#i.agegroup ///
+>                     i.adm2_code#i.CHN_ts#i.agegroup ///
+>                     i.adm0_code#i.year#i.agegroup ///
+>                 ) cluster(adm1_code) tol(1e-7) maxiter(10000)
+ 89.             estimates save "`sterdir'/agespec_response_spec4_interacted_`p
+> rod_var'.ster", replace
+ 90.         restore
+ 91.         di "  ✅ Saved Spec 4"
+ 92. 
+.         * -------------------------------------------------------------------
+> -
+.         * SPEC 5: 13-month exposure (if available)
+.         * -------------------------------------------------------------------
+> -
+.         
+.         capture confirm variable tavg_poly_1_`prod_var'_13m
+ 93.         if !_rc {
+ 94.             di ""
+ 95.             di "  Spec 5 (13-month)..."
+ 96.             
+.             reghdfe deathrate_w99 ///
+>                 c.tavg_poly_1_`prod_var'_13m#i.agegroup ///
+>                 c.tavg_poly_2_`prod_var'_13m#i.agegroup ///
+>                 c.tavg_poly_3_`prod_var'_13m#i.agegroup ///
+>                 c.tavg_poly_4_`prod_var'_13m#i.agegroup ///
+>                 c.tavg_poly_1_`prod_var'_13m#c.loggdppc_adm1_avg#i.agegroup /
+> //
+>                 c.tavg_poly_2_`prod_var'_13m#c.loggdppc_adm1_avg#i.agegroup /
+> //
+>                 c.tavg_poly_3_`prod_var'_13m#c.loggdppc_adm1_avg#i.agegroup /
+> //
+>                 c.tavg_poly_4_`prod_var'_13m#c.loggdppc_adm1_avg#i.agegroup /
+> //
+>                 c.tavg_poly_1_`prod_var'_13m#c.lr_tavg_`prod_var'_adm1_avg#i.
+> agegroup ///
+>                 c.tavg_poly_2_`prod_var'_13m#c.lr_tavg_`prod_var'_adm1_avg#i.
+> agegroup ///
+>                 c.tavg_poly_3_`prod_var'_13m#c.lr_tavg_`prod_var'_adm1_avg#i.
+> agegroup ///
+>                 c.tavg_poly_4_`prod_var'_13m#c.lr_tavg_`prod_var'_adm1_avg#i.
+> agegroup ///
+>                 , absorb( ///
+>                     i.adm0_code#c.prcp_poly_1_`prod_var'#i.agegroup ///
+>                     i.adm0_code#c.prcp_poly_2_`prod_var'#i.agegroup ///
+>                     i.adm2_code#i.CHN_ts#i.agegroup ///
+>                     i.adm0_code#i.year#i.agegroup ///
+>                 ) cluster(adm1_code)
+ 97.             estimates save "`sterdir'/agespec_response_spec5_interacted_`p
+> rod_var'.ster", replace
+ 98.             di "  ✅ Saved Spec 5"
+ 99.         }
+100.     }
+101. 
+.     di ""
+102.     di "==================================================================
+> ======"
+103.     di "✅ FINISHED: `prod' (`prod_var')"
+104.     di "==================================================================
+> ======"
+105.     di ""
+106. }
+
+========================================================================
+>>> PROCESSING: GMFD
+========================================================================
+
+Loading: /user/ab5405/summeraliaclimate/code/mortality_pipeline/output_panels/1
+> deg/panel_prepped_for_regressions_GMFD_aligned.dta
+Checking required variables...
+  ✅ All required variables present
+
+--------------------------------------------------------------------
+ESTIMATING SPEC 2 (Preferred) for GMFD
+--------------------------------------------------------------------
+

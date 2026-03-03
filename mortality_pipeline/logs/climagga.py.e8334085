@@ -1,0 +1,10 @@
+ERROR 1: PROJ: proj_create_from_database: Open of /user/ab5405/.conda/envs/hle_iv/share/proj failed
+/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/climagga.py:61: UserWarning: The specified chunks separate the stored chunks along dimension "time" starting at index 20. This could degrade performance. Instead, consider rechunking after loading.
+  return xr.open_zarr(path, consolidated=False) if path.endswith(".zarr") else xr.open_dataset(path, chunks={"lat":-1,"lon":-1,"time":20})
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/climagga.py", line 194, in <module>
+    sample = sample.to_dataset(name="tas") if "tas" in sample else sample
+             ^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/common.py", line 306, in __getattr__
+    raise AttributeError(
+AttributeError: 'Dataset' object has no attribute 'to_dataset'

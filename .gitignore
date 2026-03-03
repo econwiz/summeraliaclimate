@@ -1,0 +1,11 @@
+*.dta
+*.ster
+*.csv
+*.csvv
+obs_csvs/
+output_panels/
+prep_panels/
+__pycache__/
+*.pyc
+*.nc
+*.parquet

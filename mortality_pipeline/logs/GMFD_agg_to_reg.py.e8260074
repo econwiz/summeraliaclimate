@@ -1,0 +1,32 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/logs/../code/GMFD_agg_to_reg.py", line 51, in <module>
+    wm     = xa.pixel_overlaps(sample, gdf)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xagg/wrappers.py", line 100, in pixel_overlaps
+    wm_out = get_pixel_overlaps(gdf_in,pix_agg,impl=impl)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xagg/core.py", line 495, in get_pixel_overlaps
+    overlaps = gpd.overlay(gdf_in.to_crs(epsg_set),
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/geopandas/tools/overlay.py", line 339, in overlay
+    df2 = _make_valid(df2)
+          ^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/geopandas/tools/overlay.py", line 318, in _make_valid
+    df.loc[mask, col] = df.loc[mask, col].make_valid()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/geopandas/base.py", line 2181, in make_valid
+    return _delegate_geo_method(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/geopandas/base.py", line 129, in _delegate_geo_method
+    data = getattr(a_this, op)(**kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/geopandas/array.py", line 729, in make_valid
+    return GeometryArray(shapely.make_valid(self._data, **kwargs), crs=self.crs)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/shapely/decorators.py", line 88, in wrapped
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/shapely/constructive.py", line 752, in make_valid
+    return lib.make_valid(geometry, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+shapely.errors.GEOSException: IllegalArgumentException: CGAlgorithmsDD::orientationIndex encountered NaN/Inf numbers

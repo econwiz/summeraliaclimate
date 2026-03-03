@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/logs/../code/JRA-3Q_agg_to_reg.py", line 60, in <module>
+    with xa.set_options(impl="dask", dask_gufunc_kwargs={"allow_rechunk": True},
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xagg/options.py", line 83, in __init__
+    raise ValueError(
+ValueError: option 'impl' given an invalid value: 'dask'. Expected one of frozenset({'dot_product', 'numba', 'for_loop'})

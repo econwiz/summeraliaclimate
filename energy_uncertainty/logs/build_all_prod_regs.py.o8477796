@@ -1,0 +1,182 @@
+[INFO] Reading /user/ab5405/summeraliaclimate/code/energy_uncertainty/car_paths.csv
+
+[INFO] Processing product: ERA5-025 (suffix=ERA5)
+[INFO] ERA5-025 Loading WORLD shapefile
+[INFO] ERA5-025 Loading DAILY temperature
+[INFO] ERA5-025 Loading MONTHLY precipitation
+[INFO] ERA5-025 Years in temperature: 1981–2010
+[INFO] ERA5-025 Years in precipitation: 1981–2010
+[INFO] ERA5-025 Using overlapping years: 1981–2010
+[INFO] ERA5-025 Computing daily transforms (temperature)
+[INFO] ERA5-025 Loading and reprojecting GPW population
+[INFO] ERA5-025 Building WORLD × grid weightmap
+[INFO] ERA5-025 Aggregating GPW to country populations
+[INFO] ERA5-025 Computing pixel-level TINV for HDD/CDD
+[INFO] ERA5-025 Aggregating 1981
+[INFO] ERA5-025 Aggregating 1982
+[INFO] ERA5-025 Aggregating 1983
+[INFO] ERA5-025 Aggregating 1984
+[INFO] ERA5-025 Aggregating 1985
+[INFO] ERA5-025 Aggregating 1986
+[INFO] ERA5-025 Aggregating 1987
+[INFO] ERA5-025 Aggregating 1988
+[INFO] ERA5-025 Aggregating 1989
+[INFO] ERA5-025 Aggregating 1990
+[INFO] ERA5-025 Aggregating 1991
+[INFO] ERA5-025 Aggregating 1992
+[INFO] ERA5-025 Aggregating 1993
+[INFO] ERA5-025 Aggregating 1994
+[INFO] ERA5-025 Aggregating 1995
+[INFO] ERA5-025 Aggregating 1996
+[INFO] ERA5-025 Aggregating 1997
+[INFO] ERA5-025 Aggregating 1998
+[INFO] ERA5-025 Aggregating 1999
+[INFO] ERA5-025 Aggregating 2000
+[INFO] ERA5-025 Aggregating 2001
+[INFO] ERA5-025 Aggregating 2002
+[INFO] ERA5-025 Aggregating 2003
+[INFO] ERA5-025 Aggregating 2004
+[INFO] ERA5-025 Aggregating 2005
+[INFO] ERA5-025 Aggregating 2006
+[INFO] ERA5-025 Aggregating 2007
+[INFO] ERA5-025 Aggregating 2008
+[INFO] ERA5-025 Aggregating 2009
+[INFO] ERA5-025 Aggregating 2010
+[INFO] ERA5-025 Writing /user/ab5405/summeraliaclimate/code/energy_uncertainty/data/country_climate/ERA5/ERA5_country_year_1971_2010.csv
+[DONE] ERA5-025
+
+[INFO] Processing product: GMFD (suffix=GMFD)
+[INFO] GMFD Loading WORLD shapefile
+[INFO] GMFD Loading DAILY temperature
+[INFO] GMFD Loading MONTHLY precipitation
+[INFO] GMFD Years in temperature: 1981–2010
+[INFO] GMFD Years in precipitation: 1981–2010
+[INFO] GMFD Using overlapping years: 1981–2010
+[INFO] GMFD Computing daily transforms (temperature)
+[INFO] GMFD Loading and reprojecting GPW population
+[INFO] GMFD Building WORLD × grid weightmap
+[INFO] GMFD Aggregating GPW to country populations
+[INFO] GMFD Computing pixel-level TINV for HDD/CDD
+[INFO] GMFD Aggregating 1981
+[INFO] GMFD Aggregating 1982
+[INFO] GMFD Aggregating 1983
+[INFO] GMFD Aggregating 1984
+[INFO] GMFD Aggregating 1985
+[INFO] GMFD Aggregating 1986
+[INFO] GMFD Aggregating 1987
+[INFO] GMFD Aggregating 1988
+[INFO] GMFD Aggregating 1989
+[INFO] GMFD Aggregating 1990
+[INFO] GMFD Aggregating 1991
+[INFO] GMFD Aggregating 1992
+[INFO] GMFD Aggregating 1993
+[INFO] GMFD Aggregating 1994
+[INFO] GMFD Aggregating 1995
+[INFO] GMFD Aggregating 1996
+[INFO] GMFD Aggregating 1997
+[INFO] GMFD Aggregating 1998
+[INFO] GMFD Aggregating 1999
+[INFO] GMFD Aggregating 2000
+[INFO] GMFD Aggregating 2001
+[INFO] GMFD Aggregating 2002
+[INFO] GMFD Aggregating 2003
+[INFO] GMFD Aggregating 2004
+[INFO] GMFD Aggregating 2005
+[INFO] GMFD Aggregating 2006
+[INFO] GMFD Aggregating 2007
+[INFO] GMFD Aggregating 2008
+[INFO] GMFD Aggregating 2009
+[INFO] GMFD Aggregating 2010
+[INFO] GMFD Writing /user/ab5405/summeraliaclimate/code/energy_uncertainty/data/country_climate/GMFD/GMFD_country_year_1971_2010.csv
+[DONE] GMFD
+
+[INFO] Processing product: JRA-3Q (suffix=JRA_3Q)
+[INFO] JRA-3Q Loading WORLD shapefile
+[INFO] JRA-3Q Loading DAILY temperature
+[INFO] JRA-3Q Loading MONTHLY precipitation
+[INFO] JRA-3Q Years in temperature: 1981–2010
+[INFO] JRA-3Q Years in precipitation: 1981–2010
+[INFO] JRA-3Q Using overlapping years: 1981–2010
+[INFO] JRA-3Q Computing daily transforms (temperature)
+[INFO] JRA-3Q Loading and reprojecting GPW population
+[INFO] JRA-3Q Building WORLD × grid weightmap
+[INFO] JRA-3Q Aggregating GPW to country populations
+[INFO] JRA-3Q Computing pixel-level TINV for HDD/CDD
+[INFO] JRA-3Q Aggregating 1981
+[INFO] JRA-3Q Aggregating 1982
+[INFO] JRA-3Q Aggregating 1983
+[INFO] JRA-3Q Aggregating 1984
+[INFO] JRA-3Q Aggregating 1985
+[INFO] JRA-3Q Aggregating 1986
+[INFO] JRA-3Q Aggregating 1987
+[INFO] JRA-3Q Aggregating 1988
+[INFO] JRA-3Q Aggregating 1989
+[INFO] JRA-3Q Aggregating 1990
+[INFO] JRA-3Q Aggregating 1991
+[INFO] JRA-3Q Aggregating 1992
+[INFO] JRA-3Q Aggregating 1993
+[INFO] JRA-3Q Aggregating 1994
+[INFO] JRA-3Q Aggregating 1995
+[INFO] JRA-3Q Aggregating 1996
+[INFO] JRA-3Q Aggregating 1997
+[INFO] JRA-3Q Aggregating 1998
+[INFO] JRA-3Q Aggregating 1999
+[INFO] JRA-3Q Aggregating 2000
+[INFO] JRA-3Q Aggregating 2001
+[INFO] JRA-3Q Aggregating 2002
+[INFO] JRA-3Q Aggregating 2003
+[INFO] JRA-3Q Aggregating 2004
+[INFO] JRA-3Q Aggregating 2005
+[INFO] JRA-3Q Aggregating 2006
+[INFO] JRA-3Q Aggregating 2007
+[INFO] JRA-3Q Aggregating 2008
+[INFO] JRA-3Q Aggregating 2009
+[INFO] JRA-3Q Aggregating 2010
+[INFO] JRA-3Q Writing /user/ab5405/summeraliaclimate/code/energy_uncertainty/data/country_climate/JRA_3Q/JRA_3Q_country_year_1971_2010.csv
+[DONE] JRA-3Q
+
+[INFO] Processing product: MERRA2 (suffix=MERRA2)
+[INFO] MERRA2 Loading WORLD shapefile
+[INFO] MERRA2 Loading DAILY temperature
+[INFO] MERRA2 Loading MONTHLY precipitation
+[INFO] MERRA2 Years in temperature: 1980–2010
+[INFO] MERRA2 Years in precipitation: 1980–2010
+[INFO] MERRA2 Using overlapping years: 1980–2010
+[INFO] MERRA2 Computing daily transforms (temperature)
+[INFO] MERRA2 Loading and reprojecting GPW population
+[INFO] MERRA2 Building WORLD × grid weightmap
+[INFO] MERRA2 Aggregating GPW to country populations
+[INFO] MERRA2 Computing pixel-level TINV for HDD/CDD
+[INFO] MERRA2 Aggregating 1980
+[INFO] MERRA2 Aggregating 1981
+[INFO] MERRA2 Aggregating 1982
+[INFO] MERRA2 Aggregating 1983
+[INFO] MERRA2 Aggregating 1984
+[INFO] MERRA2 Aggregating 1985
+[INFO] MERRA2 Aggregating 1986
+[INFO] MERRA2 Aggregating 1987
+[INFO] MERRA2 Aggregating 1988
+[INFO] MERRA2 Aggregating 1989
+[INFO] MERRA2 Aggregating 1990
+[INFO] MERRA2 Aggregating 1991
+[INFO] MERRA2 Aggregating 1992
+[INFO] MERRA2 Aggregating 1993
+[INFO] MERRA2 Aggregating 1994
+[INFO] MERRA2 Aggregating 1995
+[INFO] MERRA2 Aggregating 1996
+[INFO] MERRA2 Aggregating 1997
+[INFO] MERRA2 Aggregating 1998
+[INFO] MERRA2 Aggregating 1999
+[INFO] MERRA2 Aggregating 2000
+[INFO] MERRA2 Aggregating 2001
+[INFO] MERRA2 Aggregating 2002
+[INFO] MERRA2 Aggregating 2003
+[INFO] MERRA2 Aggregating 2004
+[INFO] MERRA2 Aggregating 2005
+[INFO] MERRA2 Aggregating 2006
+[INFO] MERRA2 Aggregating 2007
+[INFO] MERRA2 Aggregating 2008
+[INFO] MERRA2 Aggregating 2009
+[INFO] MERRA2 Aggregating 2010
+[INFO] MERRA2 Writing /user/ab5405/summeraliaclimate/code/energy_uncertainty/data/country_climate/MERRA2/MERRA2_country_year_1971_2010.csv
+[DONE] MERRA2

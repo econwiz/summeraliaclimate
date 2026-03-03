@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/logs/../code/debug_overlaps.py", line 18, in <module>
+    gdf = gpd.read_file(shape_path)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.local/lib/python3.11/site-packages/geopandas/io/file.py", line 290, in _read_file
+    engine = _check_engine(engine, "'read_file' function")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.local/lib/python3.11/site-packages/geopandas/io/file.py", line 146, in _check_engine
+    raise ImportError(
+ImportError: The 'read_file' function requires the 'pyogrio' or 'fiona' package, but neither is installed or imports correctly.
+Importing pyogrio resulted in: libgdal-737b01ed.so.36.3.10.3: failed to map segment from shared object
+Importing fiona resulted in: No module named 'fiona'

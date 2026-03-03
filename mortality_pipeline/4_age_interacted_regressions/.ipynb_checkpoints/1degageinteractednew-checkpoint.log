@@ -1,0 +1,706 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: 10-user 8-core network perpetual
+Serial number: 501806318811
+  Licensed to: Columbia Business School
+               Columbia University, New York
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do 1degageinteractednew.do 
+
+. /**************************************************************************
+> * Age-specific × Product interacted regressions (ALL products pooled)
+> * - Spec 2: Temp quartic and interactions vary by AGE, with PRODUCT deltas
+> * - Includes Temp×(Income, LR) heterogeneity by AGE, with PRODUCT deltas
+> * - Precip controls as country×age FE-slopes, by PRODUCT
+> * - All key FE are PRODUCT-specific to prevent level mixing
+> * - Resolution: 1deg (all paths hardcoded for 1deg)
+> **************************************************************************/
+. 
+. clear all
+
+. set more off
+
+. 
+. * --- CONFIG -------------------------------------------------------------
+. global CODE    "/user/ab5405/summeraliaclimate/code"
+
+. 
+. local resolution "1deg"
+
+. 
+. global PANELS  "$CODE/mortality_pipeline/output_panels/`resolution'"
+
+. global OUTPUT  "$CODE/mortality_pipeline/output/`resolution'"
+
+. 
+. * Create output directory chain (one level at a time)
+. cap mkdir "$CODE/mortality_pipeline"
+
+. cap mkdir "$CODE/mortality_pipeline/output"
+
+. cap mkdir "$CODE/mortality_pipeline/output/`resolution'"
+
+. 
+. local inpanel "$PANELS/panel_prepped_for_regressions_ALLREA_aligned.dta"
+
+. local outdir  "$OUTPUT/age_spec_ALLREA"
+
+. cap mkdir "`outdir'"
+
+. 
+. local altspec 0   // 0 = only Spec 2; 1 = also run 1/3/4/5
+
+. 
+. * --- Load pooled (stacked) panel ---------------------------------------
+. di as txt "Loading ALLREA stacked panel → `inpanel'"
+Loading ALLREA stacked panel → /user/ab5405/summeraliaclimate/code/mortality_pi
+> peline/output_panels/1deg/panel_prepped_for_regressions_ALLREA_aligned.dta
+
+. use "`inpanel'", clear
+
+. 
+. * --- Ensure factors exist in the right type ----------------------------
+. capture confirm numeric variable agegroup
+
+. if _rc {
+.     encode agegroup, gen(agegroup_)
+.     drop agegroup
+.     rename agegroup_ agegroup
+. }
+
+. 
+. capture confirm numeric variable product
+
+. if _rc {
+.     encode proj_base, gen(product)
+. }
+
+. 
+. * Rebuild FE IDs if missing (defensive)
+. capture confirm variable adm0_agegrp_code
+
+. if _rc {
+.     egen adm0_agegrp_code = group(adm0_code agegroup)
+. }
+
+. capture confirm variable adm1_agegrp_code
+
+. if _rc {
+.     egen adm1_agegrp_code = group(adm1_code agegroup)
+. }
+
+. 
+. * Ensure geographic IDs are numeric (required for absorb)
+. capture confirm numeric variable adm2_code
+
+. if _rc {
+.     encode adm2_code, gen(adm2_code_n)
+.     drop adm2_code
+.     rename adm2_code_n adm2_code
+. }
+
+. 
+. capture confirm numeric variable adm1_code
+
+. if _rc {
+.     encode adm1_code, gen(adm1_code_n)
+.     drop adm1_code
+.     rename adm1_code_n adm1_code
+. }
+
+. 
+. capture confirm numeric variable adm0_code
+
+. if _rc {
+.     encode adm0_code, gen(adm0_code_n)
+.     drop adm0_code
+.     rename adm0_code_n adm0_code
+. }
+
+. 
+. * --- Population weights: normalize within PRODUCT x YEAR ---------------
+. bysort product year: egen double tot_pop = total(population)
+
+. gen double weight = population / tot_pop
+
+. 
+. * =============================== SPEC 2 (Preferred) ==================== *
+. reghdfe deathrate_w99                                                        
+>   ///
+>     /* Base AGE x Temp quartic (anchors slopes) */                           
+>    ///
+>     c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#i.agegroup           
+>    ///
+>     /* PRODUCT deltas for AGE x Temp */                                      
+>    ///
+>     c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#i.agegroup#i.product 
+>    ///
+>     /* Base AGE x Temp x log income */                                       
+>    ///
+>     c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#c.loggdppc_adm1_avg#i
+> .agegroup ///
+>     /* PRODUCT deltas for AGE x Temp x log income */                         
+>    ///
+>     c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#c.loggdppc_adm1_avg#i
+> .agegroup#i.product ///
+>     /* Base AGE x Temp x LR */                                               
+>    ///
+>     c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#c.lr_tavg_adm1_avg#i.
+> agegroup  ///
+>     /* PRODUCT deltas for AGE x Temp x LR */                                 
+>    ///
+>     c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#c.lr_tavg_adm1_avg#i.
+> agegroup#i.product   ///
+>     [pw = weight],                                                           
+>    ///
+>     absorb(                                                                  
+>    ///
+>         adm0_agegrp_code#i.product##c.prcp_poly_1                            
+>    ///
+>         adm0_agegrp_code#i.product##c.prcp_poly_2                            
+>    ///
+>         i.adm2_code#i.CHN_ts#i.agegroup#i.product                            
+>    ///
+>         i.adm0_code#i.year#i.agegroup#i.product                              
+>    ///
+>     ) cluster(adm1_code) residual(e_hat)
+(MWFE estimator converged in 30 iterations)
+note: 1b.agegroup#1.product#c.tavg_poly_1 omitted because of collinearity
+note: 2.agegroup#1.product#c.tavg_poly_1 omitted because of collinearity
+note: 3.agegroup#1.product#c.tavg_poly_1 omitted because of collinearity
+note: 4.agegroup#1.product#c.tavg_poly_1 omitted because of collinearity
+note: 1b.agegroup#1.product#c.tavg_poly_2 omitted because of collinearity
+note: 2.agegroup#1.product#c.tavg_poly_2 omitted because of collinearity
+note: 3.agegroup#1.product#c.tavg_poly_2 omitted because of collinearity
+note: 4.agegroup#1.product#c.tavg_poly_2 omitted because of collinearity
+note: 1b.agegroup#1.product#c.tavg_poly_3 omitted because of collinearity
+note: 2.agegroup#1.product#c.tavg_poly_3 omitted because of collinearity
+note: 3.agegroup#1.product#c.tavg_poly_3 omitted because of collinearity
+note: 4.agegroup#1.product#c.tavg_poly_3 omitted because of collinearity
+note: 1b.agegroup#1.product#c.tavg_poly_4 omitted because of collinearity
+note: 2.agegroup#1.product#c.tavg_poly_4 omitted because of collinearity
+note: 3.agegroup#1.product#c.tavg_poly_4 omitted because of collinearity
+note: 4.agegroup#1.product#c.tavg_poly_4 omitted because of collinearity
+note: 1b.agegroup#1.product#c.tavg_poly_1#c.loggdppc_adm1_avg omitted because o
+> f collinearity
+note: 2.agegroup#1.product#c.tavg_poly_1#c.loggdppc_adm1_avg omitted because of
+>  collinearity
+note: 3.agegroup#1.product#c.tavg_poly_1#c.loggdppc_adm1_avg omitted because of
+>  collinearity
+note: 4.agegroup#1.product#c.tavg_poly_1#c.loggdppc_adm1_avg omitted because of
+>  collinearity
+note: 1b.agegroup#1.product#c.tavg_poly_2#c.loggdppc_adm1_avg omitted because o
+> f collinearity
+note: 2.agegroup#1.product#c.tavg_poly_2#c.loggdppc_adm1_avg omitted because of
+>  collinearity
+note: 3.agegroup#1.product#c.tavg_poly_2#c.loggdppc_adm1_avg omitted because of
+>  collinearity
+note: 4.agegroup#1.product#c.tavg_poly_2#c.loggdppc_adm1_avg omitted because of
+>  collinearity
+note: 1b.agegroup#1.product#c.tavg_poly_3#c.loggdppc_adm1_avg omitted because o
+> f collinearity
+note: 2.agegroup#1.product#c.tavg_poly_3#c.loggdppc_adm1_avg omitted because of
+>  collinearity
+note: 3.agegroup#1.product#c.tavg_poly_3#c.loggdppc_adm1_avg omitted because of
+>  collinearity
+note: 4.agegroup#1.product#c.tavg_poly_3#c.loggdppc_adm1_avg omitted because of
+>  collinearity
+note: 1b.agegroup#1.product#c.tavg_poly_4#c.loggdppc_adm1_avg omitted because o
+> f collinearity
+note: 2.agegroup#1.product#c.tavg_poly_4#c.loggdppc_adm1_avg omitted because of
+>  collinearity
+note: 3.agegroup#1.product#c.tavg_poly_4#c.loggdppc_adm1_avg omitted because of
+>  collinearity
+note: 4.agegroup#1.product#c.tavg_poly_4#c.loggdppc_adm1_avg omitted because of
+>  collinearity
+note: 1b.agegroup#1.product#c.tavg_poly_1#c.lr_tavg_adm1_avg omitted because of
+>  collinearity
+note: 2.agegroup#1.product#c.tavg_poly_1#c.lr_tavg_adm1_avg omitted because of 
+> collinearity
+note: 3.agegroup#1.product#c.tavg_poly_1#c.lr_tavg_adm1_avg omitted because of 
+> collinearity
+note: 4.agegroup#1.product#c.tavg_poly_1#c.lr_tavg_adm1_avg omitted because of 
+> collinearity
+note: 1b.agegroup#1.product#c.tavg_poly_2#c.lr_tavg_adm1_avg omitted because of
+>  collinearity
+note: 2.agegroup#1.product#c.tavg_poly_2#c.lr_tavg_adm1_avg omitted because of 
+> collinearity
+note: 3.agegroup#1.product#c.tavg_poly_2#c.lr_tavg_adm1_avg omitted because of 
+> collinearity
+note: 4.agegroup#1.product#c.tavg_poly_2#c.lr_tavg_adm1_avg omitted because of 
+> collinearity
+note: 1b.agegroup#1.product#c.tavg_poly_3#c.lr_tavg_adm1_avg omitted because of
+>  collinearity
+note: 2.agegroup#1.product#c.tavg_poly_3#c.lr_tavg_adm1_avg omitted because of 
+> collinearity
+note: 3.agegroup#1.product#c.tavg_poly_3#c.lr_tavg_adm1_avg omitted because of 
+> collinearity
+note: 4.agegroup#1.product#c.tavg_poly_3#c.lr_tavg_adm1_avg omitted because of 
+> collinearity
+note: 1b.agegroup#1.product#c.tavg_poly_4#c.lr_tavg_adm1_avg omitted because of
+>  collinearity
+note: 2.agegroup#1.product#c.tavg_poly_4#c.lr_tavg_adm1_avg omitted because of 
+> collinearity
+note: 3.agegroup#1.product#c.tavg_poly_4#c.lr_tavg_adm1_avg omitted because of 
+> collinearity
+note: 4.agegroup#1.product#c.tavg_poly_4#c.lr_tavg_adm1_avg omitted because of 
+> collinearity
+
+HDFE Linear regression                            Number of obs   =    553,487
+Absorbing 4 HDFE groups                           F(  48,    223) =       5.38
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.8828
+                                                  Adj R-squared   =     0.8749
+                                                  Within R-sq.    =     0.0012
+Number of clusters (adm1_code) =        224       Root MSE        =   250.2263
+
+                            (Std. err. adjusted for 224 clusters in adm1_code)
+------------------------------------------------------------------------------
+             |               Robust
+deathrate~99 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    agegroup#|
+          c. |
+ tavg_poly_1 |
+        0-4  |  -.2338173   .1289789    -1.81   0.071    -.4879908    .0203562
+       5-64  |  -.0886335   .1076734    -0.82   0.411     -.300821     .123554
+        65+  |   .6839914   .7374569     0.93   0.355    -.7692846    2.137267
+      total  |   -.893566   .7181249    -1.24   0.215    -2.308745    .5216134
+             |
+    agegroup#|
+          c. |
+ tavg_poly_2 |
+        0-4  |  -.0430146   .0177258    -2.43   0.016    -.0779461   -.0080831
+       5-64  |   .0073682   .0124896     0.59   0.556    -.0172445    .0319809
+        65+  |  -.2947826   .1008512    -2.92   0.004    -.4935258   -.0960393
+      total  |   .0156635   .0679786     0.23   0.818    -.1182991     .149626
+             |
+    agegroup#|
+          c. |
+ tavg_poly_3 |
+        0-4  |   .0003079   .0012502     0.25   0.806    -.0021558    .0027717
+       5-64  |  -.0006396   .0006212    -1.03   0.304    -.0018638    .0005846
+        65+  |  -.0107563   .0052604    -2.04   0.042    -.0211228   -.0003898
+      total  |   .0015543   .0067843     0.23   0.819    -.0118152    .0149237
+             |
+    agegroup#|
+          c. |
+ tavg_poly_4 |
+        0-4  |   .0000317   .0000283     1.12   0.264     -.000024    .0000875
+       5-64  |   .0000137   .0000114     1.20   0.233    -8.85e-06    .0000362
+        65+  |   .0005792   .0001222     4.74   0.000     .0003383    .0008201
+      total  |  -.0000423   .0001473    -0.29   0.774    -.0003325    .0002479
+             |
+    agegroup#|
+     product#|
+          c. |
+ tavg_poly_1 |
+   0-4#GMFD  |          0  (omitted)
+  5-64#GMFD  |          0  (omitted)
+   65+#GMFD  |          0  (omitted)
+ total#GMFD  |          0  (omitted)
+             |
+    agegroup#|
+     product#|
+          c. |
+ tavg_poly_2 |
+   0-4#GMFD  |          0  (omitted)
+  5-64#GMFD  |          0  (omitted)
+   65+#GMFD  |          0  (omitted)
+ total#GMFD  |          0  (omitted)
+             |
+    agegroup#|
+     product#|
+          c. |
+ tavg_poly_3 |
+   0-4#GMFD  |          0  (omitted)
+  5-64#GMFD  |          0  (omitted)
+   65+#GMFD  |          0  (omitted)
+ total#GMFD  |          0  (omitted)
+             |
+    agegroup#|
+     product#|
+          c. |
+ tavg_poly_4 |
+   0-4#GMFD  |          0  (omitted)
+  5-64#GMFD  |          0  (omitted)
+   65+#GMFD  |          0  (omitted)
+ total#GMFD  |          0  (omitted)
+             |
+    agegroup#|
+          c. |
+ tavg_poly_1#|
+          c. |
+loggdppc_a~g |
+        0-4  |    .024834   .0124809     1.99   0.048     .0002384    .0494295
+       5-64  |   .0103813   .0101176     1.03   0.306    -.0095572    .0303197
+        65+  |  -.0774701   .0699281    -1.11   0.269    -.2152745    .0603343
+      total  |   .0819133   .0748993     1.09   0.275    -.0656876    .2295142
+             |
+    agegroup#|
+          c. |
+ tavg_poly_2#|
+          c. |
+loggdppc_a~g |
+        0-4  |   .0042835   .0017322     2.47   0.014     .0008699     .007697
+       5-64  |  -.0006334   .0011817    -0.54   0.593    -.0029621    .0016953
+        65+  |   .0270553   .0096586     2.80   0.006     .0080216    .0460891
+      total  |  -.0024214   .0061247    -0.40   0.693     -.014491    .0096483
+             |
+    agegroup#|
+          c. |
+ tavg_poly_3#|
+          c. |
+loggdppc_a~g |
+        0-4  |   -.000038   .0001207    -0.32   0.753     -.000276    .0001999
+       5-64  |   .0000598   .0000603     0.99   0.322     -.000059    .0001786
+        65+  |   .0010274   .0005131     2.00   0.046     .0000162    .0020385
+      total  |  -.0001553   .0006588    -0.24   0.814    -.0014535     .001143
+             |
+    agegroup#|
+          c. |
+ tavg_poly_4#|
+          c. |
+loggdppc_a~g |
+        0-4  |  -2.91e-06   2.74e-06    -1.06   0.291    -8.32e-06    2.50e-06
+       5-64  |  -1.32e-06   1.10e-06    -1.20   0.230    -3.48e-06    8.40e-07
+        65+  |  -.0000533   .0000112    -4.76   0.000    -.0000754   -.0000312
+      total  |   4.99e-06   .0000151     0.33   0.741    -.0000247    .0000347
+             |
+    agegroup#|
+     product#|
+          c. |
+ tavg_poly_1#|
+          c. |
+loggdppc_a~g |
+   0-4#GMFD  |          0  (omitted)
+  5-64#GMFD  |          0  (omitted)
+   65+#GMFD  |          0  (omitted)
+ total#GMFD  |          0  (omitted)
+             |
+    agegroup#|
+     product#|
+          c. |
+ tavg_poly_2#|
+          c. |
+loggdppc_a~g |
+   0-4#GMFD  |          0  (omitted)
+  5-64#GMFD  |          0  (omitted)
+   65+#GMFD  |          0  (omitted)
+ total#GMFD  |          0  (omitted)
+             |
+    agegroup#|
+     product#|
+          c. |
+ tavg_poly_3#|
+          c. |
+loggdppc_a~g |
+   0-4#GMFD  |          0  (omitted)
+  5-64#GMFD  |          0  (omitted)
+   65+#GMFD  |          0  (omitted)
+ total#GMFD  |          0  (omitted)
+             |
+    agegroup#|
+     product#|
+          c. |
+ tavg_poly_4#|
+          c. |
+loggdppc_a~g |
+   0-4#GMFD  |          0  (omitted)
+  5-64#GMFD  |          0  (omitted)
+   65+#GMFD  |          0  (omitted)
+ total#GMFD  |          0  (omitted)
+             |
+    agegroup#|
+          c. |
+ tavg_poly_1#|
+          c. |
+lr_tavg_ad~g |
+        0-4  |  -.0014514   .0023557    -0.62   0.538    -.0060937    .0031909
+       5-64  |  -.0009462   .0021058    -0.45   0.654     -.005096    .0032036
+        65+  |  -.0073134   .0174167    -0.42   0.675    -.0416358     .027009
+      total  |   .0162816   .0102654     1.59   0.114    -.0039481    .0365113
+             |
+    agegroup#|
+          c. |
+ tavg_poly_2#|
+          c. |
+lr_tavg_ad~g |
+        0-4  |  -.0003516   .0001876    -1.87   0.062    -.0007213    .0000181
+       5-64  |  -.0002246   .0001216    -1.85   0.066    -.0004643    .0000151
+        65+  |   .0009069   .0009054     1.00   0.318    -.0008774    .0026911
+      total  |   .0004926   .0017462     0.28   0.778    -.0029486    .0039338
+             |
+    agegroup#|
+          c. |
+ tavg_poly_3#|
+          c. |
+lr_tavg_ad~g |
+        0-4  |   .0000235   .0000117     2.01   0.046     4.54e-07    .0000465
+       5-64  |   .0000141   5.58e-06     2.53   0.012     3.10e-06    .0000251
+        65+  |   .0001032   .0000489     2.11   0.036     6.89e-06    .0001995
+      total  |  -.0000348   .0001055    -0.33   0.742    -.0002428    .0001732
+             |
+    agegroup#|
+          c. |
+ tavg_poly_4#|
+          c. |
+lr_tavg_ad~g |
+        0-4  |  -4.42e-07   2.10e-07    -2.11   0.036    -8.55e-07   -2.92e-08
+       5-64  |  -2.30e-07   9.32e-08    -2.47   0.014    -4.14e-07   -4.66e-08
+        65+  |  -4.25e-06   1.07e-06    -3.98   0.000    -6.35e-06   -2.15e-06
+      total  |   4.12e-07   1.92e-06     0.21   0.830    -3.37e-06    4.19e-06
+             |
+    agegroup#|
+     product#|
+          c. |
+ tavg_poly_1#|
+          c. |
+lr_tavg_ad~g |
+   0-4#GMFD  |          0  (omitted)
+  5-64#GMFD  |          0  (omitted)
+   65+#GMFD  |          0  (omitted)
+ total#GMFD  |          0  (omitted)
+             |
+    agegroup#|
+     product#|
+          c. |
+ tavg_poly_2#|
+          c. |
+lr_tavg_ad~g |
+   0-4#GMFD  |          0  (omitted)
+  5-64#GMFD  |          0  (omitted)
+   65+#GMFD  |          0  (omitted)
+ total#GMFD  |          0  (omitted)
+             |
+    agegroup#|
+     product#|
+          c. |
+ tavg_poly_3#|
+          c. |
+lr_tavg_ad~g |
+   0-4#GMFD  |          0  (omitted)
+  5-64#GMFD  |          0  (omitted)
+   65+#GMFD  |          0  (omitted)
+ total#GMFD  |          0  (omitted)
+             |
+    agegroup#|
+     product#|
+          c. |
+ tavg_poly_4#|
+          c. |
+lr_tavg_ad~g |
+   0-4#GMFD  |          0  (omitted)
+  5-64#GMFD  |          0  (omitted)
+   65+#GMFD  |          0  (omitted)
+ total#GMFD  |          0  (omitted)
+             |
+       _cons |  -255.4419   1179.407    -0.22   0.829     -2579.65    2068.766
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-------------------------------------------------------------------------------
+> ---+
+                              Absorbed FE | Categories  - Redundant  = Num. Coe
+> fs                                                                           
+>    |
+------------------------------------------+------------------------------------
+> ---|
+                 adm0_agegrp_code#product |        17           1          16  
+>                                                                              
+>    |
+   adm0_agegrp_code#product#c.prcp_poly_1 |        17           0          17  
+>   ?                                                                          
+>    |
+                 adm0_agegrp_code#product |        17          17           0  
+>                                                                              
+>    |
+   adm0_agegrp_code#product#c.prcp_poly_2 |        17           0          17  
+>   ?                                                                          
+>    |
+        adm2_code#CHN_ts#agegroup#product |     34329       34329           0  
+>   *                                                                          
+>    |
+          adm0_code#year#agegroup#product |       325          17         308  
+>   ?                                                                          
+>    |
+-------------------------------------------------------------------------------
+> ---+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
+
+. 
+. estimates save "`outdir'/agespec_prod_interact_spec2_ALLREA_`resolution'.ster
+> ", replace
+(note: file /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/
+> age_spec_ALLREA/agespec_prod_interact_spec2_ALLREA_1deg.ster not found)
+file /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_spe
+> c_ALLREA/agespec_prod_interact_spec2_ALLREA_1deg.ster saved
+
+. di as res "Saved Spec 2 -> `outdir'/agespec_prod_interact_spec2_ALLREA_`resol
+> ution'.ster"
+Saved Spec 2 -> /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1
+> deg/age_spec_ALLREA/agespec_prod_interact_spec2_ALLREA_1deg.ster
+
+. 
+. * =========================== Alt specs toggle ========================== *
+. if (`altspec') {
+. 
+.     * ------------------------------ SPEC 1 ----------------------------- *
+.     reghdfe deathrate_w99                                                    
+>   ///
+>         c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#i.agegroup       
+>    ///
+>         c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#i.agegroup#i.prod
+> uct ///
+>         c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#c.loggdppc_adm1_a
+> vg#i.agegroup ///
+>         c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#c.loggdppc_adm1_a
+> vg#i.agegroup#i.product ///
+>         c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#c.lr_tavg_adm1_av
+> g#i.agegroup  ///
+>         c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#c.lr_tavg_adm1_av
+> g#i.agegroup#i.product  ///
+>         [pw = weight],                                                       
+>    ///
+>         absorb(                                                              
+>    ///
+>             adm0_agegrp_code#i.product##c.prcp_poly_1                        
+>    ///
+>             adm0_agegrp_code#i.product##c.prcp_poly_2                        
+>    ///
+>             i.adm2_code#i.CHN_ts#i.agegroup#i.product                        
+>    ///
+>             i.adm0_code#i.year#i.product                                     
+>    ///
+>         ) cluster(adm1_code)
+.     estimates save "`outdir'/agespec_prod_interact_spec1_ALLREA_`resolution'.
+> ster", replace
+. 
+.     * ------------------------------ SPEC 3 ----------------------------- *
+.     reghdfe deathrate_w99                                                    
+>   ///
+>         c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#i.agegroup       
+>    ///
+>         c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#i.agegroup#i.prod
+> uct ///
+>         c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#c.loggdppc_adm1_a
+> vg#i.agegroup ///
+>         c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#c.loggdppc_adm1_a
+> vg#i.agegroup#i.product ///
+>         c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#c.lr_tavg_adm1_av
+> g#i.agegroup  ///
+>         c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#c.lr_tavg_adm1_av
+> g#i.agegroup#i.product  ///
+>         [pw = weight],                                                       
+>    ///
+>         absorb(                                                              
+>    ///
+>             adm0_agegrp_code#i.product##c.prcp_poly_1                        
+>    ///
+>             adm0_agegrp_code#i.product##c.prcp_poly_2                        
+>    ///
+>             i.adm2_code#i.CHN_ts#i.agegroup#i.product                        
+>    ///
+>             i.adm0_code#i.year#i.agegroup#i.product                          
+>     ///
+>             adm1_agegrp_code#i.product##c.year                               
+>     ///
+>         ) cluster(adm1_code)
+.     estimates save "`outdir'/agespec_prod_interact_spec3_ALLREA_`resolution'.
+> ster", replace
+. 
+.     * ------------------------------ SPEC 4 ----------------------------- *
+.     bysort adm1_code product: egen double omega = sd(e_hat) if e_hat < .
+.     gen double precisionweight = 1/(omega^2)
+. 
+.     sort iso adm1_id adm2_id agegroup year
+.     reghdfe deathrate_w99                                                    
+>   ///
+>         c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#i.agegroup       
+>    ///
+>         c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#i.agegroup#i.prod
+> uct ///
+>         c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#c.loggdppc_adm1_a
+> vg#i.agegroup ///
+>         c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#c.loggdppc_adm1_a
+> vg#i.agegroup#i.product ///
+>         c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#c.lr_tavg_adm1_av
+> g#i.agegroup  ///
+>         c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#c.lr_tavg_adm1_av
+> g#i.agegroup#i.product  ///
+>         [pw = precisionweight],                                              
+>    ///
+>         absorb(                                                              
+>    ///
+>             adm0_agegrp_code#i.product##c.prcp_poly_1                        
+>    ///
+>             adm0_agegrp_code#i.product##c.prcp_poly_2                        
+>    ///
+>             i.adm2_code#i.CHN_ts#i.agegroup#i.product                        
+>    ///
+>             i.adm0_code#i.year#i.agegroup#i.product                          
+>     ///
+>         ) cluster(adm1_code) tol(1e-7)
+.     estimates save "`outdir'/agespec_prod_interact_spec4_ALLREA_`resolution'.
+> ster", replace
+. 
+.     * ------------------------------ SPEC 5 ----------------------------- *
+.     capture confirm variable tavg_poly_1_13m
+.     if !_rc {
+.         reghdfe deathrate_w99                                                
+>   ///
+>             c.(tavg_poly_1_13m tavg_poly_2_13m tavg_poly_3_13m tavg_poly_4_13
+> m)#i.agegroup ///
+>             c.(tavg_poly_1_13m tavg_poly_2_13m tavg_poly_3_13m tavg_poly_4_13
+> m)#i.agegroup#i.product ///
+>             c.(tavg_poly_1_13m tavg_poly_2_13m tavg_poly_3_13m tavg_poly_4_13
+> m)#c.loggdppc_adm1_avg#i.agegroup ///
+>             c.(tavg_poly_1_13m tavg_poly_2_13m tavg_poly_3_13m tavg_poly_4_13
+> m)#c.loggdppc_adm1_avg#i.agegroup#i.product ///
+>             c.(tavg_poly_1_13m tavg_poly_2_13m tavg_poly_3_13m tavg_poly_4_13
+> m)#c.lr_tavg_adm1_avg#i.agegroup  ///
+>             c.(tavg_poly_1_13m tavg_poly_2_13m tavg_poly_3_13m tavg_poly_4_13
+> m)#c.lr_tavg_adm1_avg#i.agegroup#i.product  ///
+>             [pw = weight],                                                   
+>    ///
+>             absorb(                                                          
+>    ///
+>                 adm0_agegrp_code#i.product##c.prcp_poly_1                    
+>    ///
+>                 adm0_agegrp_code#i.product##c.prcp_poly_2                    
+>    ///
+>                 i.adm2_code#i.CHN_ts#i.agegroup#i.product                    
+>    ///
+>                 i.adm0_code#i.year#i.agegroup#i.product                      
+>     ///
+>             ) cluster(adm1_code)
+.         estimates save "`outdir'/agespec_prod_interact_spec5_ALLREA_`resoluti
+> on'.ster", replace
+.     }
+. }
+
+. 
+. di as txt "Done. Results saved in: `outdir'"
+Done. Results saved in: /user/ab5405/summeraliaclimate/code/mortality_pipeline/
+> output/1deg/age_spec_ALLREA
+
+. 
+end of do-file

@@ -1,0 +1,355 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: 10-user 8-core network perpetual
+Serial number: 501806318811
+  Licensed to: Columbia Business School
+               Columbia University, New York
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do export_ALLREA_to_per_product_csvv.do 
+
+. /**************************************************************************
+> * CSVV GENERATOR — ALLREA pooled ster → per-product CSVVs
+> *
+> * Product encoding: 1=ERA5_025, 2=GMFD, 3=JRA_3Q, 4=MERRA2
+> * Base category (product=1b) = ERA5_025
+> *
+> * For each product P:
+> *   beta_P = beta_base + delta_P   (delta_base = 0)
+> *   Var(beta_P) = Var(base) + Var(delta) + 2*Cov(base, delta)
+> *
+> * 36 gammas per product: 3 ages × 4 polys × 3 covariates {1, LR, loginc}
+> * Age codes: 1b=0-4, 2=5-64, 3=65+, 4=total (skip total in CSVV)
+> **************************************************************************/
+. 
+. clear all
+
+. set more off
+
+. 
+. global REPO "/user/ab5405/summeraliaclimate"
+
+. 
+. local STERFILE "$REPO/code/mortality_pipeline/output/age_spec_ALLREA/agespec_
+> prod_interact_spec2_ALLREA.ster"
+
+. local CSVVDIR  "$REPO/code/mortality_pipeline/output/age_spec_interacted_csvv
+> "
+
+. cap mkdir "`CSVVDIR'"
+
+. 
+. * Product list: code, label, name for output file
+. * product=1 is ERA5_025 (base category, deltas = 0)
+. local prod_codes "1 2 3 4"
+
+. local prod_names "ERA5_025 GMFD JRA_3Q MERRA2"
+
+. 
+. * Age codes for 0-4, 5-64, 65+ (skip total=4)
+. local age_codes "1 2 3"
+
+. 
+. * Load ster
+. estimates use "`STERFILE'"
+
+. matrix B = e(b)
+
+. matrix V = e(V)
+
+. 
+. di as res "Loaded: `STERFILE'"
+Loaded: /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/age_spec_
+> ALLREA/agespec_prod_interact_spec2_ALLREA.ster
+
+. di "N = " e(N)
+N = 2180697
+
+. 
+. * =====================================================================
+. * Loop over products
+. * =====================================================================
+. 
+. forvalues pi = 1/4 {
+  2. 
+.     local prod_name : word `pi' of `prod_names'
+  3.     local prod_code : word `pi' of `prod_codes'
+  4. 
+.     di ""
+  5.     di "============================================================"
+  6.     di "Building CSVV for product: `prod_name' (code=`prod_code')"
+  7.     di "============================================================"
+  8. 
+.     * ------------------------------------------------------------------
+.     * Build 36 reconstructed coefficients and their VCV
+.     * Order: age in {1,2,3} × poly in {1,2,3,4} × covar in {base,LR,loginc}
+.     * ------------------------------------------------------------------
+. 
+.     * We'll store reconstructed gammas in a matrix
+.     * and build the 36×36 VCV by hand
+. 
+.     local ncoef 36
+  9.     matrix GAMMA = J(1, `ncoef', 0)
+ 10.     matrix GVCV  = J(`ncoef', `ncoef', 0)
+ 11. 
+.     local idx 0
+ 12. 
+.     foreach a of local age_codes {
+ 13.         forvalues k = 1/4 {
+ 14.             foreach slot in base lr loginc {
+ 15. 
+.                 local ++idx
+ 16. 
+.                 * ---------- Name the base term ----------
+.                 if "`slot'" == "base" {
+ 17.                     if `a' == 1 {
+ 18.                         local base_nm "`a'b.agegroup#c.tavg_poly_`k'"
+ 19.                     }
+ 20.                     else {
+ 21.                         local base_nm "`a'.agegroup#c.tavg_poly_`k'"
+ 22.                     }
+ 23.                 }
+ 24.                 else if "`slot'" == "lr" {
+ 25.                     if `a' == 1 {
+ 26.                         local base_nm "`a'b.agegroup#c.tavg_poly_`k'#c.lr_
+> tavg_adm1_avg"
+ 27.                     }
+ 28.                     else {
+ 29.                         local base_nm "`a'.agegroup#c.tavg_poly_`k'#c.lr_t
+> avg_adm1_avg"
+ 30.                     }
+ 31.                 }
+ 32.                 else {
+ 33.                     if `a' == 1 {
+ 34.                         local base_nm "`a'b.agegroup#c.tavg_poly_`k'#c.log
+> gdppc_adm1_avg"
+ 35.                     }
+ 36.                     else {
+ 37.                         local base_nm "`a'.agegroup#c.tavg_poly_`k'#c.logg
+> dppc_adm1_avg"
+ 38.                     }
+ 39.                 }
+ 40. 
+.                 * ---------- Name the delta term ----------
+.                 * Base product (1=ERA5_025) has omitted delta (co. prefix = 0
+> )
+.                 * Other products have c. prefix = estimated delta
+.                 if `pi' == 1 {
+ 41.                     * ERA5_025 is base: delta = 0, no delta term needed
+.                     local has_delta 0
+ 42.                 }
+ 43.                 else {
+ 44.                     local has_delta 1
+ 45.                     if "`slot'" == "base" {
+ 46.                         if `a' == 1 {
+ 47.                             local delta_nm "`a'b.agegroup#`prod_code'.prod
+> uct#c.tavg_poly_`k'"
+ 48.                         }
+ 49.                         else {
+ 50.                             local delta_nm "`a'.agegroup#`prod_code'.produ
+> ct#c.tavg_poly_`k'"
+ 51.                         }
+ 52.                     }
+ 53.                     else if "`slot'" == "lr" {
+ 54.                         if `a' == 1 {
+ 55.                             local delta_nm "`a'b.agegroup#`prod_code'.prod
+> uct#c.tavg_poly_`k'#c.lr_tavg_adm1_avg"
+ 56.                         }
+ 57.                         else {
+ 58.                             local delta_nm "`a'.agegroup#`prod_code'.produ
+> ct#c.tavg_poly_`k'#c.lr_tavg_adm1_avg"
+ 59.                         }
+ 60.                     }
+ 61.                     else {
+ 62.                         if `a' == 1 {
+ 63.                             local delta_nm "`a'b.agegroup#`prod_code'.prod
+> uct#c.tavg_poly_`k'#c.loggdppc_adm1_avg"
+ 64.                         }
+ 65.                         else {
+ 66.                             local delta_nm "`a'.agegroup#`prod_code'.produ
+> ct#c.tavg_poly_`k'#c.loggdppc_adm1_avg"
+ 67.                         }
+ 68.                     }
+ 69.                 }
+ 70. 
+.                 * ---------- Get base coefficient ----------
+.                 local ib = colnumb(B, "`base_nm'")
+ 71.                 if `ib' == 0 {
+ 72.                     di as err "!! base coef not found: `base_nm'"
+ 73.                     local ib = .
+ 74.                 }
+ 75. 
+.                 * ---------- Reconstruct gamma ----------
+.                 if `has_delta' {
+ 76.                     local id = colnumb(B, "`delta_nm'")
+ 77.                     if `id' == 0 {
+ 78.                         di as err "!! delta coef not found: `delta_nm'"
+ 79.                         local id = .
+ 80.                     }
+ 81.                     matrix GAMMA[1,`idx'] = el(B,1,`ib') + el(B,1,`id')
+ 82.                 }
+ 83.                 else {
+ 84.                     matrix GAMMA[1,`idx'] = el(B,1,`ib')
+ 85.                 }
+ 86. 
+.                 * Store index info for VCV construction
+.                 local base_idx_`idx' = `ib'
+ 87.                 if `has_delta' {
+ 88.                     local delta_idx_`idx' = `id'
+ 89.                 }
+ 90.                 else {
+ 91.                     local delta_idx_`idx' = 0
+ 92.                 }
+ 93.                 local has_delta_`idx' = `has_delta'
+ 94. 
+.             } /* slot */
+ 95.         } /* poly */
+ 96.     } /* age */
+ 97. 
+.     * ------------------------------------------------------------------
+.     * Build 36×36 VCV
+.     * Var(base + delta) = V[b,b] + V[d,d] + 2*V[b,d]
+.     * Cov((b1+d1),(b2+d2)) = V[b1,b2] + V[d1,d2] + V[b1,d2] + V[d1,b2]
+.     * For base product: Cov(b1,b2) = V[b1,b2]
+.     * ------------------------------------------------------------------
+. 
+.     forvalues r = 1/`ncoef' {
+ 98.         forvalues c = 1/`ncoef' {
+ 99. 
+.             local ib_r = `base_idx_`r''
+100.             local ib_c = `base_idx_`c''
+101.             local id_r = `delta_idx_`r''
+102.             local id_c = `delta_idx_`c''
+103.             local hd_r = `has_delta_`r''
+104.             local hd_c = `has_delta_`c''
+105. 
+.             local vcv_val = el(V, `ib_r', `ib_c')
+106. 
+.             if `hd_r' & `hd_c' {
+107.                 local vcv_val = `vcv_val' + el(V,`id_r',`id_c') + el(V,`ib
+> _r',`id_c') + el(V,`id_r',`ib_c')
+108.             }
+109.             else if `hd_r' & !`hd_c' {
+110.                 local vcv_val = `vcv_val' + el(V,`id_r',`ib_c')
+111.             }
+112.             else if !`hd_r' & `hd_c' {
+113.                 local vcv_val = `vcv_val' + el(V,`ib_r',`id_c')
+114.             }
+115. 
+.             matrix GVCV[`r',`c'] = `vcv_val'
+116.         }
+117.     }
+118. 
+.     * ------------------------------------------------------------------
+.     * Write CSVV
+.     * ------------------------------------------------------------------
+. 
+.     local CSVVFILE "agespec_interaction_response_spec2_`prod_name'_prodint.cs
+> vv"
+119.     cap file close csvv
+120.     file open csvv using "`CSVVDIR'/`CSVVFILE'", write replace
+121. 
+.     file write csvv "---" _n
+122.     file write csvv "oneline: Age-specific interacted (Spec 2) ALLREA resp
+> onse – `prod_name'" _n
+123.     file write csvv "version: MORTALITY-AGE-SPEC-ALLREA-`prod_name'" _n
+124.     file write csvv "dependencies: agespec_prod_interact_spec2_ALLREA.ster
+> " _n
+125.     file write csvv "description: 4th-order poly OLS pooled ALLREA; age×pr
+> oduct interactions; per-product coefficients reconstructed from base+delta" _
+> n
+126.     file write csvv "csvv-version: auto-`c(current_date)'" _n
+127. 
+.     file write csvv "variables:" _n
+128.     file write csvv "  tavg_poly_1: T1_sum [C]" _n
+129.     file write csvv "  tavg_poly_2: T2_sum [C^2]" _n
+130.     file write csvv "  tavg_poly_3: T3_sum [C^3]" _n
+131.     file write csvv "  tavg_poly_4: T4_sum [C^4]" _n
+132.     file write csvv "  lr_tavg: long-run mean annual temperature [C]" _n
+133.     file write csvv "  loggdppc_adm1_avg: log GDP per capita" _n
+134.     file write csvv "  deathrate_w99: mortality rate winsorized at 99th pe
+> rcentile" _n
+135.     file write csvv "..." _n
+136. 
+.     file write csvv "observations" _n
+137.     file write csvv "`=e(N)'" _n
+138. 
+.     file write csvv "prednames" _n
+139.     file write csvv "tavg_poly_1, tavg_poly_2, tavg_poly_3, tavg_poly_4" _
+> n
+140. 
+.     file write csvv "covarnames" _n
+141.     file write csvv "1, lr_tavg, loggdppc_adm1_avg" _n
+142. 
+.     * GAMMA
+.     file write csvv "gamma" _n
+143.     forvalues i = 1/`ncoef' {
+144.         file write csvv "`=el(GAMMA,1,`i')'"
+145.         if mod(`i',3) != 0 file write csvv ", "
+146.         else file write csvv "" _n
+147.     }
+148. 
+.     * GAMMAVCV
+.     file write csvv "gammavcv" _n
+149.     forvalues r = 1/`ncoef' {
+150.         forvalues c = 1/`ncoef' {
+151.             if `c'==1 file write csvv "`=el(GVCV,`r',`c')'"
+152.             else      file write csvv ", `=el(GVCV,`r',`c')'"
+153.         }
+154.         file write csvv "" _n
+155.     }
+156. 
+.     * RESIDVCV
+.     file write csvv "residvcv" _n
+157.     file write csvv "`=e(rmse)^2'" _n
+158. 
+.     file close csvv
+159.     di as res "✅ Wrote `CSVVFILE'"
+160. }
+
+============================================================
+Building CSVV for product: ERA5_025 (code=1)
+============================================================
+✅ Wrote agespec_interaction_response_spec2_ERA5_025_prodint.csvv
+
+============================================================
+Building CSVV for product: GMFD (code=2)
+============================================================
+✅ Wrote agespec_interaction_response_spec2_GMFD_prodint.csvv
+
+============================================================
+Building CSVV for product: JRA_3Q (code=3)
+============================================================
+✅ Wrote agespec_interaction_response_spec2_JRA_3Q_prodint.csvv
+
+============================================================
+Building CSVV for product: MERRA2 (code=4)
+============================================================
+✅ Wrote agespec_interaction_response_spec2_MERRA2_prodint.csvv
+
+. 
+. di ""
+
+
+. di as res "All 4 per-product CSVVs written to `CSVVDIR'"
+All 4 per-product CSVVs written to /user/ab5405/summeraliaclimate/code/mortalit
+> y_pipeline/output/age_spec_interacted_csvv
+
+. 
+end of do-file

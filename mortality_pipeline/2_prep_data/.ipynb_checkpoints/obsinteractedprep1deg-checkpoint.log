@@ -1,0 +1,259 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: 10-user 8-core network perpetual
+Serial number: 501806318811
+  Licensed to: Columbia Business School
+               Columbia University, New York
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do obsinteractedprep1deg.do 
+
+. /**************************************************************************
+> * stack_all_products_to_output_panels_FLEXIBLE.do
+> *
+> * FLEXIBLE RESOLUTION VERSION
+> *
+> * - Stacks per-product aligned panels into ONE pooled dataset (ALLREA)
+> * - Saves to $OUTPUT (your output_panels folder)
+> *
+> * CHANGE LOG:
+> * - Added resolution parameter
+> * - Fixed input path to read from OUTPUT (where prep script saves)
+> * - Added products list definition
+> **************************************************************************/
+. 
+. clear all
+
+. set more off
+
+. 
+. * ===========================================================================
+> =
+. * CONFIG
+. * ===========================================================================
+> =
+. 
+. local resolution "1deg"  /* ← CHANGE THIS: "025deg" or "1deg" */
+
+. 
+. global CODE    "/user/ab5405/summeraliaclimate/code"
+
+. 
+. * Input/output directories include resolution
+. global PANELS  "$CODE/mortality_pipeline/prep_panels/`resolution'"
+
+. global OUTPUT  "$CODE/mortality_pipeline/output_panels/`resolution'"
+
+. capture mkdir "$OUTPUT"
+
+. 
+. * Products to stack
+. local products GMFD ERA5 JRA_3Q MERRA2
+
+. 
+. di ""
+
+
+. di "========================================================================"
+========================================================================
+
+. di "CONFIGURATION:"
+CONFIGURATION:
+
+. di "  Resolution: `resolution'"
+  Resolution: 1deg
+
+. di "  Products: `products'"
+  Products: GMFD ERA5 JRA_3Q MERRA2
+
+. di "  Input dir:  $OUTPUT (individual product panels)"
+  Input dir:  /user/ab5405/summeraliaclimate/code/mortality_pipeline/output_pan
+> els/1deg (individual product panels)
+
+. di "  Output: panel_prepped_for_regressions_ALLREA_aligned.dta"
+  Output: panel_prepped_for_regressions_ALLREA_aligned.dta
+
+. di "========================================================================"
+========================================================================
+
+. di ""
+
+
+. 
+. * ===========================================================================
+> =
+. * STACK PRODUCTS
+. * ===========================================================================
+> =
+. 
+. tempfile base
+
+. local first = 1
+
+. 
+. foreach product of local products {
+  2.     
+.     * Input comes from prep (where merge_panel_ALL_aligned saves)
+.     local fpath "$PANELS/panel_prepped_for_regressions_`product'_aligned.dta"
+  3.     
+.     capture confirm file "`fpath'"
+  4.     if _rc {
+  5.         di as yellow ""
+  6.         di as yellow "⚠️  File not found for `product':"
+  7.         di as yellow "    `fpath'"
+  8.         di as yellow "    (skipping)"
+  9.         di as yellow ""
+ 10.         continue
+ 11.     }
+ 12.     
+.     di ""
+ 13.     di "------------------------------------------------------------------
+> --"
+ 14.     di "Loading `product'"
+ 15.     di "  → `fpath'"
+ 16.     di "------------------------------------------------------------------
+> --"
+ 17.     
+.     use "`fpath'", clear
+ 18.     
+.     * Add product label
+.     gen str20 proj_base = "`product'"
+ 19.     
+.     * =======================================================================
+> =
+.     * Standardize product-specific variable names to generic names
+.     * =======================================================================
+> =
+.     
+.     * Temperature polynomials
+.     capture confirm variable tavg_poly_1_`product'
+ 20.     if !_rc {
+ 21.         rename tavg_poly_1_`product' tavg_poly_1
+ 22.         capture rename tavg_poly_2_`product' tavg_poly_2
+ 23.         capture rename tavg_poly_3_`product' tavg_poly_3
+ 24.         capture rename tavg_poly_4_`product' tavg_poly_4
+ 25.     }
+ 26.     
+.     * Precipitation polynomials
+.     capture confirm variable prcp_poly_1_`product'
+ 27.     if !_rc {
+ 28.         rename prcp_poly_1_`product' prcp_poly_1
+ 29.         capture rename prcp_poly_2_`product' prcp_poly_2
+ 30.     }
+ 31.     
+.     * Long-run temperature average
+.     capture confirm variable lr_tavg_`product'_adm1_avg
+ 32.     if !_rc {
+ 33.         rename lr_tavg_`product'_adm1_avg lr_tavg_adm1_avg
+ 34.     }
+ 35.     
+.     * =======================================================================
+> =
+.     * Keep only variables needed downstream
+.     * =======================================================================
+> =
+.     
+.     keep iso iso2 adm0_code adm0_code2 adm1_id adm1_code adm2_id adm2_code //
+> /
+>          year agegroup CHN_ts deaths population deathrate_w99 ///
+>          tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4 ///
+>          prcp_poly_1 prcp_poly_2 loggdppc_adm1_avg lr_tavg_adm1_avg ///
+>          adm0_agegrp_code adm1_agegrp_code ///
+>          proj_base
+ 36.     
+.     order iso iso2 adm0_code adm0_code2 adm1_id adm1_code adm2_id adm2_code /
+> //
+>           year agegroup CHN_ts deaths population deathrate_w99 ///
+>           tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4 ///
+>           prcp_poly_1 prcp_poly_2 loggdppc_adm1_avg lr_tavg_adm1_avg ///
+>           proj_base
+ 37.     
+.     di "  Observations: " _N
+ 38.     
+.     * =======================================================================
+> =
+.     * Append to base
+.     * =======================================================================
+> =
+.     
+.     if `first' {
+ 39.         save `base'
+ 40.         local first = 0
+ 41.     }
+ 42.     else {
+ 43.         append using `base'
+ 44.         save `base', replace
+ 45.     }
+ 46. }
+
+⚠️  File not found for GMFD:
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/prep_panels/1deg/pan
+> el_prepped_for_regressions_GMFD_aligned.dta
+    (skipping)
+
+
+⚠️  File not found for ERA5:
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/prep_panels/1deg/pan
+> el_prepped_for_regressions_ERA5_aligned.dta
+    (skipping)
+
+
+⚠️  File not found for JRA_3Q:
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/prep_panels/1deg/pan
+> el_prepped_for_regressions_JRA_3Q_aligned.dta
+    (skipping)
+
+
+⚠️  File not found for MERRA2:
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/prep_panels/1deg/pan
+> el_prepped_for_regressions_MERRA2_aligned.dta
+    (skipping)
+
+
+. 
+. * ===========================================================================
+> =
+. * CHECK AND SAVE
+. * ===========================================================================
+> =
+. 
+. capture confirm file `base'
+
+. if _rc {
+.     di as error ""
+
+.     di as error "❌ ERROR: No product files were found!"
+❌ ERROR: No product files were found!
+.     di as error "   Location: $OUTPUT"
+   Location: /user/ab5405/summeraliaclimate/code/mortality_pipeline/output_pane
+> ls/1deg
+.     di as error ""
+
+.     di as error "Make sure you ran prep_panel_ALL_aligned_FLEXIBLE.do first!"
+Make sure you ran prep_panel_ALL_aligned_FLEXIBLE.do first!
+.     exit 1
+--Break--
+r(1);
+. }
+--Break--
+r(1);
+
+end of do-file
+--Break--
+r(1);

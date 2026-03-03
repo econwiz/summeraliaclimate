@@ -1,0 +1,54 @@
+/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/array/core.py:4998: PerformanceWarning: Increasing number of chunks by factor of 15
+  result = blockwise(
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/bigagg.py", line 187, in <module>
+    ds.to_zarr(TMP_ZARR, mode="w")
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/dataset.py", line 2291, in to_zarr
+    return to_zarr(  # type: ignore[call-overload,misc]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/backends/api.py", line 2300, in to_zarr
+    dump_to_store(dataset, zstore, writer, encoding=encoding)
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/backends/api.py", line 2031, in dump_to_store
+    store.store(variables, attrs, check_encoding, writer, unlimited_dims=unlimited_dims)
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/backends/zarr.py", line 990, in store
+    self.set_variables(
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/backends/zarr.py", line 1208, in set_variables
+    zarr_array = self._create_new_array(
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/backends/zarr.py", line 1070, in _create_new_array
+    zarr_array = self.zarr_group.create(
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/group.py", line 2415, in create
+    return self.create_array(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/_compat.py", line 43, in inner_f
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/group.py", line 2534, in create_array
+    self._sync(
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/sync.py", line 208, in _sync
+    return sync(
+           ^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/sync.py", line 163, in sync
+    raise return_result
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/sync.py", line 119, in _runner
+    return await coro
+           ^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/group.py", line 1122, in create_array
+    return await create_array(
+           ^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/array.py", line 4456, in create_array
+    return await init_array(
+           ^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/array.py", line 4242, in init_array
+    array_array, array_bytes, bytes_bytes = _parse_chunk_encoding_v3(
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/array.py", line 4716, in _parse_chunk_encoding_v3
+    out_bytes_bytes = tuple(_parse_bytes_bytes_codec(c) for c in maybe_bytes_bytes)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/array.py", line 4716, in <genexpr>
+    out_bytes_bytes = tuple(_parse_bytes_bytes_codec(c) for c in maybe_bytes_bytes)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/registry.py", line 184, in _parse_bytes_bytes_codec
+    raise TypeError(f"Expected a BytesBytesCodec. Got {type(data)} instead.")
+TypeError: Expected a BytesBytesCodec. Got <class 'numcodecs.blosc.Blosc'> instead.

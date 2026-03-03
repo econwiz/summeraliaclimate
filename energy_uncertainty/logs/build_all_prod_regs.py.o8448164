@@ -1,0 +1,10 @@
+[INFO] Reading /user/ab5405/summeraliaclimate/code/energy_uncertainty/car_paths.csv
+
+[INFO] Processing product: ERA5-025 (suffix=ERA5)
+[INFO] ERA5-025 Loading WORLD shapefile
+[INFO] ERA5-025 Loading DAILY temperature
+[INFO] ERA5-025 Loading DAILY precipitation
+[INFO] ERA5-025 Years in temperature: 1981–2010
+[INFO] ERA5-025 Years in precipitation: 1981–2010
+[INFO] ERA5-025 Using overlapping years: 1981–2010
+[INFO] ERA5-025 Computing daily transforms (temperature)

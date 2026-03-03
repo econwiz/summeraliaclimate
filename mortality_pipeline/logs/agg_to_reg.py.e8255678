@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/logs/../code/agg_to_reg.py", line 55, in <module>
+    agg = xa.aggregate(ds_poly, wm, dask_gufunc_kwargs={"allow_rechunk": True})
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: aggregate() got an unexpected keyword argument 'dask'

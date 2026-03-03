@@ -1,0 +1,29 @@
+Traceback (most recent call last):
+  File "fiona/ogrext.pyx", line 130, in fiona.ogrext.gdal_open_vector
+  File "fiona/ogrext.pyx", line 134, in fiona.ogrext.gdal_open_vector
+  File "fiona/_err.pyx", line 375, in fiona._err.StackChecker.exc_wrap_pointer
+fiona._err.CPLE_OpenFailedError: /share_hle/data/1_estimation/3_regions/insample_shp/mortality_insample_world.shp: No such file or directory
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/logs/../code/ERA5_025_agg_to_reg.py", line 23, in <module>
+    gdf = gpd.read_file(shape_path, engine="fiona")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/geopandas/io/file.py", line 328, in _read_file
+    return _read_file_fiona(
+           ^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/geopandas/io/file.py", line 380, in _read_file_fiona
+    with reader(path_or_bytes, **kwargs) as features:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.local/lib/python3.12/site-packages/fiona/env.py", line 457, in wrapper
+    return f(*args, **kwds)
+           ^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.local/lib/python3.12/site-packages/fiona/__init__.py", line 342, in open
+    colxn = Collection(
+            ^^^^^^^^^^^
+  File "/user/ab5405/.local/lib/python3.12/site-packages/fiona/collection.py", line 226, in __init__
+    self.session.start(self, **kwargs)
+  File "fiona/ogrext.pyx", line 876, in fiona.ogrext.Session.start
+  File "fiona/ogrext.pyx", line 136, in fiona.ogrext.gdal_open_vector
+fiona.errors.DriverError: Failed to open dataset (flags=68): /share_hle/data/1_estimation/3_regions/insample_shp/mortality_insample_world.shp

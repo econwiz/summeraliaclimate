@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/logs/../code/GMFD_agg_to_reg.py", line 28, in <module>
+    mask   = np.isfinite(bounds).all(axis=1)
+             ^^
+NameError: name 'np' is not defined

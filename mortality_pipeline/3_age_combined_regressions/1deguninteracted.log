@@ -1,0 +1,798 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: 10-user 8-core network perpetual
+Serial number: 501806318811
+  Licensed to: Columbia Business School
+               Columbia University, New York
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do 1deguninteracted.do 
+
+. /**************************************************************************
+> * prep_regressions_ALLREA_interacted_FLEXIBLE.do
+> * 
+> * FLEXIBLE RESOLUTION VERSION
+> *
+> * - Estimates temperature–mortality response with FULL product interactions
+> * - Input: stacked ALLREA panel in $OUTPUT (output_panels/{resolution})
+> * - Saves Spec1–Spec5 .ster files for ALLREA with product interactions
+> *
+> * CHANGE LOG:x
+> * - Added resolution parameter to control input/output directories
+> * - Reads from mortality_pipeline/output_panels/{resolution}/
+> * - Saves to mortality_pipeline/output/{resolution}/
+> **************************************************************************/
+. 
+. clear all
+
+. set more off
+
+. 
+. * ===========================================================================
+> =
+. * CONFIG
+. * ===========================================================================
+> =
+. 
+. local resolution "1deg"  /* ← CHANGE THIS: "025deg" or "1deg" */
+
+. 
+. global CODE    "/user/ab5405/summeraliaclimate/code"
+
+. 
+. * Input/output directories include resolution
+. global PANELS  "$CODE/mortality_pipeline/output_panels/`resolution'"
+
+. global OUTPUT  "$CODE/mortality_pipeline/output/`resolution'"
+
+. 
+. * Input panel and output directory for sters
+. local inpanel  "$PANELS/panel_prepped_for_regressions_ALLREA_aligned.dta"
+
+. local ster_out "$OUTPUT/age_combined_ALLREA"
+
+. capture mkdir "$OUTPUT"
+
+. capture mkdir "`ster_out'"
+
+. 
+. di ""
+
+
+. di "========================================================================"
+========================================================================
+
+. di "CONFIGURATION:"
+CONFIGURATION:
+
+. di "  Resolution: `resolution'"
+  Resolution: 1deg
+
+. di "  Input panel: `inpanel'"
+  Input panel: /user/ab5405/summeraliaclimate/code/mortality_pipeline/output_pa
+> nels/1deg/panel_prepped_for_regressions_ALLREA_aligned.dta
+
+. di "  Output dir:  `ster_out'"
+  Output dir:  /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1d
+> eg/age_combined_ALLREA
+
+. di "========================================================================"
+========================================================================
+
+. di ""
+
+
+. 
+. * ===========================================================================
+> =
+. * LOAD DATA
+. * ===========================================================================
+> =
+. 
+. * Check if input exists
+. capture confirm file "`inpanel'"
+
+. if _rc {
+.     di as error ""
+.     di as error "ERROR: Input panel not found!"
+.     di as error "  `inpanel'"
+.     di as error ""
+.     di as error "You need to create the stacked ALLREA panel first."
+.     di as error "This combines all products (GMFD, ERA5, JRA_3Q, MERRA2)"
+.     di as error "into a single stacked dataset."
+.     exit 601
+. }
+
+. 
+. di as txt "Loading stacked ALLREA panel → `inpanel'"
+Loading stacked ALLREA panel → /user/ab5405/summeraliaclimate/code/mortality_pi
+> peline/output_panels/1deg/panel_prepped_for_regressions_ALLREA_aligned.dta
+
+. use "`inpanel'", clear
+
+. 
+. * ===========================================================================
+> =
+. * DATA PREP
+. * ===========================================================================
+> =
+. 
+. * Ensure agegroup is numeric for factor notation
+. capture confirm numeric variable agegroup
+
+. if _rc {
+.     encode agegroup, gen(agegroup_num)
+.     drop agegroup
+.     rename agegroup_num agegroup
+. }
+
+. 
+. * Encode product label (proj_base) to a factor var "product"
+. capture confirm numeric variable product
+
+. if _rc {
+.     encode proj_base, gen(product)
+. }
+
+. 
+. * Weights normalized within product × year (mirrors per-product scheme)
+. bysort product year: egen tot_pop = total(population)
+
+. gen double weight = population / tot_pop
+
+. 
+. * ===========================================================================
+> =
+. * SPECIFICATIONS
+. * ===========================================================================
+> =
+. 
+. * All specs below:
+. * - Allow country-specific precip slopes to vary by product:
+. *     absorb: adm0_code#i.product##c.prcp_poly_1 and prcp_poly_2
+. * - Make key FE product-specific so levels don't mix across products.
+. * - Cluster at adm1_code (kept for continuity).
+. 
+. * ---------------------------------------------------------------------------
+> -
+. * SPEC 1: Baseline FE (country×year) and subnational FE, all BY PRODUCT
+. * ---------------------------------------------------------------------------
+> -
+. 
+. di ""
+
+
+. di "========================================================================"
+========================================================================
+
+. di "ESTIMATING SPEC 1: Baseline FE by product"
+ESTIMATING SPEC 1: Baseline FE by product
+
+. di "========================================================================"
+========================================================================
+
+. di ""
+
+
+. 
+. reghdfe deathrate_w99                                                        
+>  ///
+>     /* Temp quartic × product */                                             
+>  ///
+>     c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#i.product            
+>  ///
+>     [pw = weight],                                                           
+>  ///
+>     absorb(                                                                  
+>  ///
+>         /* Country precip slopes by product */                               
+>  ///
+>         adm0_code#i.product##c.prcp_poly_1                                   
+>  ///
+>         adm0_code#i.product##c.prcp_poly_2                                   
+>  ///
+>         /* Subnational FE by product */                                      
+>  ///
+>         i.adm2_code#i.CHN_ts#i.agegroup#i.product                            
+>  ///
+>         /* Country × year FE by product */                                   
+>  ///
+>         i.adm0_code#i.year#i.product                                         
+>  ///
+>     )                                                                        
+>  ///
+>     cluster(adm1_code)
+(dropped 7 singleton observations)
+(MWFE estimator converged in 49 iterations)
+
+HDFE Linear regression                            Number of obs   =  2,208,315
+Absorbing 4 HDFE groups                           F(  16,    223) =       4.95
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9011
+                                                  Adj R-squared   =     0.8945
+                                                  Within R-sq.    =     0.0007
+Number of clusters (adm1_code) =        224       Root MSE        =   235.7227
+
+                            (Std. err. adjusted for 224 clusters in adm1_code)
+------------------------------------------------------------------------------
+             |               Robust
+deathrate~99 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     product#|
+          c. |
+ tavg_poly_1 |
+   ERA5_025  |  -.0785705   .0469193    -1.67   0.095    -.1710324    .0138914
+       GMFD  |  -.0322955    .053044    -0.61   0.543    -.1368273    .0722362
+     JRA_3Q  |   -.069262    .048148    -1.44   0.152    -.1641452    .0256213
+     MERRA2  |   -.006613   .0152656    -0.43   0.665    -.0366963    .0234702
+             |
+     product#|
+          c. |
+ tavg_poly_2 |
+   ERA5_025  |   .0028943   .0022104     1.31   0.192    -.0014617    .0072503
+       GMFD  |   .0002796   .0023633     0.12   0.906    -.0043778    .0049369
+     JRA_3Q  |   -.002811   .0029935    -0.94   0.349    -.0087102    .0030883
+     MERRA2  |  -.0010695   .0008197    -1.30   0.193    -.0026848    .0005457
+             |
+     product#|
+          c. |
+ tavg_poly_3 |
+   ERA5_025  |   .0001511   .0002158     0.70   0.484    -.0002741    .0005764
+       GMFD  |   .0001737   .0002908     0.60   0.551    -.0003993    .0007467
+     JRA_3Q  |   .0001364   .0001611     0.85   0.398    -.0001811    .0004539
+     MERRA2  |  -.0000413   .0000639    -0.65   0.519    -.0001672    .0000847
+             |
+     product#|
+          c. |
+ tavg_poly_4 |
+   ERA5_025  |  -5.68e-06   6.44e-06    -0.88   0.379    -.0000184    7.01e-06
+       GMFD  |  -4.17e-06   6.49e-06    -0.64   0.522     -.000017    8.63e-06
+     JRA_3Q  |  -1.33e-06   3.48e-06    -0.38   0.702    -8.19e-06    5.53e-06
+     MERRA2  |   2.20e-06   1.67e-06     1.32   0.189    -1.09e-06    5.49e-06
+             |
+       _cons |   964.4015   267.7002     3.60   0.000     436.8556    1491.947
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-------------------------------------------------------------------------------
+> --+
+                             Absorbed FE | Categories  - Redundant  = Num. Coef
+> s                                                                            
+>   |
+-----------------------------------------+-------------------------------------
+> --|
+                       adm0_code#product |        20           1          19   
+>                                                                              
+>   |
+         adm0_code#product#c.prcp_poly_1 |        20           0          20   
+>  ?                                                                           
+>   |
+                       adm0_code#product |        20          20           0   
+>                                                                              
+>   |
+         adm0_code#product#c.prcp_poly_2 |        20           0          20   
+>  ?                                                                           
+>   |
+       adm2_code#CHN_ts#agegroup#product |    137304      137304           0   
+>  *                                                                           
+>   |
+                  adm0_code#year#product |       437          20         417   
+>  ?                                                                           
+>   |
+-------------------------------------------------------------------------------
+> --+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
+
+. 
+. estimates save "`ster_out'/pooled_response_spec1_public_ALLREA.ster", replace
+file /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_com
+> bined_ALLREA/pooled_response_spec1_public_ALLREA.ster saved
+
+. di " Saved Spec 1"
+ Saved Spec 1
+
+. 
+. * ---------------------------------------------------------------------------
+> -
+. * SPEC 2 (PREFERRED): country×year×agegroup FE by product
+. * ---------------------------------------------------------------------------
+> -
+. 
+. di ""
+
+
+. di "========================================================================"
+========================================================================
+
+. di "ESTIMATING SPEC 2: Country×year×agegroup FE by product (PREFERRED)"
+ESTIMATING SPEC 2: Country×year×agegroup FE by product (PREFERRED)
+
+. di "========================================================================"
+========================================================================
+
+. di ""
+
+
+. 
+. reghdfe deathrate_w99                                                        
+>  ///
+>     c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#i.product            
+>  ///
+>     [pw = weight],                                                           
+>  ///
+>     absorb(                                                                  
+>  ///
+>         adm0_code#i.product##c.prcp_poly_1                                   
+>  ///
+>         adm0_code#i.product##c.prcp_poly_2                                   
+>  ///
+>         i.adm2_code#i.CHN_ts#i.agegroup#i.product                            
+>  ///
+>         i.adm0_code#i.year#i.agegroup#i.product                              
+>  ///
+>     )                                                                        
+>  ///
+>     cluster(adm1_code) residual(e_hat)
+(dropped 7 singleton observations)
+(MWFE estimator converged in 50 iterations)
+
+HDFE Linear regression                            Number of obs   =  2,208,315
+Absorbing 4 HDFE groups                           F(  16,    223) =       5.02
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9035
+                                                  Adj R-squared   =     0.8970
+                                                  Within R-sq.    =     0.0007
+Number of clusters (adm1_code) =        224       Root MSE        =   232.8719
+
+                            (Std. err. adjusted for 224 clusters in adm1_code)
+------------------------------------------------------------------------------
+             |               Robust
+deathrate~99 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     product#|
+          c. |
+ tavg_poly_1 |
+   ERA5_025  |  -.0819312   .0468439    -1.75   0.082    -.1742446    .0103823
+       GMFD  |  -.0362655   .0529935    -0.68   0.494    -.1406975    .0681666
+     JRA_3Q  |  -.0725758   .0481457    -1.51   0.133    -.1674545    .0223029
+     MERRA2  |   -.010666   .0151226    -0.71   0.481    -.0404674    .0191355
+             |
+     product#|
+          c. |
+ tavg_poly_2 |
+   ERA5_025  |   .0028283   .0022089     1.28   0.202    -.0015247    .0071813
+       GMFD  |   .0001984   .0023659     0.08   0.933    -.0044639    .0048608
+     JRA_3Q  |  -.0028756   .0029962    -0.96   0.338    -.0087801    .0030289
+     MERRA2  |   -.001185   .0008094    -1.46   0.145      -.00278    .0004099
+             |
+     product#|
+          c. |
+ tavg_poly_3 |
+   ERA5_025  |   .0001595   .0002159     0.74   0.461     -.000266    .0005849
+       GMFD  |   .0001828   .0002911     0.63   0.531    -.0003909    .0007565
+     JRA_3Q  |   .0001444   .0001614     0.89   0.372    -.0001737    .0004625
+     MERRA2  |  -.0000292   .0000633    -0.46   0.645     -.000154    .0000956
+             |
+     product#|
+          c. |
+ tavg_poly_4 |
+   ERA5_025  |  -5.82e-06   6.44e-06    -0.90   0.368    -.0000185    6.88e-06
+       GMFD  |  -4.31e-06   6.50e-06    -0.66   0.508    -.0000171    8.50e-06
+     JRA_3Q  |  -1.46e-06   3.49e-06    -0.42   0.675    -8.33e-06    5.41e-06
+     MERRA2  |   2.00e-06   1.66e-06     1.20   0.230    -1.27e-06    5.28e-06
+             |
+       _cons |    982.441   267.6855     3.67   0.000     454.9243    1509.958
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-------------------------------------------------------------------------------
+> --+
+                             Absorbed FE | Categories  - Redundant  = Num. Coef
+> s                                                                            
+>   |
+-----------------------------------------+-------------------------------------
+> --|
+                       adm0_code#product |        20           1          19   
+>                                                                              
+>   |
+         adm0_code#product#c.prcp_poly_1 |        20           0          20   
+>  ?                                                                           
+>   |
+                       adm0_code#product |        20          20           0   
+>                                                                              
+>   |
+         adm0_code#product#c.prcp_poly_2 |        20           0          20   
+>  ?                                                                           
+>   |
+       adm2_code#CHN_ts#agegroup#product |    137304      137304           0   
+>  *                                                                           
+>   |
+         adm0_code#year#agegroup#product |      1277          20        1257   
+>  ?                                                                           
+>   |
+-------------------------------------------------------------------------------
+> --+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
+
+. 
+. estimates save "`ster_out'/pooled_response_spec2_public_ALLREA.ster", replace
+file /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_com
+> bined_ALLREA/pooled_response_spec2_public_ALLREA.ster saved
+
+. di " Saved Spec 2"
+ Saved Spec 2
+
+. 
+. * ---------------------------------------------------------------------------
+> -
+. * SPEC 3: Adds adm1×agegroup linear time slope BY PRODUCT
+. * ---------------------------------------------------------------------------
+> -
+. 
+. di ""
+
+
+. di "========================================================================"
+========================================================================
+
+. di "ESTIMATING SPEC 3: + ADM1×agegroup time trends"
+ESTIMATING SPEC 3: + ADM1×agegroup time trends
+
+. di "========================================================================"
+========================================================================
+
+. di ""
+
+
+. 
+. reghdfe deathrate_w99                                                        
+>  ///
+>     c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#i.product            
+>  ///
+>     [pw = weight],                                                           
+>  ///
+>     absorb(                                                                  
+>  ///
+>         adm0_code#i.product##c.prcp_poly_1                                   
+>  ///
+>         adm0_code#i.product##c.prcp_poly_2                                   
+>  ///
+>         i.adm2_code#i.CHN_ts#i.agegroup#i.product                            
+>  ///
+>         i.adm0_code#i.year#i.agegroup#i.product                              
+>  ///
+>         /* Adm1×agegroup linear time slope by product */                     
+>  ///
+>         adm1_agegrp_code#i.product##c.year                                   
+>  ///
+>     )                                                                        
+>  ///
+>     cluster(adm1_code)
+(dropped 7 singleton observations)
+(MWFE estimator converged in 54 iterations)
+
+HDFE Linear regression                            Number of obs   =  2,208,315
+Absorbing 5 HDFE groups                           F(  16,    223) =       7.73
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9121
+                                                  Adj R-squared   =     0.9060
+                                                  Within R-sq.    =     0.0006
+Number of clusters (adm1_code) =        224       Root MSE        =   222.5606
+
+                            (Std. err. adjusted for 224 clusters in adm1_code)
+------------------------------------------------------------------------------
+             |               Robust
+deathrate~99 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     product#|
+          c. |
+ tavg_poly_1 |
+   ERA5_025  |  -.0601869   .0342595    -1.76   0.080    -.1277006    .0073268
+       GMFD  |   .0280193   .0392607     0.71   0.476    -.0493501    .1053887
+     JRA_3Q  |  -.0785431   .0583344    -1.35   0.180    -.1935003    .0364141
+     MERRA2  |  -.0176325   .0126883    -1.39   0.166    -.0426368    .0073717
+             |
+     product#|
+          c. |
+ tavg_poly_2 |
+   ERA5_025  |   .0019097   .0019512     0.98   0.329    -.0019355    .0057549
+       GMFD  |  -.0002681   .0016448    -0.16   0.871    -.0035093    .0029732
+     JRA_3Q  |   -.004628    .003045    -1.52   0.130    -.0106286    .0013727
+     MERRA2  |  -.0007643   .0005789    -1.32   0.188    -.0019051    .0003765
+             |
+     product#|
+          c. |
+ tavg_poly_3 |
+   ERA5_025  |   .0000461    .000153     0.30   0.764    -.0002554    .0003475
+       GMFD  |  -.0001997   .0001864    -1.07   0.285    -.0005671    .0001678
+     JRA_3Q  |   .0001064   .0001622     0.66   0.512    -.0002132    .0004261
+     MERRA2  |  -.0000102   .0000498    -0.20   0.838    -.0001083    .0000879
+             |
+     product#|
+          c. |
+ tavg_poly_4 |
+   ERA5_025  |  -1.63e-06   4.45e-06    -0.37   0.714    -.0000104    7.13e-06
+       GMFD  |   5.48e-06   3.81e-06     1.44   0.152    -2.04e-06     .000013
+     JRA_3Q  |   1.14e-06   3.14e-06     0.36   0.718    -5.06e-06    7.33e-06
+     MERRA2  |   8.86e-07   1.32e-06     0.67   0.503    -1.72e-06    3.49e-06
+             |
+       _cons |   1107.714   263.5012     4.20   0.000     588.4429    1626.985
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-------------------------------------------------------------------------------
+> --+
+                             Absorbed FE | Categories  - Redundant  = Num. Coef
+> s                                                                            
+>   |
+-----------------------------------------+-------------------------------------
+> --|
+                       adm0_code#product |        20           1          19   
+>                                                                              
+>   |
+         adm0_code#product#c.prcp_poly_1 |        20           0          20   
+>  ?                                                                           
+>   |
+                       adm0_code#product |        20          20           0   
+>                                                                              
+>   |
+         adm0_code#product#c.prcp_poly_2 |        20           0          20   
+>  ?                                                                           
+>   |
+       adm2_code#CHN_ts#agegroup#product |    137304      137304           0   
+>  *                                                                           
+>   |
+         adm0_code#year#agegroup#product |      1277          20        1257   
+>  ?                                                                           
+>   |
+                adm1_agegrp_code#product |      3284        3284           0   
+>  *                                                                           
+>   |
+         adm1_agegrp_code#product#c.year |      3284           0        3284   
+>  ?                                                                           
+>   |
+-------------------------------------------------------------------------------
+> --+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
+
+. 
+. estimates save "`ster_out'/pooled_response_spec3_public_ALLREA.ster", replace
+file /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_com
+> bined_ALLREA/pooled_response_spec3_public_ALLREA.ster saved
+
+. di " Saved Spec 3"
+ Saved Spec 3
+
+. 
+. * ---------------------------------------------------------------------------
+> -
+. * SPEC 4: FGLS-style using product-specific precision weights
+. * ---------------------------------------------------------------------------
+> -
+. 
+. di ""
+
+
+. di "========================================================================"
+========================================================================
+
+. di "ESTIMATING SPEC 4: FGLS precision weights"
+ESTIMATING SPEC 4: FGLS precision weights
+
+. di "========================================================================"
+========================================================================
+
+. di ""
+
+
+. 
+. gen double e2 = e_hat^2
+(13,299 missing values generated)
+
+. bysort adm1_code product: egen double omega = sd(e_hat) if e_hat < .
+(13,299 missing values generated)
+
+. gen double precisionweight = weight * 1/(omega^2)
+(13,299 missing values generated)
+
+. 
+. sort iso adm1_id adm2_id year agegroup
+
+. 
+. reghdfe deathrate_w99                                                        
+>  ///
+>     c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#i.product            
+>  ///
+>     [pw = precisionweight],                                                  
+>  ///
+>     absorb(                                                                  
+>  ///
+>         adm0_code#i.product##c.prcp_poly_1                                   
+>  ///
+>         adm0_code#i.product##c.prcp_poly_2                                   
+>  ///
+>         i.adm2_code#i.CHN_ts#i.agegroup#i.product                            
+>  ///
+>         i.adm0_code#i.year#i.agegroup#i.product                              
+>  ///
+>     )                                                                        
+>  ///
+>     cluster(adm1_code) tol(1e-7)
+(MWFE estimator converged in 43 iterations)
+
+HDFE Linear regression                            Number of obs   =  2,208,315
+Absorbing 4 HDFE groups                           F(  16,    223) =       4.64
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.9890
+                                                  Adj R-squared   =     0.9883
+                                                  Within R-sq.    =     0.0011
+Number of clusters (adm1_code) =        224       Root MSE        =   104.6308
+
+                            (Std. err. adjusted for 224 clusters in adm1_code)
+------------------------------------------------------------------------------
+             |               Robust
+deathrate~99 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+     product#|
+          c. |
+ tavg_poly_1 |
+   ERA5_025  |  -.0499232   .0154962    -3.22   0.001    -.0804609   -.0193856
+       GMFD  |  -.0221834   .0166818    -1.33   0.185    -.0550576    .0106907
+     JRA_3Q  |  -.0313535     .01288    -2.43   0.016    -.0567356   -.0059714
+     MERRA2  |  -.0299522   .0124552    -2.40   0.017    -.0544971   -.0054073
+             |
+     product#|
+          c. |
+ tavg_poly_2 |
+   ERA5_025  |   .0013513   .0011176     1.21   0.228     -.000851    .0035536
+       GMFD  |  -.0008297   .0008662    -0.96   0.339    -.0025367    .0008774
+     JRA_3Q  |  -.0002821   .0011755    -0.24   0.811    -.0025987    .0020344
+     MERRA2  |  -.0002459   .0005531    -0.44   0.657    -.0013359     .000844
+             |
+     product#|
+          c. |
+ tavg_poly_3 |
+   ERA5_025  |   .0000952   .0000774     1.23   0.220    -.0000572    .0002476
+       GMFD  |    .000105   .0000934     1.12   0.262    -.0000791     .000289
+     JRA_3Q  |    .000033   .0000558     0.59   0.554    -.0000769    .0001429
+     MERRA2  |   .0000488   .0000511     0.95   0.341     -.000052    .0001495
+             |
+     product#|
+          c. |
+ tavg_poly_4 |
+   ERA5_025  |  -2.66e-06   3.10e-06    -0.86   0.392    -8.76e-06    3.44e-06
+       GMFD  |  -1.79e-06   3.39e-06    -0.53   0.598    -8.47e-06    4.89e-06
+     JRA_3Q  |  -8.19e-08   2.84e-06    -0.03   0.977    -5.67e-06    5.51e-06
+     MERRA2  |  -1.64e-07   1.23e-06    -0.13   0.894    -2.58e-06    2.26e-06
+             |
+       _cons |   876.8694   29.67871    29.55   0.000     818.3828     935.356
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-------------------------------------------------------------------------------
+> --+
+                             Absorbed FE | Categories  - Redundant  = Num. Coef
+> s                                                                            
+>   |
+-----------------------------------------+-------------------------------------
+> --|
+                       adm0_code#product |        20           1          19   
+>                                                                              
+>   |
+         adm0_code#product#c.prcp_poly_1 |        20           0          20   
+>  ?                                                                           
+>   |
+                       adm0_code#product |        20          20           0   
+>                                                                              
+>   |
+         adm0_code#product#c.prcp_poly_2 |        20           0          20   
+>  ?                                                                           
+>   |
+       adm2_code#CHN_ts#agegroup#product |    137304      137304           0   
+>  *                                                                           
+>   |
+         adm0_code#year#agegroup#product |      1277          20        1257   
+>  ?                                                                           
+>   |
+-------------------------------------------------------------------------------
+> --+
+? = number of redundant parameters may be higher
+* = FE nested within cluster; treated as redundant for DoF computation
+
+. 
+. estimates save "`ster_out'/pooled_response_spec4_public_ALLREA.ster", replace
+file /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_com
+> bined_ALLREA/pooled_response_spec4_public_ALLREA.ster saved
+
+. di " Saved Spec 4"
+ Saved Spec 4
+
+. 
+. * ---------------------------------------------------------------------------
+> -
+. * SPEC 5: Full interactions (temp×income, temp×LR-mean, all × product)
+. * ---------------------------------------------------------------------------
+> -
+. 
+. di ""
+
+
+. di "========================================================================"
+========================================================================
+
+. di "ESTIMATING SPEC 5: Full interactions (temp×income×LR-mean)"
+ESTIMATING SPEC 5: Full interactions (temp×income×LR-mean)
+
+. di "========================================================================"
+========================================================================
+
+. di ""
+
+
+. 
+. reghdfe deathrate_w99                                                        
+>  ///
+>     /* 1) Temp quartic × product */                                          
+>  ///
+>     c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#i.product            
+>  ///
+>     /* 2) Temp × income × product */                                         
+>  ///
+>     c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#c.loggdppc_adm1_avg#i
+> .product ///
+>     /* 3) Temp × LR-mean-temp × product */                                   
+>  ///
+>     c.(tavg_poly_1 tavg_poly_2 tavg_poly_3 tavg_poly_4)#c.lr_tavg_adm1_avg#i.
+> product  ///
+>     [pw = weight],                                                           
+>  ///
+>     absorb(                                                                  
+>  ///
+>         /* Country precip slopes by product */                               
+>  ///
+>         adm0_code#i.product##c.prcp_poly_1                                   
+>  ///
+>         adm0_code#i.product##c.prcp_poly_2                                   
+>  ///
+>         /* Subnational FE by product */                                      
+>  ///
+>         i.adm2_code#i.CHN_ts#i.agegroup#i.product                            
+>  ///
+>         /* Country × year FE by product */                                   
+>  ///
+>         i.adm0_code#i.year#i.product                                         
+>  ///
+>     )                                                                        
+>  ///
+>     cluster(adm1_code)
+(dropped 7 singleton observations)
+(MWFE estimator converged in 49 iterations)
+             _hqrdmult():  3930  error in LAPACK routine
+           hqrdmultq1t():     -  function returned error
+              _qrsolve():     -  function returned error
+               qrsolve():     -  function returned error
+     reghdfe_solve_ols():     -  function returned error
+                 <istmt>:     -  function returned error
+r(3930);
+
+end of do-file
+r(3930);

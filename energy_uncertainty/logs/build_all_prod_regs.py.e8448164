@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_all_prod_regs.py", line 460, in <module>
+    main()
+  File "/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_all_prod_regs.py", line 452, in main
+    build_product_country_climate(
+  File "/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_all_prod_regs.py", line 279, in build_product_country_climate
+    ds_daily = compute_daily_transforms(ds_t)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_all_prod_regs.py", line 139, in compute_daily_transforms
+    if PR_VAR_NAME is not None and PR_VAR_NAME in ds:
+       ^^^^^^^^^^^
+NameError: name 'PR_VAR_NAME' is not defined. Did you mean: 'TAS_VAR_NAME'?

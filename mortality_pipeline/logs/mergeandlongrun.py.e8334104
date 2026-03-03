@@ -1,0 +1,2 @@
+/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/mergeandlongrun.py:85: UserWarning: The specified chunks separate the stored chunks along dimension "time" starting at index 20. This could degrade performance. Instead, consider rechunking after loading.
+  ds = xr.open_dataset(tas_fp, chunks={"lat": -1, "lon": -1, "time": 20})

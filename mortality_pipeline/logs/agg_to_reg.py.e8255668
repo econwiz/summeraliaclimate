@@ -1,0 +1,32 @@
+/user/ab5405/.local/lib/python3.11/site-packages/pyogrio/raw.py:198: RuntimeWarning: /shared/share_hle/data/aux_data/geo_data/impact-region.shp contains polygon(s) with rings with invalid winding order. Autocorrecting them, but that shapefile should be corrected using ogr2ogr for example.
+  return ogr_read(
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/logs/../code/agg_to_reg.py", line 18, in <module>
+    gdf["geometry"] = gdf.geometry.apply(lambda geom: make_valid(geom))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.local/lib/python3.11/site-packages/geopandas/geoseries.py", line 818, in apply
+    result = super().apply(func, args=args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.local/lib/python3.11/site-packages/pandas/core/series.py", line 4764, in apply
+    ).apply()
+      ^^^^^^^
+  File "/user/ab5405/.local/lib/python3.11/site-packages/pandas/core/apply.py", line 1209, in apply
+    return self.apply_standard()
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.local/lib/python3.11/site-packages/pandas/core/apply.py", line 1289, in apply_standard
+    mapped = obj._map_values(
+             ^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.local/lib/python3.11/site-packages/pandas/core/base.py", line 919, in _map_values
+    return arr.map(mapper, na_action=na_action)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.local/lib/python3.11/site-packages/pandas/core/arrays/base.py", line 2188, in map
+    return map_array(self, mapper, na_action=na_action)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.local/lib/python3.11/site-packages/pandas/core/algorithms.py", line 1814, in map_array
+    return lib.map_infer(values, mapper, convert=convert)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "lib.pyx", line 2926, in pandas._libs.lib.map_infer
+  File "/user/ab5405/summeraliaclimate/logs/../code/agg_to_reg.py", line 18, in <lambda>
+    gdf["geometry"] = gdf.geometry.apply(lambda geom: make_valid(geom))
+                                                      ^^^^^^^^^^
+NameError: name 'make_valid' is not defined

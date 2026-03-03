@@ -1,0 +1,27 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/generate_obs_data/precip_ERA5_agg.py", line 123, in <module>
+    df_reg = df_reg.merge(df_lr, on=['iso','adm1_id'], how='left')
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/pandas/core/frame.py", line 10839, in merge
+    return merge(
+           ^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/pandas/core/reshape/merge.py", line 184, in merge
+    return op.get_result(copy=copy)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/pandas/core/reshape/merge.py", line 886, in get_result
+    join_index, left_indexer, right_indexer = self._get_join_info()
+                                              ^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/pandas/core/reshape/merge.py", line 1152, in _get_join_info
+    (left_indexer, right_indexer) = self._get_join_indexers()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/pandas/core/reshape/merge.py", line 1126, in _get_join_indexers
+    return get_join_indexers(
+           ^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/pandas/core/reshape/merge.py", line 1760, in get_join_indexers
+    lidx, ridx = get_join_indexers_non_unique(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/pandas/core/reshape/merge.py", line 1796, in get_join_indexers_non_unique
+    lidx, ridx = libjoin.left_outer_join(lkey, rkey, count, sort=sort)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/join.pyx", line 116, in pandas._libs.join.left_outer_join
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 11.3 GiB for an array with shape (1516592364,) and data type int64

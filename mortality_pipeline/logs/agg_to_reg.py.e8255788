@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/logs/../code/agg_to_reg.py", line 41, in <module>
+    wm = wm.chunk({"loc": -1})
+         ^^^^^^^^
+AttributeError: 'weightmap' object has no attribute 'chunk'

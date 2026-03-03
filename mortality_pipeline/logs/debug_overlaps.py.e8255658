@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/logs/../code/debug_overlaps.py", line 13, in <module>
+    df_paths = pd.read_csv(sample_fp, dtype=str)
+               ^^
+NameError: name 'pd' is not defined. Did you mean: 'gpd'?

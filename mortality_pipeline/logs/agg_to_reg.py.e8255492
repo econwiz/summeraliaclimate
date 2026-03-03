@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/logs/../code/agg_to_reg.py", line 8, in <module>
+    import pyreadstat
+ModuleNotFoundError: No module named 'pyreadstat'

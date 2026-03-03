@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/fixmerrastitch.py", line 207, in <module>
+    main()
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/fixmerrastitch.py", line 200, in main
+    stitched = stitch_temp_parts(PRODUCT, OUTDIR)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/fixmerrastitch.py", line 109, in stitch_temp_parts
+    raise FileNotFoundError(f"No temp CSVs like {prefix}*.csv found in {outdir}")
+FileNotFoundError: No temp CSVs like __tmp_MERRA2*.csv found in /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_csvs

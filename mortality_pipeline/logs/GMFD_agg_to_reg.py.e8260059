@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/logs/../code/GMFD_agg_to_reg.py", line 32, in <module>
+    for idx, geom in gdf.geometry.iteritems():
+                     ^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/pandas/core/generic.py", line 6318, in __getattr__
+    return object.__getattribute__(self, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'GeoSeries' object has no attribute 'iteritems'

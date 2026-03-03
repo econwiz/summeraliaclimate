@@ -1,0 +1,4 @@
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/bigagg.py", line 220
+    ds_poly = xr.Dataset(vars_dict))
+                                   ^
+SyntaxError: unmatched ')'

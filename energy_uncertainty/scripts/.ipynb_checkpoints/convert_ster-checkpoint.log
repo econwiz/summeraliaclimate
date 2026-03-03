@@ -1,0 +1,75 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: 10-user 8-core network perpetual
+Serial number: 501806318811
+  Licensed to: Columbia Business School
+               Columbia University, New York
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do convert_ster.do 
+
+. clear all
+
+. set more off
+
+. 
+. * paths
+. global OLD "/user/ab5405/summeraliaclimate/code/energy_uncertainty/output_ori
+> ginal/sters"
+
+. 
+. * helper program: load ster, dump e(b) to CSV
+. capture program drop est_to_csv
+
+. program define est_to_csv
+  1.     syntax using/, SAVE(string)
+  2. 
+.     estimates use "`using'", clear
+  3. 
+.     matrix b = e(b)
+  4.     local k = colsof(b)
+  5.     local names : colnames b
+  6. 
+.     preserve
+  7.         clear
+  8.         set obs `k'
+  9.         gen strL parm = ""
+ 10.         gen double beta = .
+ 11. 
+.         local j = 1
+ 12.         foreach nm of local names {
+ 13.             replace parm = "`nm'"   in `j'
+ 14.             replace beta = b[1,`j'] in `j'
+ 15.             local ++j
+ 16.         }
+ 17. 
+.         order parm beta
+ 18.         export delimited using "`save'", replace
+ 19.     restore
+ 20. end
+
+. 
+. * ---- export each original ster ----
+. est_to_csv using "$OLD/FD_FGLS_global_TINV_clim.ster", ///
+>     save("$OLD/FD_FGLS_global_TINV_clim_coeff.csv")
+option clear not allowed
+r(198);
+
+end of do-file
+r(198);

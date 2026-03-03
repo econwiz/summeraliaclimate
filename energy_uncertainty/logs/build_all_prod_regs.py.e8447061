@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_all_prod_regs.py", line 430, in <module>
+    precip_path=precip_path,
+^^
+  File "/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_all_prod_regs.py", line 422, in main
+    Path(precip_raw.strip())
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/summeraliaclimate/code/energy_uncertainty/scripts/build_all_prod_regs.py", line 325, in build_product_country_climate
+    if ds_p is not None and PR_VAR_NAME in ds_p:
+                                          ^^^^^^
+NameError: name 'pr_mon' is not defined

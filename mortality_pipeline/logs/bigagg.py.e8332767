@@ -1,0 +1,33 @@
+Exception ignored in sys.unraisablehook: Traceback (most recent call last):
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/_task_spec.py", line 150, in parse_input
+MemoryError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/array/rechunk.py", line 374, in rechunk
+MemoryError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/namedarray/parallelcompat.py", line 349, in rechunk
+MemoryError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/variable.py", line 2639, in chunk
+MemoryError
+
+During handling of the above exception, another exception occurred:
+
+MemoryError
+
+During handling of the above exception, another exception occurred:
+
+MemoryError
+
+During handling of the above exception, another exception occurred:
+
+MemoryError

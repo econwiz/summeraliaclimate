@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/precip_JRA_3Q_agg.py", line 118, in <module>
+    ds_poly = xr.merge([t1, t2, t3, t4, pr_mean]).chunk({"lat": -1, "lon": -1})
+                                        ^^^^^^^
+NameError: name 'pr_mean' is not defined

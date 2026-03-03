@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/generate_obs_data/ERA5_025_agg_to_reg.py", line 52, in <module>
+    with xa.set_options(
+         ^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xagg/options.py", line 72, in __init__
+    raise ValueError(
+ValueError: argument name 'dask_gufunc_kwargs' is not in the set of valid options {'impl', 'rgrd_alg', 'silent', 'nan_to_zero_regridding'}

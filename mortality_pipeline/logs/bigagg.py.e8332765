@@ -1,0 +1,31 @@
+Exception ignored in sys.unraisablehookTraceback (most recent call last):
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/array/rechunk.py", line 239, in <genexpr>
+MemoryError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/array/rechunk.py", line 374, in rechunk
+MemoryError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/namedarray/parallelcompat.py", line 349, in rechunk
+MemoryError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/variable.py", line 2639, in chunk
+MemoryError
+
+During handling of the above exception, another exception occurred:
+
+MemoryError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/bigagg.py", line 160, in <module>
+MemoryError

@@ -1,0 +1,7 @@
+/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/simpaggscript.py:59: PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+  df_panel["iso0"] = df_panel["iso"]
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/simpaggscript.py", line 60, in <module>
+    df_panel["iso"]  = df_panel["iso0"].where(~df_panel["iso0"].isin(EU_ISOS), "EU")
+                                                                     ^^^^^^^
+NameError: name 'EU_ISOS' is not defined. Did you mean: 'EU_ISO'?

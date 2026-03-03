@@ -1,0 +1,37 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/energy_consumption/energy-code-release-2020/0_make_dataset/climate_ERA5/make_ERA5_WORLD_csvs.py", line 319, in <module>
+    main()
+  File "/user/ab5405/summeraliaclimate/code/energy_consumption/energy-code-release-2020/0_make_dataset/climate_ERA5/make_ERA5_WORLD_csvs.py", line 274, in main
+    agg_num = xa.aggregate(ds_num, wm)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xagg/core.py", line 803, in aggregate
+    _warn_trigger_partialnan=_warn_ifsomenans(ds,var,other_dims,
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xagg/auxfuncs.py", line 160, in _warn_ifsomenans
+    nanflags = _diagnose_nans(ds,dims)
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xagg/auxfuncs.py", line 103, in _diagnose_nans
+    allnan_flags = {dim:da.isnull().all(dim = [d for d in da.sizes if d != dim]).any().values
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/dataarray.py", line 797, in values
+    return self.variable.values
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/variable.py", line 536, in values
+    return _as_array_or_item(self._data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/variable.py", line 316, in _as_array_or_item
+    data = np.asarray(data)
+           ^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/array/core.py", line 1724, in __array__
+    x = self.compute()
+        ^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/base.py", line 373, in compute
+    (result,) = compute(self, traverse=False, **kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/base.py", line 681, in compute
+    results = schedule(expr, keys, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/_task_spec.py", line 764, in __call__
+    return self.func(*new_argspec)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 158. GiB for an array with shape (577, 1440, 142, 360) and data type float32

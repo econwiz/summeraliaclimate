@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/logs/../code/agg_to_reg.py", line 40, in <module>
+    for yr in years:
+                ^^^^^
+NameError: name 'ds_all' is not defined

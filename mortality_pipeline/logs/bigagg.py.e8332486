@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/bigagg.py", line 196, in <module>
+    wm_adm2 = xa.pixel_overlaps(sample, gdf_adm2).chunk({"loc": -1})
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'weightmap' object has no attribute 'chunk'

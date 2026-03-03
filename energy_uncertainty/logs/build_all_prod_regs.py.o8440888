@@ -1,0 +1,50 @@
+[INFO] Reading /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/car_paths.csv
+
+[INFO] Processing product: ERA5-025 (suffix=ERA5)
+[INFO] ERA5-025 Loading WORLD shapefile...
+[INFO] ERA5-025 Loading DAILY temperature...
+[INFO] ERA5-025 Loading MONTHLY precipitation...
+[INFO] ERA5-025 Years in temperature: 1981–2010
+[INFO] ERA5-025 Years in precipitation: 1981–2010
+[INFO] ERA5-025 Using overlapping years: 1981–2010
+[INFO] ERA5-025 Computing daily transforms (temperature)...
+[INFO] ERA5-025 Loading and reprojecting GPW population...
+[INFO] ERA5-025 Building WORLD × grid weightmap...
+[INFO] ERA5-025 Aggregating GPW to country populations...
+[INFO] ERA5-025 Aggregating 1981
+[INFO] ERA5-025 Aggregating 1982
+[INFO] ERA5-025 Aggregating 1983
+[INFO] ERA5-025 Aggregating 1984
+[INFO] ERA5-025 Aggregating 1985
+[INFO] ERA5-025 Aggregating 1986
+[INFO] ERA5-025 Aggregating 1987
+[INFO] ERA5-025 Aggregating 1988
+[INFO] ERA5-025 Aggregating 1989
+[INFO] ERA5-025 Aggregating 1990
+[INFO] ERA5-025 Aggregating 1991
+[INFO] ERA5-025 Aggregating 1992
+[INFO] ERA5-025 Aggregating 1993
+[INFO] ERA5-025 Aggregating 1994
+[INFO] ERA5-025 Aggregating 1995
+[INFO] ERA5-025 Aggregating 1996
+[INFO] ERA5-025 Aggregating 1997
+[INFO] ERA5-025 Aggregating 1998
+[INFO] ERA5-025 Aggregating 1999
+[INFO] ERA5-025 Aggregating 2000
+[INFO] ERA5-025 Aggregating 2001
+[INFO] ERA5-025 Aggregating 2002
+[INFO] ERA5-025 Aggregating 2003
+[INFO] ERA5-025 Aggregating 2004
+[INFO] ERA5-025 Aggregating 2005
+[INFO] ERA5-025 Aggregating 2006
+[INFO] ERA5-025 Aggregating 2007
+[INFO] ERA5-025 Aggregating 2008
+[INFO] ERA5-025 Aggregating 2009
+[INFO] ERA5-025 Aggregating 2010
+[INFO] ERA5-025 Writing /user/ab5405/summeraliaclimate/code/energy_uncertainty/data/country_climate/ERA5/ERA5_country_climate_1971_2010.csv
+[DONE] ERA5-025
+
+[INFO] Processing product: GMFD (suffix=GMFD)
+[INFO] GMFD Loading WORLD shapefile...
+[INFO] GMFD Loading DAILY temperature...
+[INFO] GMFD Loading MONTHLY precipitation...

@@ -1,0 +1,4 @@
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/simpaggscript.py", line 88
+    ds_clim = ds_full.sel(time=slice(f"{CLIM_START}-01-01", f"{CLIM_END}-12-31"))
+                                                         ^
+SyntaxError: invalid syntax

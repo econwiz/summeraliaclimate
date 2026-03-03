@@ -1,0 +1,5 @@
+ERROR 1: PROJ: proj_create_from_database: Open of /user/ab5405/.conda/envs/hle_iv/share/proj failed
+/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/group.py:3535: ZarrUserWarning: Object at .done is not recognized as a component of a Zarr hierarchy.
+  warnings.warn(
+/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/zarr/core/group.py:3535: ZarrUserWarning: Object at .done is not recognized as a component of a Zarr hierarchy.
+  warnings.warn(

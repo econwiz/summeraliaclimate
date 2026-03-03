@@ -1,0 +1,3 @@
+[INFO] Loaded 33 yearly files → 291,819 rows
+[WARN] Found 27 invalid geometries — fixing...
+✅ Wrote ERA5_025_by_region_year.csv with 168,442 rows → /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/obs_csvs

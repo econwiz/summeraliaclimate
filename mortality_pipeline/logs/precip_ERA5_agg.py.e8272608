@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/precip_ERA5_agg.py", line 119, in <module>
+    ds_poly = xr.merge([t1, t2, t3, t4, pr_mean]) \
+                                        ^^^^^^^
+NameError: name 'pr_mean' is not defined

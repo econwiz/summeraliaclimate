@@ -1,0 +1,16 @@
+/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/array/core.py:4998: PerformanceWarning: Increasing number of chunks by factor of 15
+  result = blockwise(
+/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/array/core.py:4998: PerformanceWarning: Increasing number of chunks by factor of 15
+  result = blockwise(
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/bigagg.py", line 222, in <module>
+    
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/dataset.py", line 7178, in to_dataframe
+    return self._to_dataframe(ordered_dims=ordered_dims)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/dataset.py", line 7121, in _to_dataframe
+    index = self.coords.to_index([*ordered_dims])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/coordinates.py", line 138, in to_index
+    raise ValueError("no valid index for a 0-dimensional object")
+ValueError: no valid index for a 0-dimensional object

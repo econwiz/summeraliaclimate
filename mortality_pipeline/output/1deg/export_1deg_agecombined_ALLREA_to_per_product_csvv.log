@@ -1,0 +1,302 @@
+
+  ___  ____  ____  ____  ____ ®
+ /__    /   ____/   /   ____/      18.0
+___/   /   /___/   /   /___/       MP—Parallel Edition
+
+ Statistics and Data Science       Copyright 1985-2023 StataCorp LLC
+                                   StataCorp
+                                   4905 Lakeway Drive
+                                   College Station, Texas 77845 USA
+                                   800-STATA-PC        https://www.stata.com
+                                   979-696-4600        stata@stata.com
+
+Stata license: 10-user 8-core network perpetual
+Serial number: 501806318811
+  Licensed to: Columbia Business School
+               Columbia University, New York
+
+Notes:
+      1. Stata is running in batch mode.
+      2. Unicode is supported; see help unicode_advice.
+      3. More than 2 billion observations are allowed; see help obs_advice.
+      4. Maximum number of variables is set to 5,000 but can be increased;
+          see help set_maxvar.
+
+. do export_1deg_agecombined_ALLREA_to_per_product_csvv.do 
+
+. /**************************************************************************
+> * CSVV GENERATOR — Age-Combined ALLREA pooled ster → per-product CSVVs
+> * 1deg version
+> *
+> * Product encoding: 1=ERA5_025, 2=GMFD, 3=JRA_3Q, 4=MERRA2
+> * Base category (product=1b) = ERA5_025
+> *
+> * 4 gammas per product: polys 1..4 (age-combined, no covariate interactions)
+> **************************************************************************/
+. 
+. clear all
+
+. set more off
+
+. 
+. global REPO "/user/ab5405/summeraliaclimate"
+
+. 
+. local STERDIR "$REPO/code/mortality_pipeline/output/1deg/age_combined_ALLREA"
+
+. local CSVVDIR "$REPO/code/mortality_pipeline/output/1deg/age_combined_csvv_AL
+> LREA"
+
+. cap mkdir "`CSVVDIR'"
+
+. 
+. local prod_codes "1 2 3 4"
+
+. local prod_names "ERA5_025 GMFD JRA_3Q MERRA2"
+
+. 
+. forvalues SPEC = 1/5 {
+  2. 
+.     local STERFILE "pooled_response_spec`SPEC'_public_ALLREA.ster"
+  3. 
+.     capture estimates use "`STERDIR'/`STERFILE'"
+  4.     if _rc {
+  5.         di as yellow "Note: couldn't find `STERDIR'/`STERFILE' — skipping 
+> Spec `SPEC'."
+  6.         continue
+  7.     }
+  8. 
+.     matrix B = e(b)
+  9.     matrix V = e(V)
+ 10. 
+.     di ""
+ 11.     di "========================================================"
+ 12.     di "Spec `SPEC' — generating per-product CSVVs"
+ 13.     di "========================================================"
+ 14. 
+.     forvalues pi = 1/4 {
+ 15. 
+.         local prod_name : word `pi' of `prod_names'
+ 16.         local prod_code : word `pi' of `prod_codes'
+ 17. 
+.         local ncoef 4
+ 18.         matrix GAMMA = J(1, `ncoef', 0)
+ 19.         matrix GVCV  = J(`ncoef', `ncoef', 0)
+ 20. 
+.         forvalues k = 1/4 {
+ 21. 
+.             local base_nm "1b.product#c.tavg_poly_`k'"
+ 22.             local ib = colnumb(B, "`base_nm'")
+ 23.             if `ib' == 0 di as err "!! base coef not found: `base_nm'"
+ 24. 
+.             if `pi' == 1 {
+ 25.                 local has_delta 0
+ 26.                 local id 0
+ 27.                 matrix GAMMA[1,`k'] = el(B,1,`ib')
+ 28.             }
+ 29.             else {
+ 30.                 local has_delta 1
+ 31.                 local delta_nm "`prod_code'.product#c.tavg_poly_`k'"
+ 32.                 local id = colnumb(B, "`delta_nm'")
+ 33.                 if `id' == 0 di as err "!! delta coef not found: `delta_nm
+> '"
+ 34.                 matrix GAMMA[1,`k'] = el(B,1,`ib') + el(B,1,`id')
+ 35.             }
+ 36. 
+.             local base_idx_`k'  = `ib'
+ 37.             local delta_idx_`k' = `id'
+ 38.             local has_delta_`k' = `has_delta'
+ 39.         }
+ 40. 
+.         forvalues r = 1/4 {
+ 41.             forvalues c = 1/4 {
+ 42.                 local ib_r = `base_idx_`r''
+ 43.                 local ib_c = `base_idx_`c''
+ 44.                 local id_r = `delta_idx_`r''
+ 45.                 local id_c = `delta_idx_`c''
+ 46.                 local hd_r = `has_delta_`r''
+ 47.                 local hd_c = `has_delta_`c''
+ 48. 
+.                 local vcv_val = el(V,`ib_r',`ib_c')
+ 49.                 if `hd_r' & `hd_c'  local vcv_val = `vcv_val' + el(V,`id_r
+> ',`id_c') + el(V,`ib_r',`id_c') + el(V,`id_r',`ib_c')
+ 50.                 else if `hd_r'      local vcv_val = `vcv_val' + el(V,`id_r
+> ',`ib_c')
+ 51.                 else if `hd_c'      local vcv_val = `vcv_val' + el(V,`ib_r
+> ',`id_c')
+ 52.                 matrix GVCV[`r',`c'] = `vcv_val'
+ 53.             }
+ 54.         }
+ 55. 
+.         local CSVVFILE "pooled_response_spec`SPEC'_`prod_name'_prodint.csvv"
+ 56.         cap file close csvv
+ 57.         file open csvv using "`CSVVDIR'/`CSVVFILE'", write replace
+ 58. 
+.         file write csvv "---" _n
+ 59.         file write csvv "oneline: Age-combined ALLREA 1deg (Spec `SPEC') r
+> esponse – `prod_name'" _n
+ 60.         file write csvv "version: MORTALITY-AGE-COMBINED-ALLREA-1DEG-SPEC`
+> SPEC'-`prod_name'" _n
+ 61.         file write csvv "dependencies: `STERFILE'" _n
+ 62.         file write csvv "description: 4th-order poly OLS pooled ALLREA 1de
+> g age-combined; per-product coefficients reconstructed from base+delta" _n
+ 63.         file write csvv "csvv-version: auto-`c(current_date)'" _n
+ 64. 
+.         file write csvv "variables:" _n
+ 65.         file write csvv "  tavg_poly_1: T1_sum [C]" _n
+ 66.         file write csvv "  tavg_poly_2: T2_sum [C^2]" _n
+ 67.         file write csvv "  tavg_poly_3: T3_sum [C^3]" _n
+ 68.         file write csvv "  tavg_poly_4: T4_sum [C^4]" _n
+ 69.         file write csvv "  deathrate_w99: mortality rate winsorized at 99t
+> h percentile" _n
+ 70.         file write csvv "..." _n
+ 71. 
+.         file write csvv "observations" _n
+ 72.         file write csvv "`=e(N)'" _n
+ 73. 
+.         file write csvv "prednames" _n
+ 74.         file write csvv "tavg_poly_1, tavg_poly_2, tavg_poly_3, tavg_poly_
+> 4" _n
+ 75. 
+.         file write csvv "covarnames" _n
+ 76.         file write csvv "1" _n
+ 77. 
+.         file write csvv "gamma" _n
+ 78.         forvalues k = 1/4 {
+ 79.             if `k'==1 file write csvv "`=el(GAMMA,1,`k')'"
+ 80.             else      file write csvv ", `=el(GAMMA,1,`k')'"
+ 81.         }
+ 82.         file write csvv "" _n
+ 83. 
+.         file write csvv "gammavcv" _n
+ 84.         forvalues r = 1/4 {
+ 85.             forvalues c = 1/4 {
+ 86.                 if `c'==1 file write csvv "`=el(GVCV,`r',`c')'"
+ 87.                 else      file write csvv ", `=el(GVCV,`r',`c')'"
+ 88.             }
+ 89.             file write csvv "" _n
+ 90.         }
+ 91. 
+.         file write csvv "residvcv" _n
+ 92.         file write csvv "`=e(rmse)^2'" _n
+ 93. 
+.         file close csvv
+ 94.         di as res "  ✅ Wrote `CSVVFILE'"
+ 95.     }
+ 96. }
+
+========================================================
+Spec 1 — generating per-product CSVVs
+========================================================
+(file
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_co
+    > mbined_csvv_ALLREA/pooled_response_spec1_ERA5_025_prodint.csvv not
+    found)
+  ✅ Wrote pooled_response_spec1_ERA5_025_prodint.csvv
+(file
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_co
+    > mbined_csvv_ALLREA/pooled_response_spec1_GMFD_prodint.csvv not found)
+  ✅ Wrote pooled_response_spec1_GMFD_prodint.csvv
+(file
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_co
+    > mbined_csvv_ALLREA/pooled_response_spec1_JRA_3Q_prodint.csvv not found)
+  ✅ Wrote pooled_response_spec1_JRA_3Q_prodint.csvv
+(file
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_co
+    > mbined_csvv_ALLREA/pooled_response_spec1_MERRA2_prodint.csvv not found)
+  ✅ Wrote pooled_response_spec1_MERRA2_prodint.csvv
+
+========================================================
+Spec 2 — generating per-product CSVVs
+========================================================
+(file
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_co
+    > mbined_csvv_ALLREA/pooled_response_spec2_ERA5_025_prodint.csvv not
+    found)
+  ✅ Wrote pooled_response_spec2_ERA5_025_prodint.csvv
+(file
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_co
+    > mbined_csvv_ALLREA/pooled_response_spec2_GMFD_prodint.csvv not found)
+  ✅ Wrote pooled_response_spec2_GMFD_prodint.csvv
+(file
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_co
+    > mbined_csvv_ALLREA/pooled_response_spec2_JRA_3Q_prodint.csvv not found)
+  ✅ Wrote pooled_response_spec2_JRA_3Q_prodint.csvv
+(file
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_co
+    > mbined_csvv_ALLREA/pooled_response_spec2_MERRA2_prodint.csvv not found)
+  ✅ Wrote pooled_response_spec2_MERRA2_prodint.csvv
+
+========================================================
+Spec 3 — generating per-product CSVVs
+========================================================
+(file
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_co
+    > mbined_csvv_ALLREA/pooled_response_spec3_ERA5_025_prodint.csvv not
+    found)
+  ✅ Wrote pooled_response_spec3_ERA5_025_prodint.csvv
+(file
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_co
+    > mbined_csvv_ALLREA/pooled_response_spec3_GMFD_prodint.csvv not found)
+  ✅ Wrote pooled_response_spec3_GMFD_prodint.csvv
+(file
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_co
+    > mbined_csvv_ALLREA/pooled_response_spec3_JRA_3Q_prodint.csvv not found)
+  ✅ Wrote pooled_response_spec3_JRA_3Q_prodint.csvv
+(file
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_co
+    > mbined_csvv_ALLREA/pooled_response_spec3_MERRA2_prodint.csvv not found)
+  ✅ Wrote pooled_response_spec3_MERRA2_prodint.csvv
+
+========================================================
+Spec 4 — generating per-product CSVVs
+========================================================
+(file
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_co
+    > mbined_csvv_ALLREA/pooled_response_spec4_ERA5_025_prodint.csvv not
+    found)
+  ✅ Wrote pooled_response_spec4_ERA5_025_prodint.csvv
+(file
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_co
+    > mbined_csvv_ALLREA/pooled_response_spec4_GMFD_prodint.csvv not found)
+  ✅ Wrote pooled_response_spec4_GMFD_prodint.csvv
+(file
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_co
+    > mbined_csvv_ALLREA/pooled_response_spec4_JRA_3Q_prodint.csvv not found)
+  ✅ Wrote pooled_response_spec4_JRA_3Q_prodint.csvv
+(file
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_co
+    > mbined_csvv_ALLREA/pooled_response_spec4_MERRA2_prodint.csvv not found)
+  ✅ Wrote pooled_response_spec4_MERRA2_prodint.csvv
+
+========================================================
+Spec 5 — generating per-product CSVVs
+========================================================
+(file
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_co
+    > mbined_csvv_ALLREA/pooled_response_spec5_ERA5_025_prodint.csvv not
+    found)
+  ✅ Wrote pooled_response_spec5_ERA5_025_prodint.csvv
+(file
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_co
+    > mbined_csvv_ALLREA/pooled_response_spec5_GMFD_prodint.csvv not found)
+  ✅ Wrote pooled_response_spec5_GMFD_prodint.csvv
+(file
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_co
+    > mbined_csvv_ALLREA/pooled_response_spec5_JRA_3Q_prodint.csvv not found)
+  ✅ Wrote pooled_response_spec5_JRA_3Q_prodint.csvv
+(file
+    /user/ab5405/summeraliaclimate/code/mortality_pipeline/output/1deg/age_co
+    > mbined_csvv_ALLREA/pooled_response_spec5_MERRA2_prodint.csvv not found)
+  ✅ Wrote pooled_response_spec5_MERRA2_prodint.csvv
+
+. 
+. di ""
+
+
+. di as res "All 1deg age-combined per-product CSVVs written to `CSVVDIR'"
+All 1deg age-combined per-product CSVVs written to /user/ab5405/summeraliaclima
+> te/code/mortality_pipeline/output/1deg/age_combined_csvv_ALLREA
+
+. 
+end of do-file

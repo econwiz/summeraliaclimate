@@ -1,0 +1,4 @@
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/bigagg.py", line 76
+    need = ["iso",adm1_id","adm2_id","geometry"]
+                                              ^
+SyntaxError: unterminated string literal (detected at line 76)

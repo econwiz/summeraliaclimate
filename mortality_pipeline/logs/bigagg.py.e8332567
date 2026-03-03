@@ -1,0 +1,9 @@
+/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/array/core.py:4998: PerformanceWarning: Increasing number of chunks by factor of 15
+  result = blockwise(
+/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/dask/array/core.py:4998: PerformanceWarning: Increasing number of chunks by factor of 15
+  result = blockwise(
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/bigagg.py", line 180, in <module>
+    agg = xa.aggregate(dsp, WM_ADM2, dask_gufunc_kwargs={"allow_rechunk": True})
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: aggregate() got an unexpected keyword argument 'dask_gufunc_kwargs'

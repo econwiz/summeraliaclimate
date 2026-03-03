@@ -1,0 +1,26 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/logs/../code/GMFD_agg_to_reg.py", line 17, in <module>
+    import xagg as xa
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xagg/__init__.py", line 5, in <module>
+    from .wrappers import pixel_overlaps
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xagg/wrappers.py", line 5, in <module>
+    from . core import (create_raster_polygons,get_pixel_overlaps)
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xagg/core.py", line 22, in <module>
+    from . classes import (weightmap,aggregated)
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xagg/classes.py", line 11, in <module>
+    import cmocean
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/cmocean/__init__.py", line 11, in <module>
+    from . import cm, tools, data
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/cmocean/cm.py", line 47, in <module>
+    cmap_d[cmapname] = tools.cmap(rgb, N=256)
+                       ^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/cmocean/tools.py", line 86, in cmap
+    cmap = mpl.colors.LinearSegmentedColormap.from_list('mycmap', rgbin, N=N)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/matplotlib/colors.py", line 1110, in from_list
+    r, g, b, a = to_rgba_array(colors).T
+                 ^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/matplotlib/colors.py", line 478, in to_rgba_array
+    if np.any((result < 0) | (result > 1)):
+               ^^^^^^
+UnboundLocalError: cannot access local variable 'result' where it is not associated with a value

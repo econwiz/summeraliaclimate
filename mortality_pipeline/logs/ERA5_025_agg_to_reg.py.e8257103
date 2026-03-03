@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/logs/../code/ERA5_025_agg_to_reg.py", line 74, in <module>
+    rows_for_prod.append(df_reg)
+    ^^^^^^^^^^^^^
+NameError: name 'rows_for_prod' is not defined

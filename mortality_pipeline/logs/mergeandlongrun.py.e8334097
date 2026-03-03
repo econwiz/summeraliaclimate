@@ -1,0 +1,14 @@
+ERROR 1: PROJ: proj_create_from_database: Open of /user/ab5405/.conda/envs/hle_iv/share/proj failed
+/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/mergeandlongrun.py:84: UserWarning: The specified chunks separate the stored chunks along dimension "time" starting at index 20. This could degrade performance. Instead, consider rechunking after loading.
+  ds = xr.open_dataset(tas_fp, chunks={"lat":-1,"lon":-1,"time":20})
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/mergeandlongrun.py", line 97, in <module>
+    WM_ADM1 = xa.pixel_overlaps(tmean_lr, gdf_adm1)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xagg/wrappers.py", line 100, in pixel_overlaps
+    wm_out = get_pixel_overlaps(gdf_in,pix_agg,impl=impl)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xagg/core.py", line 529, in get_pixel_overlaps
+    overlap_info['coords'] = overlap_info.apply(lambda row: list(zip(row['lat'],row['lon'])),axis=1)
+                             ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'overlap_info' where it is not associated with a value

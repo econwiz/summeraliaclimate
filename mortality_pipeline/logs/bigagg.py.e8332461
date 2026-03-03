@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/bigagg.py", line 64, in <module>
+    keys = panel[["iso","adm1_id","adm2_id","year"]].drop_duplicates()
+           ^^^^^
+NameError: name 'panel' is not defined

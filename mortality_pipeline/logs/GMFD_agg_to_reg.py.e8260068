@@ -1,0 +1,4 @@
+  File "/user/ab5405/summeraliaclimate/logs/../code/GMFD_agg_to_reg.py", line 57
+    if not new_geom.is_valid:
+    ^^
+SyntaxError: expected 'except' or 'finally' block

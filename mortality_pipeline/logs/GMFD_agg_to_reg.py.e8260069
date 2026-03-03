@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/logs/../code/GMFD_agg_to_reg.py", line 7, in <module>
+    BASE = Path(__file__).resolve().parent
+           ^^^^
+NameError: name 'Path' is not defined

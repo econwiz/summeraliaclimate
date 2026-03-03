@@ -1,0 +1,6 @@
+ERROR 1: PROJ: proj_create_from_database: Open of /user/ab5405/.conda/envs/hle_iv/share/proj failed
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/bigagg.py", line 161, in <module>
+    if has_precip:
+       ^^^^^^^^^^
+NameError: name 'has_precip' is not defined

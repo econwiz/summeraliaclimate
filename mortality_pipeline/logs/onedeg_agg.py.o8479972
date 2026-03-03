@@ -1,0 +1,184 @@
+
+======================================================================
+BATCH CONFIGURATION:
+  Products: GMFD, ERA5-025, JRA-3Q, MERRA2
+  Resolution: 1deg (141 lats × 359 lons)
+  Skip Regrid: True
+  Output dir: /user/ab5405/summeraliaclimate/code/mortality_pipeline/0_generate_obs_data/obs_csvs/1deg
+======================================================================
+
+[INFO] Loading mortality panel...
+[INFO] Panel years 1957–2013  ADM2 clusters=8893
+[INFO] Loading shapefile...
+[WARN] Found 25 invalid geometries, fixing...
+[INFO] Shapes: ADM2=8843, ADM1=228
+
+
+######################################################################
+# PROCESSING PRODUCT: GMFD
+######################################################################
+
+[SKIP] Output already exists: /user/ab5405/summeraliaclimate/code/mortality_pipeline/0_generate_obs_data/obs_csvs/1deg/GMFD_by_region_year.csv
+
+
+######################################################################
+# PROCESSING PRODUCT: ERA5-025
+######################################################################
+
+[INFO] Loading climate data for ERA5-025...
+[INFO] Time range: 1957-01-01T00:00:00.000000000 to 2013-12-31T00:00:00.000000000
+[INFO] SKIP_REGRID=True, using native grid
+[INFO] Source grid: 1.0000° lat × 1.0000° lon
+[INFO] Weight maps built
+[INFO] Aggregating 1957
+[INFO] Aggregating 1958
+[INFO] Aggregating 1959
+[INFO] Aggregating 1960
+[INFO] Aggregating 1961
+[INFO] Aggregating 1962
+[INFO] Aggregating 1963
+[INFO] Aggregating 1964
+[INFO] Aggregating 1965
+[INFO] Aggregating 1966
+[INFO] Aggregating 1967
+[INFO] Aggregating 1968
+[INFO] Aggregating 1969
+[INFO] Aggregating 1970
+[INFO] Aggregating 1971
+[INFO] Aggregating 1972
+[INFO] Aggregating 1973
+[INFO] Aggregating 1974
+[INFO] Aggregating 1975
+[INFO] Aggregating 1976
+[INFO] Aggregating 1977
+[INFO] Aggregating 1978
+[INFO] Aggregating 1979
+[INFO] Aggregating 1980
+[INFO] Aggregating 1981
+[INFO] Aggregating 1982
+[INFO] Aggregating 1983
+[INFO] Aggregating 1984
+[INFO] Aggregating 1985
+[INFO] Aggregating 1986
+[INFO] Aggregating 1987
+[INFO] Aggregating 1988
+[INFO] Aggregating 1989
+[INFO] Aggregating 1990
+[INFO] Aggregating 1991
+[INFO] Aggregating 1992
+[INFO] Aggregating 1993
+[INFO] Aggregating 1994
+[INFO] Aggregating 1995
+[INFO] Aggregating 1996
+[INFO] Aggregating 1997
+[INFO] Aggregating 1998
+[INFO] Aggregating 1999
+[INFO] Aggregating 2000
+[INFO] Aggregating 2001
+[INFO] Aggregating 2002
+[INFO] Aggregating 2003
+[INFO] Aggregating 2004
+[INFO] Aggregating 2005
+[INFO] Aggregating 2006
+[INFO] Aggregating 2007
+[INFO] Aggregating 2008
+[INFO] Aggregating 2009
+[INFO] Aggregating 2010
+[INFO] Aggregating 2011
+[INFO] Aggregating 2012
+[INFO] Aggregating 2013
+[INFO] Computing ADM1 long-run temperature...
+adjusting grid... (this may happen because only a subset of pixels were used for aggregation for efficiency - i.e. [subset_bbox=True] in xa.pixel_overlaps())
+grid adjustment successful
+aggregating Tmean...
+all variables aggregated to polygons!
+[INFO] Merging and writing output...
+
+======================================================================
+✅ SUCCESS - ERA5-025
+Wrote ERA5_025_by_region_year.csv
+  Rows: 168,442
+======================================================================
+
+
+######################################################################
+# PROCESSING PRODUCT: JRA-3Q
+######################################################################
+
+[INFO] Loading climate data for JRA-3Q...
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+❌ ERROR processing JRA-3Q:
+  /shared/share_hle/data/climate_raw/JRA-3Q-1deg/pr_day-1deg_JRA-3Q_historical_reanalysis_19570101-20241231.zarr does not exist
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+######################################################################
+# PROCESSING PRODUCT: MERRA2
+######################################################################
+
+[INFO] Loading climate data for MERRA2...
+[INFO] Time range: 1980-01-01T12:00:00.000000000 to 2013-12-31T12:00:00.000000000
+[INFO] SKIP_REGRID=True, using native grid
+[INFO] Source grid: 1.0000° lat × 1.0000° lon
+[INFO] Weight maps built
+[INFO] Aggregating 1980
+[INFO] Aggregating 1981
+[INFO] Aggregating 1982
+[INFO] Aggregating 1983
+[INFO] Aggregating 1984
+[INFO] Aggregating 1985
+[INFO] Aggregating 1986
+[INFO] Aggregating 1987
+[INFO] Aggregating 1988
+[INFO] Aggregating 1989
+[INFO] Aggregating 1990
+[INFO] Aggregating 1991
+[INFO] Aggregating 1992
+[INFO] Aggregating 1993
+[INFO] Aggregating 1994
+[INFO] Aggregating 1995
+[INFO] Aggregating 1996
+[INFO] Aggregating 1997
+[INFO] Aggregating 1998
+[INFO] Aggregating 1999
+[INFO] Aggregating 2000
+[INFO] Aggregating 2001
+[INFO] Aggregating 2002
+[INFO] Aggregating 2003
+[INFO] Aggregating 2004
+[INFO] Aggregating 2005
+[INFO] Aggregating 2006
+[INFO] Aggregating 2007
+[INFO] Aggregating 2008
+[INFO] Aggregating 2009
+[INFO] Aggregating 2010
+[INFO] Aggregating 2011
+[INFO] Aggregating 2012
+[INFO] Aggregating 2013
+[INFO] Computing ADM1 long-run temperature...
+adjusting grid... (this may happen because only a subset of pixels were used for aggregation for efficiency - i.e. [subset_bbox=True] in xa.pixel_overlaps())
+grid adjustment successful
+aggregating Tmean...
+all variables aggregated to polygons!
+[INFO] Merging and writing output...
+
+======================================================================
+✅ SUCCESS - MERRA2
+Wrote MERRA2_by_region_year.csv
+  Rows: 168,442
+======================================================================
+
+
+======================================================================
+BATCH PROCESSING COMPLETE
+Resolution: 1deg
+Output directory: /user/ab5405/summeraliaclimate/code/mortality_pipeline/0_generate_obs_data/obs_csvs/1deg
+
+Generated files:
+  ✅ GMFD_by_region_year.csv
+  ✅ ERA5_025_by_region_year.csv
+  ❌ JRA_3Q_by_region_year.csv
+  ✅ MERRA2_by_region_year.csv
+======================================================================
+

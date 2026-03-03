@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/logs/../code/JRA-3Q_agg_to_reg.py", line 61, in <module>
+    agg = xa.aggregate(ds_poly, wm)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xagg/core.py", line 844, in aggregate
+    rel_area_padded = np.full((n_polys, max_pix), np.nan)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/numpy/_core/numeric.py", line 352, in full
+    a = empty(shape, dtype, order, device=device)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 8.08 GiB for an array with shape (24378, 44508) and data type float64

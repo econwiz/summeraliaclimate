@@ -1,0 +1,28 @@
+Traceback (most recent call last):
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/dataset.py", line 1154, in _construct_dataarray
+    variable = self._variables[name]
+               ~~~~~~~~~~~~~~~^^^^^^
+KeyError: 'pr'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/dataset.py", line 1261, in __getitem__
+    return self._construct_dataarray(key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/dataset.py", line 1156, in _construct_dataarray
+    _, name, variable = _get_virtual_variable(self._variables, name, self.sizes)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/dataset_utils.py", line 79, in _get_virtual_variable
+    raise KeyError(key)
+KeyError: 'pr'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/logs/../code/precip_GMFD_agg.py", line 62, in <module>
+    pr_mean = ds_yr[precip_var].mean("time").rename("PRCP_mean")
+              ~~~~~^^^^^^^^^^^^
+  File "/user/ab5405/.conda/envs/hle_iv/lib/python3.12/site-packages/xarray/core/dataset.py", line 1274, in __getitem__
+    raise KeyError(message) from e
+KeyError: "No variable named 'pr'. Variables on the dataset include ['tas', 'time', 'lat', 'lon']"

@@ -1,0 +1,43 @@
+[INFO] Reading /user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/car_paths.csv
+
+[INFO] Processing product: MERRA2 (suffix=MERRA2)
+[INFO] MERRA2 Loading WORLD shapefile...
+[INFO] MERRA2 Loading climate...
+[INFO] MERRA2 Years in climate: 1980–2010
+[INFO] MERRA2 Computing daily transforms...
+[INFO] MERRA2 Loading and reprojecting GPW population...
+[INFO] MERRA2 Building WORLD × grid weightmap...
+[INFO] MERRA2 Aggregating GPW to country populations...
+[INFO] MERRA2 Aggregating 1980
+[INFO] MERRA2 Aggregating 1981
+[INFO] MERRA2 Aggregating 1982
+[INFO] MERRA2 Aggregating 1983
+[INFO] MERRA2 Aggregating 1984
+[INFO] MERRA2 Aggregating 1985
+[INFO] MERRA2 Aggregating 1986
+[INFO] MERRA2 Aggregating 1987
+[INFO] MERRA2 Aggregating 1988
+[INFO] MERRA2 Aggregating 1989
+[INFO] MERRA2 Aggregating 1990
+[INFO] MERRA2 Aggregating 1991
+[INFO] MERRA2 Aggregating 1992
+[INFO] MERRA2 Aggregating 1993
+[INFO] MERRA2 Aggregating 1994
+[INFO] MERRA2 Aggregating 1995
+[INFO] MERRA2 Aggregating 1996
+[INFO] MERRA2 Aggregating 1997
+[INFO] MERRA2 Aggregating 1998
+[INFO] MERRA2 Aggregating 1999
+[INFO] MERRA2 Aggregating 2000
+[INFO] MERRA2 Aggregating 2001
+[INFO] MERRA2 Aggregating 2002
+[INFO] MERRA2 Aggregating 2003
+[INFO] MERRA2 Aggregating 2004
+[INFO] MERRA2 Aggregating 2005
+[INFO] MERRA2 Aggregating 2006
+[INFO] MERRA2 Aggregating 2007
+[INFO] MERRA2 Aggregating 2008
+[INFO] MERRA2 Aggregating 2009
+[INFO] MERRA2 Aggregating 2010
+[INFO] MERRA2 Writing /user/ab5405/summeraliaclimate/code/energy_uncertainty/data/country_climate/MERRA2/MERRA2_country_climate_1971_2010.csv
+[DONE] MERRA2

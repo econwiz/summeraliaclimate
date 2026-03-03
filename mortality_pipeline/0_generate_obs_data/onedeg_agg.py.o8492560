@@ -1,0 +1,56 @@
+
+======================================================================
+BATCH CONFIGURATION:
+  Products: GMFD, ERA5-025, JRA-3Q, MERRA2
+  Resolution: 1deg (141 lats × 359 lons)
+  Skip Regrid: True
+  Output dir: /user/ab5405/summeraliaclimate/code/mortality_pipeline/0_generate_obs_data/obs_csvs/1deg
+======================================================================
+
+[INFO] Loading mortality panel...
+[INFO] Panel years 1957–2013  ADM2 clusters=8893
+[INFO] Loading shapefile...
+[WARN] Found 25 invalid geometries, fixing...
+[INFO] Shapes: ADM2=8843, ADM1=228
+
+
+######################################################################
+# PROCESSING PRODUCT: GMFD
+######################################################################
+
+[SKIP] Output already exists: /user/ab5405/summeraliaclimate/code/mortality_pipeline/0_generate_obs_data/obs_csvs/1deg/GMFD_by_region_year.csv
+
+
+######################################################################
+# PROCESSING PRODUCT: ERA5-025
+######################################################################
+
+[SKIP] Output already exists: /user/ab5405/summeraliaclimate/code/mortality_pipeline/0_generate_obs_data/obs_csvs/1deg/ERA5_025_by_region_year.csv
+
+
+######################################################################
+# PROCESSING PRODUCT: JRA-3Q
+######################################################################
+
+[SKIP] Output already exists: /user/ab5405/summeraliaclimate/code/mortality_pipeline/0_generate_obs_data/obs_csvs/1deg/JRA_3Q_by_region_year.csv
+
+
+######################################################################
+# PROCESSING PRODUCT: MERRA2
+######################################################################
+
+[SKIP] Output already exists: /user/ab5405/summeraliaclimate/code/mortality_pipeline/0_generate_obs_data/obs_csvs/1deg/MERRA2_by_region_year.csv
+
+
+======================================================================
+BATCH PROCESSING COMPLETE
+Resolution: 1deg
+Output directory: /user/ab5405/summeraliaclimate/code/mortality_pipeline/0_generate_obs_data/obs_csvs/1deg
+
+Generated files:
+  ✅ GMFD_by_region_year.csv
+  ✅ ERA5_025_by_region_year.csv
+  ✅ JRA_3Q_by_region_year.csv
+  ✅ MERRA2_by_region_year.csv
+======================================================================
+

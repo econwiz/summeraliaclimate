@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/simpaggscript.py", line 81, in <module>
+    ds_pr  = open_climate(row["precip_filepath"]).chunk({"lat": -1, "lon": -1, "time": 30})
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/simpaggscript.py", line 42, in open_climate
+    if path.endswith(".zarr"):
+       ^^^^^^^^^^^^^
+AttributeError: 'float' object has no attribute 'endswith'

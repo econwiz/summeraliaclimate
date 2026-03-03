@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/user/ab5405/summeraliaclimate/code/regressions/0_generate_obs_data/precip_GMFD_agg.py", line 39, in <module>
+    df_paths["product"] = df_paths["product"].str.strip()
+                          ^^^^^^^^
+NameError: name 'df_paths' is not defined
